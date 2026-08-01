@@ -26,16 +26,9 @@ namespace Ale.Chronicle.Editor
 
             // ── 基础信息 ──────────────────────────────────────────────────────────
             EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
-            EditorGUI.BeginChangeCheck();
-            string id       = EditorGUILayout.TextField("ID", c.id);
-            string template = NamePopup("角色模板", c.templateRef, Names(db.CharacterTemplates, t => t.name));
-            if (EditorGUI.EndChangeCheck())
-            {
-                ctx.RecordUndo("修改角色");
-                c.id          = id;
-                c.templateRef = template;
-                ctx.MarkDirty();   // 触发窗口 RefreshCaches → RebuildAttributes 同步自由字段
-            }
+            ChronicleEntityHeader.DrawIdField(ctx, "角色", c.id,
+                ctx.DuplicateIdsOf(EChronicleEntityKind.Character), v => c.id = v);
+            ChronicleEntityHeader.DrawTemplateRefReadonly(c.templateRef);   // 来源模板创建后只读（经中列「从模板添加」设定）
 
             // ── 家族指针 ──────────────────────────────────────────────────────────
             EditorGUILayout.Space(4);

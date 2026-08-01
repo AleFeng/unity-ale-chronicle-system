@@ -1,47 +1,199 @@
 using System.Collections.Generic;
 using Ale.Chronicle;
+using Ale.Toolkit.Runtime;
 using Ale.Toolkit.Editor;
+using UnityEditor;
+using UnityEngine;
 
 namespace Ale.Chronicle.Editor
 {
-    /// <summary>「角色」页签（Phase 1 核心交付）：左列角色列表，右列组合装配检视器 + 属性汇流实时预览。</summary>
-    public sealed class CharacterSystemTab : ChronicleTwoColumnTab
+    /// <summary>
+    /// 「角色」页签（三列）：左=角色模板列表、中=角色列表（模板过滤 / 搜索 / 从模板添加 / 快速添加）、
+    /// 右=角色 Inspector（选中角色时）或角色模板 Inspector（选中左列模板时）。布局与选中互斥由基类提供。
+    /// </summary>
+    public sealed class CharacterSystemTab : EditorThreeColumnTab<CharacterDefinition>
     {
-        private readonly CharacterListPanel _panel = new CharacterListPanel();
-        protected override IEditorMasterListPanel<ChronicleDatabase> Panel => _panel;
+        private readonly CharacterTemplateListPanel _templatePanel = new CharacterTemplateListPanel();
+        private readonly CharacterListPanel         _listPanel     = new CharacterListPanel();
+        private IEditorMasterListPanel<ChronicleDatabase>[] _leftPanels;
+
+        protected override IEditorMasterListPanel<ChronicleDatabase>[] LeftPanels
+            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _templatePanel };
+
+        protected override string EntityNoun => "角色";
+
+        protected override List<CharacterDefinition> EntityList(ChronicleDatabase db) => db.Characters;
+
+        protected override CharacterDefinition DrawEntityList(IChronicleEditorContext ctx, CharacterDefinition displaySelected)
+            => _listPanel.DrawList(ctx, displaySelected);
+
+        protected override CharacterDefinition ConsumePendingSelect() => _listPanel.ConsumePendingSelect();
+
+        protected override void DrawEntityInspector(IChronicleEditorContext ctx, CharacterDefinition entity)
+            => CharacterInspectorPanel.Draw(ctx, entity);
     }
 
-    /// <summary>角色主列表面板：绑定 <see cref="ChronicleDatabase.Characters"/>，右列交给 <see cref="CharacterInspectorPanel"/>。</summary>
-    public sealed class CharacterListPanel : EditorMasterListPanel<CharacterDefinition>
+    /// <summary>角色列表面板（中列）：模板过滤 + 搜索 + 从模板添加 / 快速添加，每行 id / 姓名 简要。</summary>
+    public sealed class CharacterListPanel : EditorEntityListPanel<CharacterDefinition, CharacterTemplate>
     {
-        protected override List<CharacterDefinition> GetList(ChronicleDatabase db) => db.Characters;
+        public CharacterListPanel() : base("ChronicleCharacterListDrag") { }
+
+        protected override EChronicleEntityKind Kind => EChronicleEntityKind.Character;
         protected override string Noun => "角色";
 
-        protected override string RowLabel(CharacterDefinition item)
+        protected override List<CharacterDefinition> Entities(ChronicleDatabase db) => db.Characters;
+        protected override List<CharacterTemplate>   Templates(ChronicleDatabase db) => db.CharacterTemplates;
+        protected override string TemplateName(CharacterTemplate t) => t.name;
+        protected override string TemplateRefOf(CharacterDefinition e) => e.templateRef;
+        protected override string IdOf(CharacterDefinition e) => e.id;
+
+        protected override Color RowDotColor(ChronicleDatabase db, CharacterDefinition e)
         {
-            string idPart = string.IsNullOrEmpty(item.id) ? "(未命名)" : item.id;
-            string name   = item.GetAttributeValue<string>(WellKnownAttr.Name);
-            return string.IsNullOrEmpty(name) ? idPart : $"{idPart} · {name}";
+            var t = db.GetCharacterTemplate(e.templateRef);
+            return t != null ? t.color : Color.gray;
         }
 
-        protected override CharacterDefinition CreateNew(ChronicleDatabase db, List<CharacterDefinition> list)
+        protected override bool Matches(ChronicleDatabase db, CharacterDefinition e, string term)
         {
-            int n = list.Count + 1;
-            string id;
-            do { id = "char_" + n; n++; } while (Contains(list, id));
-            var c = new CharacterDefinition(id);
-            if (db.CharacterTemplates.Count > 0)
-                c.templateRef = db.CharacterTemplates[0].name;   // 默认取首个模板，用户可改
+            if (string.IsNullOrEmpty(term)) return true;
+            term = term.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
+            string name = e.GetAttributeValue<string>(WellKnownAttr.Name);
+            return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
+        }
+
+        protected override CharacterDefinition AddFromTemplate(IChronicleEditorContext ctx, string templateName)
+        {
+            var db = ctx.Database;
+            ctx.RecordUndo("从模板添加角色");
+            var c = new CharacterDefinition(GenerateId(db, "char_", id => db.GetCharacter(id) != null), templateName);
+            c.RebuildAttributes(db);
+            db.Characters.Add(c);
+            ctx.MarkDirty();
             return c;
         }
 
-        private static bool Contains(List<CharacterDefinition> list, string id)
+        protected override CharacterDefinition QuickAdd(IChronicleEditorContext ctx)
         {
-            foreach (var c in list) if (c != null && c.id == id) return true;
+            var db = ctx.Database;
+            if (db.Characters.Count == 0)
+                return AddFromTemplate(ctx, db.CharacterTemplates.Count > 0 ? db.CharacterTemplates[0].name : null);
+
+            ctx.RecordUndo("快速添加角色");
+            var clone = db.Characters[db.Characters.Count - 1].Clone();
+            clone.id = GenerateId(db, "char_", id => db.GetCharacter(id) != null);
+            db.Characters.Add(clone);
+            ctx.MarkDirty();
+            return clone;
+        }
+
+        protected override void DrawRowColumns(ChronicleDatabase db, CharacterDefinition e,
+            Rect keyRow, float contentX, float contentRight, float valY, float valH)
+        {
+            float w     = Mathf.Max(0f, contentRight - contentX);
+            float idW   = Mathf.Min(140f, w * 0.5f);
+            float nameX = contentX + idW + Pad;
+            float nameW = Mathf.Max(0f, contentRight - nameX);
+
+            GUI.Label(new Rect(contentX, keyRow.y, idW, keyRow.height), "ID", KeyStyle);
+            GUI.Label(new Rect(nameX, keyRow.y, nameW, keyRow.height), "姓名", KeyStyle);
+
+            GUI.Label(new Rect(contentX, valY, idW, valH), string.IsNullOrEmpty(e.id) ? "(空 ID)" : e.id, IdStyle);
+            string name = e.GetAttributeValue<string>(WellKnownAttr.Name);
+            GUI.Label(new Rect(nameX, valY, nameW, valH), name ?? string.Empty, SubStyle);
+        }
+    }
+
+    /// <summary>角色模板主列表面板（角色页左列）：绑定 <see cref="ChronicleDatabase.CharacterTemplates"/> + 模板检视器。</summary>
+    public sealed class CharacterTemplateListPanel : EditorMasterListPanel<CharacterTemplate>
+    {
+        private readonly AttributeDefinitionListDrawer _schemaDrawer = new AttributeDefinitionListDrawer();
+
+        protected override List<CharacterTemplate> GetList(ChronicleDatabase db) => db.CharacterTemplates;
+        protected override string Noun => "角色模板";
+        protected override bool   HasColorDot => true;
+        protected override Color  RowColor(CharacterTemplate item) => item.color;
+
+        protected override string RowLabel(CharacterTemplate item)
+            => string.IsNullOrEmpty(item.name) ? "(未命名)" : item.name;
+
+        protected override CharacterTemplate CreateNew(ChronicleDatabase db, List<CharacterTemplate> list)
+        {
+            int n = list.Count + 1;
+            string name;
+            do { name = "template_" + n; n++; } while (Contains(list, name));
+            return new CharacterTemplate(name);
+        }
+
+        private static bool Contains(List<CharacterTemplate> list, string name)
+        {
+            foreach (var t in list) if (t != null && t.name == name) return true;
             return false;
         }
 
-        public override void DrawInspector(IChronicleEditorContext ctx, CharacterDefinition item)
-            => CharacterInspectorPanel.Draw(ctx, item);
+        protected override void OnInvalidate() => _schemaDrawer.Invalidate();
+
+        public override void DrawInspector(IChronicleEditorContext ctx, CharacterTemplate tmpl)
+        {
+            if (tmpl == null)
+            {
+                EditorGUILayout.LabelField("请选择或新建一个角色模板。", ToolkitEditorStyles.Placeholder);
+                return;
+            }
+
+            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
+            EditorGUI.BeginChangeCheck();
+            string name = EditorGUILayout.TextField("名称(引用键)", tmpl.name);
+            Color  color = EditorGUILayout.ColorField("列表色点", tmpl.color);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ctx.RecordUndo("修改角色模板");
+                tmpl.name  = name;
+                tmpl.color = color;
+                ctx.MarkDirty();
+            }
+
+            EditorGUILayout.Space(4);
+            _schemaDrawer.Draw(ctx, ctx.Database, tmpl.attributes, "身份字段 schema");
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("生成规则（预留）", ToolkitEditorStyles.Header);
+            EditorGUI.BeginChangeCheck();
+            string race   = EditorGUILayout.TextField("默认种族(可空)", tmpl.raceRef);
+            int    budget = EditorGUILayout.IntField("属性点预算", tmpl.attributePointBudget);
+            int    minAge = EditorGUILayout.IntField("初始年龄下限(世界日)", tmpl.minAgeDays);
+            int    maxAge = EditorGUILayout.IntField("初始年龄上限(世界日)", tmpl.maxAgeDays);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ctx.RecordUndo("修改模板生成规则");
+                tmpl.raceRef              = race;
+                tmpl.attributePointBudget = budget;
+                tmpl.minAgeDays           = minAge;
+                tmpl.maxAgeDays           = maxAge;
+                ctx.MarkDirty();
+            }
+
+            EditorGUILayout.LabelField("出生必带特质 id", EditorStyles.miniBoldLabel);
+            StringListEditor(ctx, "必带特质", tmpl.guaranteedTraitRefs);
+            EditorGUILayout.LabelField("随机特质候选池 id", EditorStyles.miniBoldLabel);
+            StringListEditor(ctx, "候选特质", tmpl.randomTraitPoolRefs);
+        }
+
+        private static void StringListEditor(IChronicleEditorContext ctx, string noun, List<string> list)
+        {
+            if (list == null) return;
+            int removeAt = -1;
+            for (int i = 0; i < list.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUI.BeginChangeCheck();
+                string v = EditorGUILayout.TextField(list[i]);
+                if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo("修改" + noun); list[i] = v; ctx.MarkDirty(); }
+                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = i;
+                EditorGUILayout.EndHorizontal();
+            }
+            if (removeAt >= 0) { ctx.RecordUndo("删除" + noun); list.RemoveAt(removeAt); ctx.MarkDirty(); }
+            if (GUILayout.Button("+ 添加" + noun, GUILayout.Width(100))) { ctx.RecordUndo("添加" + noun); list.Add(""); ctx.MarkDirty(); }
+        }
     }
 }

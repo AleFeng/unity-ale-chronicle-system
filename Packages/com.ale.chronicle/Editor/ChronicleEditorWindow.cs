@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Ale.Chronicle;
 using Ale.Chronicle.Serialization;
 using Ale.Toolkit.Editor;
 using UnityEditor;
@@ -17,11 +16,10 @@ namespace Ale.Chronicle.Editor
     /// </summary>
     public sealed class ChronicleEditorWindow : EditorDatabaseWindowBase<ChronicleDatabase>, IChronicleEditorContext
     {
-        private readonly AttributeSystemTab        _attributeTab = new AttributeSystemTab();
-        private readonly TraitSystemTab            _traitTab     = new TraitSystemTab();
-        private readonly CharacterSystemTab        _characterTab = new CharacterSystemTab();
-        private readonly CharacterTemplateSystemTab _templateTab = new CharacterTemplateSystemTab();
-        private readonly GeneralSystemTab          _generalTab   = new GeneralSystemTab();
+        private readonly AttributeSystemTab _attributeTab = new AttributeSystemTab();
+        private readonly TraitSystemTab     _traitTab     = new TraitSystemTab();
+        private readonly CharacterSystemTab _characterTab = new CharacterSystemTab();
+        private readonly GeneralSystemTab   _generalTab   = new GeneralSystemTab();
         private IEditorSystemTab<ChronicleDatabase>[] _tabs;
 
         // 各实体种类的重复 id/name 集合（Layout 阶段由 RefreshCaches 刷新）。
@@ -43,10 +41,10 @@ namespace Ale.Chronicle.Editor
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "角色", "角色模板", "属性", "特质", "通用" };
+        protected override string[] SystemTabLabels => new[] { "角色", "属性", "特质", "通用" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _templateTab, _attributeTab, _traitTab, _generalTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _attributeTab, _traitTab, _generalTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
