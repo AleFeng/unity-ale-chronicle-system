@@ -29,14 +29,23 @@ namespace Ale.Chronicle.Editor
         [MenuItem("Tools/Ale Toolkit/Chronicle System/Chronicle Editor", priority = 1101)]
         public static void Open() => GetWindow<ChronicleEditorWindow>("编年史编辑器").Show();
 
+        /// <summary>打开窗口并载入指定数据库（供数据文件 Inspector 的「打开编辑器」按钮调用）。</summary>
+        public static void Open(ChronicleDatabase db)
+        {
+            var window = GetWindow<ChronicleEditorWindow>("编年史编辑器");
+            if (db) window.SetDatabase(db);
+            window.Show();
+            window.Focus();
+        }
+
         // ── 基类钩子 ──────────────────────────────────────────────────────────────
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "属性", "特质", "角色", "枚举" };
+        protected override string[] SystemTabLabels => new[] { "角色", "属性", "特质", "枚举" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _attributeTab, _traitTab, _characterTab, _enumTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _attributeTab, _traitTab, _enumTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
