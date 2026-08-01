@@ -1,0 +1,22 @@
+{
+    "name": "Ale.Chronicle.Editor",
+    "rootNamespace": "Ale.Chronicle.Editor",
+    "references": [
+        "Ale.Chronicle.Runtime",
+        "Ale.Toolkit.Runtime",
+        "Ale.Toolkit.Editor",
+        "Ale.Condition.Core",
+        "Ale.Condition.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
