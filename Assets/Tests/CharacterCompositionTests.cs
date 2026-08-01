@@ -21,6 +21,8 @@ namespace Ale.Chronicle.Tests
             public CharacterTemplate GetCharacterTemplate(string name) => name != null && Templates.TryGetValue(name, out var t) ? t : null;
             public TraitDefinition   GetTrait(string id)               => id   != null && Traits.TryGetValue(id, out var t)      ? t : null;
             public Tag               GetTag(string name)               => name != null && Tags.TryGetValue(name, out var t)      ? t : null;
+            public CoreAttributeTemplate GetCoreAttributeTemplate(string name) => null;
+            public TraitTemplate         GetTraitTemplate(string name)         => null;
         }
 
         private static AttributeDefinition Field(string id, EFieldType type) => new AttributeDefinition(id, type);

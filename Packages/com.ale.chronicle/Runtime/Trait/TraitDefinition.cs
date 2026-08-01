@@ -20,13 +20,16 @@ namespace Ale.Chronicle
     /// <para><b>Effect 推迟</b>：<c>onGained/onLost</c> 等突变随 Effect 系统落地，本阶段不建模。</para>
     /// </summary>
     [Serializable]
-    public class TraitDefinition
+    public class TraitDefinition : AttributeOwner
     {
         /// <summary>来源标记前缀（<c>trait:</c>）。</summary>
         public const string SourceTagPrefix = "trait:";
 
         /// <summary>稳定引用键（如 "brave"/"勇敢"）。</summary>
         public string id;
+
+        /// <summary>来源特质模板名（决定自定义字段 schema 与默认值）。</summary>
+        public string templateRef;
 
         /// <summary>显示名（Text）。</summary>
         public AttributeValue displayName = new AttributeValue(EFieldType.Text);
@@ -79,9 +82,24 @@ namespace Ale.Chronicle
         /// <summary>获得该特质需满足的条件（Condition System；空 = 无门槛）。</summary>
         public ConditionExpression eligibility = new ConditionExpression();
 
+        /// <summary>来自模板 schema 的自定义字段值。</summary>
+        public List<AttributeEntry> values = new List<AttributeEntry>();
+
+        // 实现 AttributeOwner：把 values 暴露给基类懒加载字典缓存。
+        protected override List<AttributeEntry> AttributeEntries => values;
+
         public TraitDefinition() { }
 
         public TraitDefinition(string id) { this.id = id; }
+
+        /// <summary>依模板 schema 对账自定义字段（增补缺失 / 移除多余 / 类型漂移重置）。</summary>
+        public void RebuildAttributes(IChronicleSchemaSource src)
+        {
+            if (src == null) return;
+            var template = src.GetTraitTemplate(templateRef);
+            AttributeSync.Sync(values, template != null ? template.attributes : null);
+            InvalidateEntryCache();
+        }
 
         /// <summary>临时特质。</summary>
         public bool IsTemporary => lifetime == ETraitLifetime.Temporary;
@@ -147,6 +165,7 @@ namespace Ale.Chronicle
             if (compatibilities == null)       compatibilities       = new List<TraitCompatibility>();
             if (aiWeights == null)             aiWeights             = new List<TraitAiWeight>();
             if (eligibility == null)           eligibility           = new ConditionExpression();
+            if (values == null)                values                = new List<AttributeEntry>();
         }
 
         private static AttributeValue EnsureType(AttributeValue v, EFieldType t)
@@ -161,6 +180,7 @@ namespace Ale.Chronicle
             var c = new TraitDefinition
             {
                 id                    = id,
+                templateRef           = templateRef,
                 displayName           = displayName != null ? displayName.Clone() : new AttributeValue(EFieldType.Text),
                 description           = description != null ? description.Clone() : new AttributeValue(EFieldType.Text),
                 icon                  = icon        != null ? icon.Clone()        : new AttributeValue(EFieldType.Sprite),
@@ -181,6 +201,8 @@ namespace Ale.Chronicle
             c.modifiers             = new List<ModifierDefinition>(modifiers != null ? modifiers.Count : 0);
             if (modifiers != null)
                 foreach (var m in modifiers) c.modifiers.Add(m != null ? m.Clone() : null);
+            if (values != null)
+                foreach (var e in values) c.values.Add(e != null ? e.Clone() : new AttributeEntry());
             return c;
         }
     }

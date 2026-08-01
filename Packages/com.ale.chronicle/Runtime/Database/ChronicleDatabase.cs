@@ -26,6 +26,10 @@ namespace Ale.Chronicle
         [SerializeField] private List<TraitDefinition>        traits             = new List<TraitDefinition>();
         [SerializeField] private List<CharacterTemplate>      characterTemplates = new List<CharacterTemplate>();
         [SerializeField] private List<CharacterDefinition>    characters         = new List<CharacterDefinition>();
+        [SerializeField] private List<CoreAttributeTemplate>  coreAttributeTemplates = new List<CoreAttributeTemplate>();
+        [SerializeField] private List<TraitTemplate>          traitTemplates         = new List<TraitTemplate>();
+        [SerializeField] private List<ChronicleGroupTag>      groupTags              = new List<ChronicleGroupTag>();
+        [SerializeField] private List<NumberFormatConfig>     numberFormatConfigs    = new List<NumberFormatConfig>();
 
         #region 访问器
 
@@ -49,6 +53,18 @@ namespace Ale.Chronicle
 
         /// <summary>角色 列表。</summary>
         public List<CharacterDefinition> Characters => characters;
+
+        /// <summary>核心属性模板 列表。</summary>
+        public List<CoreAttributeTemplate> CoreAttributeTemplates => coreAttributeTemplates;
+
+        /// <summary>特质模板 列表。</summary>
+        public List<TraitTemplate> TraitTemplates => traitTemplates;
+
+        /// <summary>分组标签 列表。</summary>
+        public List<ChronicleGroupTag> GroupTags => groupTags;
+
+        /// <summary>数字格式配置 列表。</summary>
+        public List<NumberFormatConfig> NumberFormatConfigs => numberFormatConfigs;
 
         #endregion
 
@@ -77,6 +93,15 @@ namespace Ale.Chronicle
         /// <summary>按名称查找角色模板，未找到返回 null。</summary>
         public CharacterTemplate GetCharacterTemplate(string templateName) => Find(characterTemplates, templateName, t => t.name);
 
+        /// <summary>按名称查找核心属性模板，未找到返回 null。</summary>
+        public CoreAttributeTemplate GetCoreAttributeTemplate(string templateName) => Find(coreAttributeTemplates, templateName, t => t.name);
+
+        /// <summary>按名称查找特质模板，未找到返回 null。</summary>
+        public TraitTemplate GetTraitTemplate(string templateName) => Find(traitTemplates, templateName, t => t.name);
+
+        /// <summary>按名称查找数字格式配置，未找到返回 null。</summary>
+        public NumberFormatConfig GetNumberFormatConfig(string configName) => Find(numberFormatConfigs, configName, c => c.name);
+
         // ── 按 ID ─────────────────────────────────────────────────────────────────
 
         /// <summary>按 id 查找核心属性，未找到返回 null。</summary>
@@ -87,6 +112,9 @@ namespace Ale.Chronicle
 
         /// <summary>按 id 查找角色，未找到返回 null。</summary>
         public CharacterDefinition GetCharacter(string characterId) => Find(characters, characterId, c => c.id);
+
+        /// <summary>按 id 查找分组标签，未找到返回 null。</summary>
+        public ChronicleGroupTag GetGroupTag(string tagId) => Find(groupTags, tagId, t => t.id);
 
         #endregion
 
@@ -123,21 +151,32 @@ namespace Ale.Chronicle
             CheckDuplicates(coreAttributes,     a => a.id,   "核心属性 id", errors);
             CheckDuplicates(traits,             t => t.id,   "特质 id",     errors);
             CheckDuplicates(characters,         c => c.id,   "角色 id",     errors);
-            CheckDuplicates(characterTemplates, t => t.name, "角色模板 name", errors);
+            CheckDuplicates(characterTemplates,     t => t.name, "角色模板 name", errors);
+            CheckDuplicates(coreAttributeTemplates, t => t.name, "属性模板 name", errors);
+            CheckDuplicates(traitTemplates,         t => t.name, "特质模板 name", errors);
             CheckDuplicates(enumTypes,          e => e.name, "枚举类型 name", errors);
             CheckDuplicates(tags,               t => t.name, "功能标签 name", errors);
+            CheckDuplicates(groupTags,          t => t.id,   "分组标签 id",   errors);
+            CheckDuplicates(numberFormatConfigs, c => c.name, "数字格式 name", errors);
 
             var dangling = new HashSet<string>();
 
-            // 核心属性类别 → 枚举类型
+            // 核心属性：类别 → 枚举类型；模板 → 属性模板
             foreach (var a in coreAttributes)
-                if (a != null && !string.IsNullOrEmpty(a.categoryEnumRef) && GetEnumType(a.categoryEnumRef) == null)
+            {
+                if (a == null) continue;
+                if (!string.IsNullOrEmpty(a.categoryEnumRef) && GetEnumType(a.categoryEnumRef) == null)
                     dangling.Add($"核心属性[{a.id}].categoryEnumRef → 枚举 '{a.categoryEnumRef}'");
+                if (!string.IsNullOrEmpty(a.templateRef) && GetCoreAttributeTemplate(a.templateRef) == null)
+                    dangling.Add($"核心属性[{a.id}].templateRef → 属性模板 '{a.templateRef}'");
+            }
 
-            // 特质：modifier 目标属性 / 功能标签 / 互斥 / 相性
+            // 特质：模板 / modifier 目标属性 / 功能标签 / 互斥 / 相性
             foreach (var t in traits)
             {
                 if (t == null) continue;
+                if (!string.IsNullOrEmpty(t.templateRef) && GetTraitTemplate(t.templateRef) == null)
+                    dangling.Add($"特质[{t.id}].templateRef → 特质模板 '{t.templateRef}'");
                 if (t.modifiers != null)
                     foreach (var m in t.modifiers)
                         if (m != null && !string.IsNullOrEmpty(m.targetAttributeId) && GetCoreAttribute(m.targetAttributeId) == null)
@@ -217,6 +256,10 @@ namespace Ale.Chronicle
             traits             = source.traits.Select(t => t.Clone()).ToList();
             characterTemplates = source.characterTemplates.Select(t => t.Clone()).ToList();
             characters         = source.characters.Select(c => c.Clone()).ToList();
+            coreAttributeTemplates = source.coreAttributeTemplates.Select(t => t.Clone()).ToList();
+            traitTemplates         = source.traitTemplates.Select(t => t.Clone()).ToList();
+            groupTags              = source.groupTags.Select(t => t.Clone()).ToList();
+            numberFormatConfigs    = source.numberFormatConfigs.Select(c => c.Clone()).ToList();
         }
 
         #endregion

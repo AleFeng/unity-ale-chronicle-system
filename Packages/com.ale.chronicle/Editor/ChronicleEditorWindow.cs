@@ -17,10 +17,11 @@ namespace Ale.Chronicle.Editor
     /// </summary>
     public sealed class ChronicleEditorWindow : EditorDatabaseWindowBase<ChronicleDatabase>, IChronicleEditorContext
     {
-        private readonly AttributeSystemTab _attributeTab = new AttributeSystemTab();
-        private readonly TraitSystemTab     _traitTab     = new TraitSystemTab();
-        private readonly CharacterSystemTab _characterTab = new CharacterSystemTab();
-        private readonly EnumSystemTab      _enumTab      = new EnumSystemTab();
+        private readonly AttributeSystemTab        _attributeTab = new AttributeSystemTab();
+        private readonly TraitSystemTab            _traitTab     = new TraitSystemTab();
+        private readonly CharacterSystemTab        _characterTab = new CharacterSystemTab();
+        private readonly CharacterTemplateSystemTab _templateTab = new CharacterTemplateSystemTab();
+        private readonly EnumSystemTab             _enumTab      = new EnumSystemTab();
         private IEditorSystemTab<ChronicleDatabase>[] _tabs;
 
         // 各实体种类的重复 id/name 集合（Layout 阶段由 RefreshCaches 刷新）。
@@ -42,10 +43,10 @@ namespace Ale.Chronicle.Editor
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "角色", "属性", "特质", "枚举" };
+        protected override string[] SystemTabLabels => new[] { "角色", "角色模板", "属性", "特质", "枚举" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _attributeTab, _traitTab, _enumTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _templateTab, _attributeTab, _traitTab, _enumTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
