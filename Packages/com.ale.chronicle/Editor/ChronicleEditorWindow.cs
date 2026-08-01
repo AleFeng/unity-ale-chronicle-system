@@ -25,16 +25,37 @@ namespace Ale.Chronicle.Editor
         // 各实体种类的重复 id/name 集合（Layout 阶段由 RefreshCaches 刷新）。
         private Dictionary<EChronicleEntityKind, HashSet<string>> _duplicateIds;
 
+        /// <summary>窗口标题。</summary>
+        private const string WindowTitle = "编年史编辑器";
+
+        /// <summary>窗口初始尺寸（宽 × 高）：仅首次打开时应用，并居中于主编辑器窗口。</summary>
+        private static readonly Vector2 WindowDefaultSize = new Vector2(1280f, 780f);
+
         [MenuItem("Tools/Ale Toolkit/Chronicle System/Chronicle Editor", priority = 1101)]
-        public static void Open() => GetWindow<ChronicleEditorWindow>("编年史编辑器").Show();
+        public static void Open() => OpenWindow();
 
         /// <summary>打开窗口并载入指定数据库（供数据文件 Inspector 的「打开编辑器」按钮调用）。</summary>
         public static void Open(ChronicleDatabase db)
         {
-            var window = GetWindow<ChronicleEditorWindow>("编年史编辑器");
+            var window = OpenWindow();
             if (db) window.SetDatabase(db);
-            window.Show();
             window.Focus();
+        }
+
+        /// <summary>获取（或创建）窗口；首次创建时按 <see cref="WindowDefaultSize"/> 定尺寸并居中。</summary>
+        private static ChronicleEditorWindow OpenWindow()
+        {
+            bool isNew = !HasOpenInstances<ChronicleEditorWindow>();
+            var window = GetWindow<ChronicleEditorWindow>(WindowTitle);
+            if (isNew)
+            {
+                var main = EditorGUIUtility.GetMainWindowPosition();
+                float x = main.x + (main.width  - WindowDefaultSize.x) * 0.5f;
+                float y = main.y + (main.height - WindowDefaultSize.y) * 0.5f;
+                window.position = new Rect(x, y, WindowDefaultSize.x, WindowDefaultSize.y);
+            }
+            window.Show();
+            return window;
         }
 
         // ── 基类钩子 ──────────────────────────────────────────────────────────────
