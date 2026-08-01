@@ -19,6 +19,7 @@ namespace Ale.Chronicle.Editor
         private readonly AttributeSystemTab _attributeTab = new AttributeSystemTab();
         private readonly TraitSystemTab     _traitTab     = new TraitSystemTab();
         private readonly CharacterSystemTab _characterTab = new CharacterSystemTab();
+        private readonly SkillSystemTab     _skillTab     = new SkillSystemTab();
         private readonly GeneralSystemTab   _generalTab   = new GeneralSystemTab();
         private IEditorSystemTab<ChronicleDatabase>[] _tabs;
 
@@ -62,10 +63,10 @@ namespace Ale.Chronicle.Editor
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "角色", "属性", "特质", "通用" };
+        protected override string[] SystemTabLabels => new[] { "角色", "属性", "特质", "技能", "通用" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _attributeTab, _traitTab, _generalTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _attributeTab, _traitTab, _skillTab, _generalTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
@@ -87,8 +88,13 @@ namespace Ale.Chronicle.Editor
 
             // 模板 / 特质标签 schema 变动后，同步所有角色的自由字段集合（幂等）。
             if (db)
+            {
                 foreach (var c in db.Characters)
                     c?.RebuildAttributes(db);
+                // 技能模板 schema 变动后，同步所有技能的自定义字段集合（幂等）。
+                foreach (var s in db.Skills)
+                    s?.RebuildAttributes(db);
+            }
         }
 
         protected override string BuildStatusMessage(ChronicleDatabase db)
@@ -156,6 +162,7 @@ namespace Ale.Chronicle.Editor
             Collect(db.Characters,         x => x?.id,   result[EChronicleEntityKind.Character]);
             Collect(db.EnumTypesList,      x => x?.name, result[EChronicleEntityKind.EnumType]);
             Collect(db.Tags,               x => x?.name, result[EChronicleEntityKind.Tag]);
+            Collect(db.Skills,             x => x?.id,   result[EChronicleEntityKind.Skill]);
             return result;
         }
 
@@ -179,6 +186,7 @@ namespace Ale.Chronicle.Editor
             EChronicleEntityKind.Character         => "角色 id",
             EChronicleEntityKind.EnumType          => "枚举类型 name",
             EChronicleEntityKind.Tag               => "功能标签 name",
+            EChronicleEntityKind.Skill             => "技能 id",
             _                                      => k.ToString(),
         };
     }

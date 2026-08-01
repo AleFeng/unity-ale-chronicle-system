@@ -13,6 +13,7 @@ namespace Ale.Chronicle.Editor
         Character,
         EnumType,
         Tag,
+        Skill,
     }
 
     /// <summary>
