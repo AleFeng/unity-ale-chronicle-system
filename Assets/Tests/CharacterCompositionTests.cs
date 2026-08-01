@@ -23,6 +23,7 @@ namespace Ale.Chronicle.Tests
             public Tag               GetTag(string name)               => name != null && Tags.TryGetValue(name, out var t)      ? t : null;
             public CoreAttributeTemplate GetCoreAttributeTemplate(string name) => null;
             public TraitTemplate         GetTraitTemplate(string name)         => null;
+            public SkillTemplate         GetSkillTemplate(string name)         => null;
         }
 
         private static AttributeDefinition Field(string id, EFieldType type) => new AttributeDefinition(id, type);

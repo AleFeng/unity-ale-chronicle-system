@@ -101,6 +101,18 @@ namespace Ale.Chronicle.Tests
             c.SetAttributeValue(WellKnownAttr.Birthday, 100);
             c.SetAttributeValue("rank", 3);
 
+            // 技能模板 / 技能（v3 新列；分组标签引用统一 groupTags 池的 g1）
+            var skillTmpl = new SkillTemplate("火系");
+            skillTmpl.attributes.Add(new AttributeDefinition("power", EFieldType.Int));
+            db.SkillTemplates.Add(skillTmpl);
+
+            var fireball = new Skill("fireball", "火系") { primaryGroupTag = "g1" };
+            fireball.displayText.SetTextValue(0, "火球术");
+            fireball.secondaryGroupTags.Add("g1");
+            db.Skills.Add(fireball);
+            fireball.RebuildAttributes(db);                // 生成 power 自定义字段
+            fireball.SetAttributeValue("power", 30);
+
             return db;
         }
 
@@ -195,6 +207,22 @@ namespace Ale.Chronicle.Tests
             var fmt = _dst.GetNumberFormatConfig("fmt");
             Assert.IsNotNull(fmt);
             Assert.AreEqual(1000, fmt.locales[0].rules[0].threshold);
+
+            // v3 新列：技能模板 / 技能（含显示名 / 分组标签 / 自定义字段 values）
+            var st = _dst.GetSkillTemplate("火系");
+            Assert.IsNotNull(st);
+            Assert.AreEqual(1, st.attributes.Count);
+            Assert.AreEqual("power", st.attributes[0].id);
+
+            var fb = _dst.GetSkill("fireball");
+            Assert.IsNotNull(fb);
+            Assert.AreEqual("火系", fb.templateRef);
+            Assert.AreEqual("火球术", fb.displayText.GetTextValue(0));
+            Assert.AreEqual(EFieldType.Text, fb.displayText.Type);
+            Assert.AreEqual(EFieldType.Sprite, fb.iconValue.Type);
+            Assert.AreEqual("g1", fb.primaryGroupTag);
+            Assert.Contains("g1", fb.secondaryGroupTags);
+            Assert.AreEqual(30, fb.GetAttributeValue<int>("power"));   // v3 values
         }
     }
 }

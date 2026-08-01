@@ -30,6 +30,8 @@ namespace Ale.Chronicle
         [SerializeField] private List<TraitTemplate>          traitTemplates         = new List<TraitTemplate>();
         [SerializeField] private List<ChronicleGroupTag>      groupTags              = new List<ChronicleGroupTag>();
         [SerializeField] private List<NumberFormatConfig>     numberFormatConfigs    = new List<NumberFormatConfig>();
+        [SerializeField] private List<SkillTemplate>          skillTemplates         = new List<SkillTemplate>();
+        [SerializeField] private List<Skill>                  skills                 = new List<Skill>();
 
         #region 访问器
 
@@ -65,6 +67,12 @@ namespace Ale.Chronicle
 
         /// <summary>数字格式配置 列表。</summary>
         public List<NumberFormatConfig> NumberFormatConfigs => numberFormatConfigs;
+
+        /// <summary>技能模板 列表。</summary>
+        public List<SkillTemplate> SkillTemplates => skillTemplates;
+
+        /// <summary>技能 列表。</summary>
+        public List<Skill> Skills => skills;
 
         #endregion
 
@@ -102,6 +110,9 @@ namespace Ale.Chronicle
         /// <summary>按名称查找数字格式配置，未找到返回 null。</summary>
         public NumberFormatConfig GetNumberFormatConfig(string configName) => Find(numberFormatConfigs, configName, c => c.name);
 
+        /// <summary>按名称查找技能模板，未找到返回 null。</summary>
+        public SkillTemplate GetSkillTemplate(string templateName) => Find(skillTemplates, templateName, t => t.name);
+
         // ── 按 ID ─────────────────────────────────────────────────────────────────
 
         /// <summary>按 id 查找核心属性，未找到返回 null。</summary>
@@ -115,6 +126,9 @@ namespace Ale.Chronicle
 
         /// <summary>按 id 查找分组标签，未找到返回 null。</summary>
         public ChronicleGroupTag GetGroupTag(string tagId) => Find(groupTags, tagId, t => t.id);
+
+        /// <summary>按 id 查找技能，未找到返回 null。</summary>
+        public Skill GetSkill(string skillId) => Find(skills, skillId, s => s.id);
 
         #endregion
 
@@ -158,6 +172,8 @@ namespace Ale.Chronicle
             CheckDuplicates(tags,               t => t.name, "功能标签 name", errors);
             CheckDuplicates(groupTags,          t => t.id,   "分组标签 id",   errors);
             CheckDuplicates(numberFormatConfigs, c => c.name, "数字格式 name", errors);
+            CheckDuplicates(skills,             s => s.id,   "技能 id",       errors);
+            CheckDuplicates(skillTemplates,     t => t.name, "技能模板 name", errors);
 
             var dangling = new HashSet<string>();
 
@@ -214,6 +230,20 @@ namespace Ale.Chronicle
                         AddIfDanglingCharacter(c.id, "childRefs", kid, dangling);
             }
 
+            // 技能：模板 / 主分组标签 / 副分组标签（分组标签引用统一 groupTags 池）
+            foreach (var s in skills)
+            {
+                if (s == null) continue;
+                if (!string.IsNullOrEmpty(s.templateRef) && GetSkillTemplate(s.templateRef) == null)
+                    dangling.Add($"技能[{s.id}].templateRef → 技能模板 '{s.templateRef}'");
+                if (!string.IsNullOrEmpty(s.primaryGroupTag) && GetGroupTag(s.primaryGroupTag) == null)
+                    dangling.Add($"技能[{s.id}].primaryGroupTag → 分组标签 '{s.primaryGroupTag}'");
+                if (s.secondaryGroupTags != null)
+                    foreach (var g in s.secondaryGroupTags)
+                        if (!string.IsNullOrEmpty(g) && GetGroupTag(g) == null)
+                            dangling.Add($"技能[{s.id}].secondaryGroupTags → 分组标签 '{g}'");
+            }
+
             if (dangling.Count > 0)
                 errors.Add("存在悬空引用：" + string.Join("；", dangling));
 
@@ -260,6 +290,8 @@ namespace Ale.Chronicle
             traitTemplates         = source.traitTemplates.Select(t => t.Clone()).ToList();
             groupTags              = source.groupTags.Select(t => t.Clone()).ToList();
             numberFormatConfigs    = source.numberFormatConfigs.Select(c => c.Clone()).ToList();
+            skillTemplates         = source.skillTemplates.Select(t => t.Clone()).ToList();
+            skills                 = source.skills.Select(s => s.Clone()).ToList();
         }
 
         #endregion

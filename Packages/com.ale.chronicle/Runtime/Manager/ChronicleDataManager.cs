@@ -65,6 +65,7 @@ namespace Ale.Chronicle
         private readonly Dictionary<string, TraitDefinition>        _traits    = new Dictionary<string, TraitDefinition>();
         private readonly Dictionary<string, CharacterTemplate>      _templates = new Dictionary<string, CharacterTemplate>();
         private readonly Dictionary<string, CharacterDefinition>    _characters = new Dictionary<string, CharacterDefinition>();
+        private readonly Dictionary<string, Skill>                  _skills    = new Dictionary<string, Skill>();
 
         /// <summary>使查询索引失效，下次查询时重建。运行期直接改动已注册数据库内容后需手动调用。</summary>
         public void InvalidateIndex() => _indexDirty = true;
@@ -76,6 +77,7 @@ namespace Ale.Chronicle
 
             _enumTypes.Clear(); _tags.Clear(); _coreAttrs.Clear();
             _traits.Clear();    _templates.Clear(); _characters.Clear();
+            _skills.Clear();
 
             foreach (var db in _databases)
             {
@@ -86,6 +88,7 @@ namespace Ale.Chronicle
                 Index(_traits,     db.Traits,            x => x.id);
                 Index(_templates,  db.CharacterTemplates, x => x.name);
                 Index(_characters, db.Characters,        x => x.id);
+                Index(_skills,     db.Skills,            x => x.id);
             }
         }
 
@@ -130,6 +133,9 @@ namespace Ale.Chronicle
 
         /// <summary>按 id 跨库查找角色，未找到返回 null。</summary>
         public CharacterDefinition GetCharacter(string characterId) => Lookup(_characters, characterId);
+
+        /// <summary>按 id 跨库查找技能，未找到返回 null。</summary>
+        public Skill GetSkill(string skillId) => Lookup(_skills, skillId);
 
         #endregion
     }

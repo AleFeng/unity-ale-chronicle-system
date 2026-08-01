@@ -23,6 +23,9 @@ namespace Ale.Chronicle.Serialization
         public TraitTemplateDto[] traitTemplates;
         public GroupTagDto[] groupTags;
         public NumberFormatConfigDto[] numberFormatConfigs;
+        // v3 追加（技能系统）
+        public SkillTemplateDto[] skillTemplates;
+        public SkillDto[] skills;
     }
 
     [Serializable]
@@ -135,6 +138,39 @@ namespace Ale.Chronicle.Serialization
         public int attributePointBudget;
         public int minAgeDays;
         public int maxAgeDays;
+    }
+
+    /// <summary>技能模板 DTO：派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加技能默认信息。
+    /// 图标以 <see cref="AttributeValueDto"/>(Sprite) 承载（与核心属性 / 特质图标同约定）。</summary>
+    [Serializable]
+    public class SkillTemplateDto : ConfigTemplateDto
+    {
+        /// <summary>默认显示名（Text：纯文本 fallback + 本地化引用）。</summary>
+        public AttributeValueDto displayText;
+        /// <summary>默认描述（Text：纯文本 fallback + 本地化引用）。</summary>
+        public AttributeValueDto descriptionText;
+        /// <summary>默认图标（Sprite 对象类属性值：GUID / Addressable 地址由对象槽承载）。</summary>
+        public AttributeValueDto iconValue;
+        public string primaryGroupTag;
+        public string[] secondaryGroupTags;
+    }
+
+    /// <summary>技能实例 DTO。分组标签引用统一 groupTags 池的 id。</summary>
+    [Serializable]
+    public class SkillDto
+    {
+        public string id;
+        public string templateRef;
+        /// <summary>显示名（Text：纯文本 fallback + 本地化引用）。</summary>
+        public AttributeValueDto displayText;
+        /// <summary>描述（Text：纯文本 fallback + 本地化引用）。</summary>
+        public AttributeValueDto descriptionText;
+        /// <summary>图标（Sprite 对象类属性值：GUID / Addressable 地址由对象槽承载）。</summary>
+        public AttributeValueDto iconValue;
+        public string primaryGroupTag;
+        public string[] secondaryGroupTags;
+        /// <summary>来自模板 schema 的自定义属性值。</summary>
+        public AttributeEntryDto[] values;
     }
 
     [Serializable]

@@ -23,8 +23,9 @@ namespace Ale.Chronicle.Serialization
         /// <summary>魔数 "CHRO"。</summary>
         private const int Magic = 0x4348524F;
 
-        /// <summary>当前序列化格式版本。v2：属性/特质实例追加 templateRef+values，尾部追加 属性模板/特质模板/分组标签/数字格式 四块。</summary>
-        public const int Version = 2;
+        /// <summary>当前序列化格式版本。v2：属性/特质实例追加 templateRef+values，尾部追加 属性模板/特质模板/分组标签/数字格式 四块。
+        /// v3：尾部追加 技能模板/技能 两块（技能分组标签复用统一 groupTags 池，不单列）。</summary>
+        public const int Version = 3;
 
         /// <summary>可正确解析的最低格式版本。</summary>
         private const int MinReadableVersion = 1;
@@ -55,6 +56,10 @@ namespace Ale.Chronicle.Serialization
                 WriteArray(w, dto.traitTemplates, WriteTraitTemplate);
                 WriteArray(w, dto.groupTags, WriteGroupTag);
                 WriteArray(w, dto.numberFormatConfigs, WriteNumberFormatConfig);
+
+                // v3 追加块（技能系统）
+                WriteArray(w, dto.skillTemplates, WriteSkillTemplate);
+                WriteArray(w, dto.skills, WriteSkill);
             }
             return stream.ToArray();
         }
@@ -109,6 +114,13 @@ namespace Ale.Chronicle.Serialization
                 dto.numberFormatConfigs    = ReadArray(r, ReadNumberFormatConfig);
             }
 
+            // v3 追加块（技能系统）：旧 v2 文件到数字格式即结束。
+            if (version >= 3)
+            {
+                dto.skillTemplates = ReadArray(r, ReadSkillTemplate);
+                dto.skills         = ReadArray(r, ReadSkill);
+            }
+
             FromDto(dto, target, resolver);
         }
 
@@ -132,6 +144,9 @@ namespace Ale.Chronicle.Serialization
                 traitTemplates         = ToolkitDtoMapper.ToArray(db.TraitTemplates, t => ToDto(t, resolver)),
                 groupTags              = ToolkitDtoMapper.ToArray(db.GroupTags, g => ToolkitDtoMapper.ToDto(g, resolver)),
                 numberFormatConfigs    = ToolkitDtoMapper.ToArray(db.NumberFormatConfigs, c => ToDto(c, resolver)),
+                skillTemplates         = ToolkitDtoMapper.ToArray(db.SkillTemplates, t => ToDto(t, resolver)),
+                skills                 = ToolkitDtoMapper.ToArrayFiltered(db.Skills,
+                                            s => s != null && !string.IsNullOrWhiteSpace(s.id), s => ToDto(s, resolver)),
             };
         }
 
@@ -147,6 +162,8 @@ namespace Ale.Chronicle.Serialization
             target.TraitTemplates.Clear();
             target.GroupTags.Clear();
             target.NumberFormatConfigs.Clear();
+            target.SkillTemplates.Clear();
+            target.Skills.Clear();
             if (dto == null) return;
 
             if (dto.enumTypes != null)          foreach (var e in dto.enumTypes)          target.EnumTypesList.Add(FromDto(e, resolver));
@@ -159,6 +176,8 @@ namespace Ale.Chronicle.Serialization
             if (dto.traitTemplates != null)         foreach (var t in dto.traitTemplates)         target.TraitTemplates.Add(FromDto(t, resolver));
             if (dto.groupTags != null)              foreach (var g in dto.groupTags)              target.GroupTags.Add(ToolkitDtoMapper.FromDto<ChronicleGroupTag>(g, resolver));
             if (dto.numberFormatConfigs != null)    foreach (var c in dto.numberFormatConfigs)    target.NumberFormatConfigs.Add(FromDto(c, resolver));
+            if (dto.skillTemplates != null)         foreach (var t in dto.skillTemplates)         target.SkillTemplates.Add(FromDto(t, resolver));
+            if (dto.skills != null)                 foreach (var s in dto.skills)                 target.Skills.Add(FromDto(s, resolver));
         }
 
         // ── 枚举类型 ────────────────────────────────────────────────────────────────
@@ -448,6 +467,66 @@ namespace Ale.Chronicle.Serialization
                 c.locales.Add(loc);
             }
             return c;
+        }
+
+        // ── 技能模板 / 技能 ─────────────────────────────────────────────────────────
+
+        private static SkillTemplateDto ToDto(SkillTemplate t, IAssetRefResolver resolver)
+        {
+            var dto = new SkillTemplateDto
+            {
+                displayText        = ToolkitDtoMapper.ToDto(t.displayText, resolver),
+                descriptionText    = ToolkitDtoMapper.ToDto(t.descriptionText, resolver),
+                iconValue          = ToolkitDtoMapper.ToDto(t.iconValue, resolver),
+                primaryGroupTag    = t.primaryGroupTag,
+                secondaryGroupTags = ToolkitDtoMapper.ToArray(t.secondaryGroupTags),
+            };
+            ToolkitDtoMapper.FillTemplateDto(dto, t, resolver);   // name / color / attributes
+            return dto;
+        }
+
+        private static SkillTemplate FromDto(SkillTemplateDto dto, IAssetRefResolver resolver)
+        {
+            var t = new SkillTemplate
+            {
+                displayText        = ToolkitDtoMapper.TextFromDto(dto.displayText, resolver),
+                descriptionText    = ToolkitDtoMapper.TextFromDto(dto.descriptionText, resolver),
+                iconValue          = dto.iconValue != null ? ToolkitDtoMapper.FromDto(dto.iconValue, resolver) : new AttributeValue(EFieldType.Sprite),
+                primaryGroupTag    = dto.primaryGroupTag,
+                secondaryGroupTags = ToolkitDtoMapper.FromDto(dto.secondaryGroupTags),
+            };
+            ToolkitDtoMapper.FillTemplate(t, dto, resolver);      // name / color / attributes
+            return t;
+        }
+
+        private static SkillDto ToDto(Skill s, IAssetRefResolver resolver)
+        {
+            return new SkillDto
+            {
+                id                 = s.id,
+                templateRef        = s.templateRef,
+                displayText        = ToolkitDtoMapper.ToDto(s.displayText, resolver),
+                descriptionText    = ToolkitDtoMapper.ToDto(s.descriptionText, resolver),
+                iconValue          = ToolkitDtoMapper.ToDto(s.iconValue, resolver),
+                primaryGroupTag    = s.primaryGroupTag,
+                secondaryGroupTags = ToolkitDtoMapper.ToArray(s.secondaryGroupTags),
+                values             = ToolkitDtoMapper.ToDto(s.values, resolver),
+            };
+        }
+
+        private static Skill FromDto(SkillDto dto, IAssetRefResolver resolver)
+        {
+            var s = new Skill(dto.id, dto.templateRef)
+            {
+                displayText        = ToolkitDtoMapper.TextFromDto(dto.displayText, resolver),
+                descriptionText    = ToolkitDtoMapper.TextFromDto(dto.descriptionText, resolver),
+                iconValue          = dto.iconValue != null ? ToolkitDtoMapper.FromDto(dto.iconValue, resolver) : new AttributeValue(EFieldType.Sprite),
+                primaryGroupTag    = dto.primaryGroupTag,
+                secondaryGroupTags = ToolkitDtoMapper.FromDto(dto.secondaryGroupTags),
+            };
+            ToolkitDtoMapper.FromDto(dto.values, s.values, resolver);
+            s.InvalidateEntryCache();
+            return s;
         }
 
         // ── 角色模板 ────────────────────────────────────────────────────────────────
@@ -812,6 +891,62 @@ namespace Ale.Chronicle.Serialization
                         decimalPlaces = br2.ReadInt32(),
                     })
                 })
+            };
+        }
+
+        // ── v3 追加块：技能模板 / 技能 ─────────────────────────────────────────────────
+
+        private static void WriteSkillTemplate(BinaryWriter w, SkillTemplateDto t)
+        {
+            WriteStr(w, t.name);
+            WriteFloatArray(w, t.color);
+            WriteArray(w, t.attributes, WriteDefinition);
+            WriteValue(w, t.displayText);
+            WriteValue(w, t.descriptionText);
+            WriteValue(w, t.iconValue);
+            WriteStr(w, t.primaryGroupTag);
+            WriteStrArray(w, t.secondaryGroupTags);
+        }
+
+        private static SkillTemplateDto ReadSkillTemplate(BinaryReader r)
+        {
+            return new SkillTemplateDto
+            {
+                name               = ReadStr(r),
+                color              = ReadFloatArray(r),
+                attributes         = ReadArray(r, ReadDefinition),
+                displayText        = ReadValue(r),
+                descriptionText    = ReadValue(r),
+                iconValue          = ReadValue(r),
+                primaryGroupTag    = ReadStr(r),
+                secondaryGroupTags = ReadStrArray(r),
+            };
+        }
+
+        private static void WriteSkill(BinaryWriter w, SkillDto s)
+        {
+            WriteStr(w, s.id);
+            WriteStr(w, s.templateRef);
+            WriteValue(w, s.displayText);
+            WriteValue(w, s.descriptionText);
+            WriteValue(w, s.iconValue);
+            WriteStr(w, s.primaryGroupTag);
+            WriteStrArray(w, s.secondaryGroupTags);
+            WriteEntries(w, s.values);
+        }
+
+        private static SkillDto ReadSkill(BinaryReader r)
+        {
+            return new SkillDto
+            {
+                id                 = ReadStr(r),
+                templateRef        = ReadStr(r),
+                displayText        = ReadValue(r),
+                descriptionText    = ReadValue(r),
+                iconValue          = ReadValue(r),
+                primaryGroupTag    = ReadStr(r),
+                secondaryGroupTags = ReadStrArray(r),
+                values             = ReadEntries(r),
             };
         }
 
