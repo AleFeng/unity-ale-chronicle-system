@@ -66,6 +66,7 @@ namespace Ale.Chronicle
         private readonly Dictionary<string, CharacterTemplate>      _templates = new Dictionary<string, CharacterTemplate>();
         private readonly Dictionary<string, CharacterDefinition>    _characters = new Dictionary<string, CharacterDefinition>();
         private readonly Dictionary<string, Skill>                  _skills    = new Dictionary<string, Skill>();
+        private readonly Dictionary<string, ChronicleGroupTag>      _groupTags = new Dictionary<string, ChronicleGroupTag>();
 
         /// <summary>使查询索引失效，下次查询时重建。运行期直接改动已注册数据库内容后需手动调用。</summary>
         public void InvalidateIndex() => _indexDirty = true;
@@ -77,7 +78,7 @@ namespace Ale.Chronicle
 
             _enumTypes.Clear(); _tags.Clear(); _coreAttrs.Clear();
             _traits.Clear();    _templates.Clear(); _characters.Clear();
-            _skills.Clear();
+            _skills.Clear();    _groupTags.Clear();
 
             foreach (var db in _databases)
             {
@@ -89,6 +90,7 @@ namespace Ale.Chronicle
                 Index(_templates,  db.CharacterTemplates, x => x.name);
                 Index(_characters, db.Characters,        x => x.id);
                 Index(_skills,     db.Skills,            x => x.id);
+                Index(_groupTags,  db.GroupTags,         x => x.id);
             }
         }
 
@@ -136,6 +138,23 @@ namespace Ale.Chronicle
 
         /// <summary>按 id 跨库查找技能，未找到返回 null。</summary>
         public Skill GetSkill(string skillId) => Lookup(_skills, skillId);
+
+        /// <summary>按 id 跨库查找分组标签，未找到返回 null。</summary>
+        public ChronicleGroupTag GetGroupTag(string tagId) => Lookup(_groupTags, tagId);
+
+        /// <summary>跨库返回全部技能（按注册 / 列表顺序，id 去重、先注册先得）；未注册返回空列表。</summary>
+        public List<Skill> GetAllSkills()
+        {
+            EnsureIndex();
+            return new List<Skill>(_skills.Values);
+        }
+
+        /// <summary>跨库返回全部分组标签（按注册 / 列表顺序，id 去重、先注册先得）；未注册返回空列表。</summary>
+        public List<ChronicleGroupTag> GetAllGroupTags()
+        {
+            EnsureIndex();
+            return new List<ChronicleGroupTag>(_groupTags.Values);
+        }
 
         #endregion
     }

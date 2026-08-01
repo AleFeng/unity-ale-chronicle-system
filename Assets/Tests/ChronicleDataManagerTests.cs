@@ -23,6 +23,13 @@ namespace Ale.Chronicle.Tests
             return db;
         }
 
+        private ChronicleDatabase NewDb()
+        {
+            var db = ScriptableObject.CreateInstance<ChronicleDatabase>();
+            _created.Add(db);
+            return db;
+        }
+
         [TearDown]
         public void Cleanup()
         {
@@ -68,6 +75,56 @@ namespace Ale.Chronicle.Tests
 
             mgr.Unregister(db);
             Assert.IsNull(mgr.GetTrait("x"));
+        }
+
+        // ── 技能 UI 迁移所需的目录 / 分组标签访问器（S1）────────────────────────────
+
+        [Test]
+        public void GetAllSkills_AggregatesAcrossDatabases_DedupByIdFirstWins()
+        {
+            var db1 = NewDb();
+            db1.Skills.Add(new Skill("a"));
+            db1.Skills.Add(new Skill("b"));
+            var db2 = NewDb();
+            db2.Skills.Add(new Skill("b"));   // 重复 id：应被 db1 的 b 覆盖（先注册先得）
+            db2.Skills.Add(new Skill("c"));
+
+            var mgr = ChronicleDataManager.Instance;
+            mgr.Register(db1);
+            mgr.Register(db2);
+
+            var all = mgr.GetAllSkills();
+            Assert.AreEqual(3, all.Count, "id 去重后应为 a / b / c 三个");
+            CollectionAssert.AreEqual(new[] { "a", "b", "c" }, all.ConvertAll(s => s.id), "按注册 / 列表顺序保序");
+            Assert.AreSame(db1.GetSkill("b"), mgr.GetSkill("b"), "重复 id 命中先注册者");
+        }
+
+        [Test]
+        public void GetGroupTag_And_GetAllGroupTags_Work()
+        {
+            var db = NewDb();
+            db.GroupTags.Add(new ChronicleGroupTag("g1", "攻击"));
+            db.GroupTags.Add(new ChronicleGroupTag("g2", "防御"));
+
+            var mgr = ChronicleDataManager.Instance;
+            mgr.Register(db);
+
+            Assert.AreSame(db.GetGroupTag("g1"), mgr.GetGroupTag("g1"));
+            Assert.IsNull(mgr.GetGroupTag("missing"));
+
+            var all = mgr.GetAllGroupTags();
+            Assert.AreEqual(2, all.Count);
+            CollectionAssert.AreEqual(new[] { "g1", "g2" }, all.ConvertAll(t => t.id));
+        }
+
+        [Test]
+        public void GetAll_ReturnEmptyNotNull_WhenNoDatabases()
+        {
+            var mgr = ChronicleDataManager.Instance;
+            Assert.IsNotNull(mgr.GetAllSkills());
+            Assert.AreEqual(0, mgr.GetAllSkills().Count);
+            Assert.IsNotNull(mgr.GetAllGroupTags());
+            Assert.AreEqual(0, mgr.GetAllGroupTags().Count);
         }
     }
 }

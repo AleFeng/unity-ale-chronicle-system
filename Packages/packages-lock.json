@@ -1,11 +1,5 @@
 {
   "dependencies": {
-    "com.ale.charactersystem": {
-      "version": "file:com.ale.charactersystem",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.ale.chronicle": {
       "version": "file:com.ale.chronicle",
       "depth": 0,
