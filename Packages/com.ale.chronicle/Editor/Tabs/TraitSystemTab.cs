@@ -7,57 +7,200 @@ using UnityEngine;
 
 namespace Ale.Chronicle.Editor
 {
-    /// <summary>「特质」页签：左列特质列表（行首标注 永久/临时），右列检视器
-    /// （基础信息 / 显示·资源 / 遗传·出生 / 修饰器 / 互斥 / 相性 / AI 权重 / 获得条件）。</summary>
-    public sealed class TraitSystemTab : ChronicleTwoColumnTab
+    /// <summary>
+    /// 「特质」页签（三列）：左=特质模板列表、中=特质列表（模板过滤 / 搜索 / 从模板添加 / 快速添加）、
+    /// 右=特质 Inspector（选中特质时）或特质模板 Inspector（选中左列模板时）。
+    /// </summary>
+    public sealed class TraitSystemTab : EditorThreeColumnTab<TraitDefinition>
     {
-        private readonly TraitListPanel _panel = new TraitListPanel();
-        protected override IEditorMasterListPanel<ChronicleDatabase> Panel => _panel;
+        private readonly TraitTemplatePanel _templatePanel = new TraitTemplatePanel();
+        private readonly TraitListPanel     _listPanel     = new TraitListPanel();
+        private IEditorMasterListPanel<ChronicleDatabase>[] _leftPanels;
+
+        protected override IEditorMasterListPanel<ChronicleDatabase>[] LeftPanels
+            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _templatePanel };
+
+        protected override string EntityNoun => "特质";
+
+        protected override List<TraitDefinition> EntityList(ChronicleDatabase db) => db.Traits;
+
+        protected override TraitDefinition DrawEntityList(IChronicleEditorContext ctx, TraitDefinition displaySelected)
+            => _listPanel.DrawList(ctx, displaySelected);
+
+        protected override TraitDefinition ConsumePendingSelect() => _listPanel.ConsumePendingSelect();
+
+        protected override void DrawEntityInspector(IChronicleEditorContext ctx, TraitDefinition entity)
+            => TraitInspectorPanel.Draw(ctx, entity);
     }
 
-    /// <summary>特质主列表面板：绑定 <see cref="ChronicleDatabase.Traits"/> + 完整特质检视器。</summary>
-    public sealed class TraitListPanel : EditorMasterListPanel<TraitDefinition>
+    /// <summary>特质列表面板（中列）：模板过滤 + 搜索 + 从模板添加 / 快速添加，每行 id / 名称 / 时效·修饰器数。</summary>
+    public sealed class TraitListPanel : EditorEntityListPanel<TraitDefinition, TraitTemplate>
     {
-        protected override List<TraitDefinition> GetList(ChronicleDatabase db) => db.Traits;
+        public TraitListPanel() : base("ChronicleTraitListDrag") { }
+
+        protected override EChronicleEntityKind Kind => EChronicleEntityKind.Trait;
         protected override string Noun => "特质";
 
-        protected override string RowLabel(TraitDefinition item)
+        protected override List<TraitDefinition> Entities(ChronicleDatabase db) => db.Traits;
+        protected override List<TraitTemplate>   Templates(ChronicleDatabase db) => db.TraitTemplates;
+        protected override string TemplateName(TraitTemplate t) => t.name;
+        protected override string TemplateRefOf(TraitDefinition e) => e.templateRef;
+        protected override string IdOf(TraitDefinition e) => e.id;
+
+        protected override Color RowDotColor(ChronicleDatabase db, TraitDefinition e)
         {
-            string name = string.IsNullOrEmpty(item.id) ? "(未命名)" : item.PlainName();
-            return (item.IsTemporary ? "[临时] " : "[永久] ") + name;
+            var t = db.GetTraitTemplate(e.templateRef);
+            return t != null ? t.color : Color.gray;
         }
 
-        protected override TraitDefinition CreateNew(ChronicleDatabase db, List<TraitDefinition> list)
+        protected override bool Matches(ChronicleDatabase db, TraitDefinition e, string term)
+        {
+            if (string.IsNullOrEmpty(term)) return true;
+            term = term.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
+            string name = e.PlainName();
+            return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
+        }
+
+        protected override TraitDefinition AddFromTemplate(IChronicleEditorContext ctx, string templateName)
+        {
+            var db = ctx.Database;
+            ctx.RecordUndo("从模板添加特质");
+            var t = db.GetTraitTemplate(templateName);
+            var tr = new TraitDefinition(GenerateId(db, "trait_", id => db.GetTrait(id) != null))
+            {
+                templateRef = templateName,
+            };
+            if (t != null)
+            {
+                tr.categoryEnumRef     = t.categoryEnumRef;
+                tr.lifetime            = t.lifetime;
+                tr.defaultDurationDays = t.defaultDurationDays;
+            }
+            tr.displayName.SetTextValue(0, "新特质");
+            tr.RebuildAttributes(db);
+            db.Traits.Add(tr);
+            ctx.MarkDirty();
+            return tr;
+        }
+
+        protected override TraitDefinition QuickAdd(IChronicleEditorContext ctx)
+        {
+            var db = ctx.Database;
+            if (db.Traits.Count == 0)
+                return AddFromTemplate(ctx, db.TraitTemplates.Count > 0 ? db.TraitTemplates[0].name : null);
+
+            ctx.RecordUndo("快速添加特质");
+            var clone = db.Traits[db.Traits.Count - 1].Clone();
+            clone.id = GenerateId(db, "trait_", id => db.GetTrait(id) != null);
+            db.Traits.Add(clone);
+            ctx.MarkDirty();
+            return clone;
+        }
+
+        protected override void DrawRowColumns(ChronicleDatabase db, TraitDefinition e,
+            Rect keyRow, float contentX, float contentRight, float valY, float valH)
+        {
+            float w     = Mathf.Max(0f, contentRight - contentX);
+            float idW   = Mathf.Min(110f, w * 0.32f);
+            float infoW = Mathf.Min(120f, w * 0.34f);
+            float nameX = contentX + idW + Pad;
+            float infoX = contentRight - infoW;
+            float nameW = Mathf.Max(0f, infoX - Pad - nameX);
+
+            GUI.Label(new Rect(contentX, keyRow.y, idW, keyRow.height), "ID", KeyStyle);
+            GUI.Label(new Rect(nameX, keyRow.y, nameW, keyRow.height), "名称", KeyStyle);
+            GUI.Label(new Rect(infoX, keyRow.y, infoW, keyRow.height), "时效·修饰器", KeyStyle);
+
+            GUI.Label(new Rect(contentX, valY, idW, valH), string.IsNullOrEmpty(e.id) ? "(空 ID)" : e.id, IdStyle);
+            GUI.Label(new Rect(nameX, valY, nameW, valH), e.PlainName(), SubStyle);
+            int modCount = e.modifiers != null ? e.modifiers.Count : 0;
+            GUI.Label(new Rect(infoX, valY, infoW, valH), $"{(e.IsTemporary ? "临时" : "永久")}·{modCount}", SubStyle);
+        }
+    }
+
+    /// <summary>特质模板主列表面板（特质页左列）：绑定 <see cref="ChronicleDatabase.TraitTemplates"/> + 模板检视器。</summary>
+    public sealed class TraitTemplatePanel : EditorMasterListPanel<TraitTemplate>
+    {
+        private readonly AttributeDefinitionListDrawer _schemaDrawer = new AttributeDefinitionListDrawer();
+
+        protected override List<TraitTemplate> GetList(ChronicleDatabase db) => db.TraitTemplates;
+        protected override string Noun => "特质模板";
+        protected override bool   HasColorDot => true;
+        protected override Color  RowColor(TraitTemplate item) => item.color;
+
+        protected override string RowLabel(TraitTemplate item)
+            => string.IsNullOrEmpty(item.name) ? "(未命名)" : item.name;
+
+        protected override TraitTemplate CreateNew(ChronicleDatabase db, List<TraitTemplate> list)
         {
             int n = list.Count + 1;
-            string id;
-            do { id = "trait_" + n; n++; } while (Contains(list, id));
-            var t = new TraitDefinition(id);
-            t.displayName.SetTextValue(0, "新特质");
-            return t;
+            string name;
+            do { name = "trait_template_" + n; n++; } while (Contains(list, name));
+            return new TraitTemplate(name);
         }
 
-        private static bool Contains(List<TraitDefinition> list, string id)
+        private static bool Contains(List<TraitTemplate> list, string name)
         {
-            foreach (var t in list) if (t != null && t.id == id) return true;
+            foreach (var t in list) if (t != null && t.name == name) return true;
             return false;
         }
 
-        public override void DrawInspector(IChronicleEditorContext ctx, TraitDefinition trait)
+        protected override void OnInvalidate() => _schemaDrawer.Invalidate();
+
+        public override void DrawInspector(IChronicleEditorContext ctx, TraitTemplate tmpl)
+        {
+            if (tmpl == null)
+            {
+                EditorGUILayout.LabelField("请选择或新建一个特质模板。", ToolkitEditorStyles.Placeholder);
+                return;
+            }
+
+            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
+            EditorGUI.BeginChangeCheck();
+            string name     = EditorGUILayout.TextField("名称(引用键)", tmpl.name);
+            Color  color    = EditorGUILayout.ColorField("列表色点", tmpl.color);
+            string category = EditorGUILayout.TextField("默认类别枚举(可空)", tmpl.categoryEnumRef);
+            var    lifetime = (ETraitLifetime)EditorGUILayout.EnumPopup("默认时效", tmpl.lifetime);
+            float  durDays  = tmpl.defaultDurationDays;
+            if (lifetime == ETraitLifetime.Temporary)
+                durDays = EditorGUILayout.FloatField("默认存活天数", tmpl.defaultDurationDays);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ctx.RecordUndo("修改特质模板");
+                tmpl.name                = name;
+                tmpl.color               = color;
+                tmpl.categoryEnumRef     = category;
+                tmpl.lifetime            = lifetime;
+                tmpl.defaultDurationDays = durDays;
+                ctx.MarkDirty();
+            }
+
+            EditorGUILayout.Space(4);
+            _schemaDrawer.Draw(ctx, ctx.Database, tmpl.attributes, "自定义字段 schema");
+        }
+    }
+
+    /// <summary>特质实例检视器（特质页右列）：基础信息 / 显示·资源 / 遗传·出生 / 修饰器 / 互斥·相性·AI权重 / 自定义字段 / 获得条件。</summary>
+    public static class TraitInspectorPanel
+    {
+        public static void Draw(IChronicleEditorContext ctx, TraitDefinition trait)
         {
             if (trait == null)
             {
                 EditorGUILayout.LabelField("请选择或新建一个特质。", ToolkitEditorStyles.Placeholder);
                 return;
             }
-
             trait.Normalize();
             var db = ctx.Database;
 
             // ── 基础信息 ──────────────────────────────────────────────────────────
             EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
+            ChronicleEntityHeader.DrawIdField(ctx, "特质", trait.id,
+                ctx.DuplicateIdsOf(EChronicleEntityKind.Trait), v => trait.id = v);
+            ChronicleEntityHeader.DrawTemplateRefReadonly(trait.templateRef);
+
             EditorGUI.BeginChangeCheck();
-            string id       = EditorGUILayout.TextField("ID", trait.id);
             var    lifetime = (ETraitLifetime)EditorGUILayout.EnumPopup("时效", trait.lifetime);
             float  durDays  = trait.defaultDurationDays;
             bool   refresh  = trait.durationStacksRefresh;
@@ -72,7 +215,6 @@ namespace Ale.Chronicle.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 ctx.RecordUndo("修改特质");
-                trait.id                    = id;
                 trait.lifetime              = lifetime;
                 trait.defaultDurationDays   = durDays;
                 trait.durationStacksRefresh = refresh;
@@ -121,6 +263,11 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("AI 权重", ToolkitEditorStyles.Header);
             AiWeightListEditor(ctx, trait.aiWeights);
+
+            // ── 自定义字段（来自模板 schema）───────────────────────────────────────
+            EditorGUILayout.Space(4);
+            var tmpl = db.GetTraitTemplate(trait.templateRef);
+            ChronicleEntityHeader.DrawCustomAttributes(ctx, trait.values, tmpl?.attributes, "（无——模板未定义自定义字段）");
 
             // ── 获得条件（Condition System 内联绘制器）──────────────────────────────
             EditorGUILayout.Space(4);
