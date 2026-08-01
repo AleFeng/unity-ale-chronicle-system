@@ -18,6 +18,7 @@ namespace Ale.Chronicle.Editor
     public sealed class ChronicleEditorWindow : EditorDatabaseWindowBase<ChronicleDatabase>, IChronicleEditorContext
     {
         private readonly AttributeSystemTab _attributeTab = new AttributeSystemTab();
+        private readonly TraitSystemTab     _traitTab     = new TraitSystemTab();
         private readonly EnumSystemTab      _enumTab      = new EnumSystemTab();
         private IEditorSystemTab<ChronicleDatabase>[] _tabs;
 
@@ -31,10 +32,10 @@ namespace Ale.Chronicle.Editor
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "属性", "枚举" };
+        protected override string[] SystemTabLabels => new[] { "属性", "特质", "枚举" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _attributeTab, _enumTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _attributeTab, _traitTab, _enumTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
