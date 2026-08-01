@@ -18,6 +18,11 @@ namespace Ale.Chronicle.Serialization
         public TraitDefinitionDto[] traits;
         public CharacterTemplateDto[] characterTemplates;
         public CharacterDefinitionDto[] characters;
+        // v2 追加
+        public CoreAttributeTemplateDto[] coreAttributeTemplates;
+        public TraitTemplateDto[] traitTemplates;
+        public GroupTagDto[] groupTags;
+        public NumberFormatConfigDto[] numberFormatConfigs;
     }
 
     [Serializable]
@@ -36,10 +41,22 @@ namespace Ale.Chronicle.Serialization
     public class CoreAttributeDefinitionDto
     {
         public string id;
+        public string templateRef;                 // v2
         public AttributeValueDto displayName;
         public AttributeValueDto abbreviation;
         public AttributeValueDto description;
         public AttributeValueDto icon;
+        public string categoryEnumRef;
+        public float minValue;
+        public float maxValue;
+        public float defaultBase;
+        public AttributeEntryDto[] values;         // v2：来自模板 schema 的自定义字段
+    }
+
+    /// <summary>属性模板 DTO：派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加默认区间/类别。</summary>
+    [Serializable]
+    public class CoreAttributeTemplateDto : ConfigTemplateDto
+    {
         public string categoryEnumRef;
         public float minValue;
         public float maxValue;
@@ -77,6 +94,7 @@ namespace Ale.Chronicle.Serialization
     public class TraitDefinitionDto
     {
         public string id;
+        public string templateRef;                 // v2
         public AttributeValueDto displayName;
         public AttributeValueDto description;
         public AttributeValueDto icon;
@@ -95,6 +113,16 @@ namespace Ale.Chronicle.Serialization
         public TraitAiWeightDto[] aiWeights;
         /// <summary>eligibility（ConditionExpression）的 Condition System JSON 串。</summary>
         public string eligibilityJson;
+        public AttributeEntryDto[] values;         // v2：来自模板 schema 的自定义字段
+    }
+
+    /// <summary>特质模板 DTO：派生自 <see cref="ConfigTemplateDto"/>，追加默认类别/时效。</summary>
+    [Serializable]
+    public class TraitTemplateDto : ConfigTemplateDto
+    {
+        public string categoryEnumRef;
+        public int lifetime;
+        public float defaultDurationDays;
     }
 
     /// <summary>派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加生成规则预留字段。</summary>

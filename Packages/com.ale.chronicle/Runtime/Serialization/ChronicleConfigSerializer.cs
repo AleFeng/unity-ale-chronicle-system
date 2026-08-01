@@ -23,8 +23,8 @@ namespace Ale.Chronicle.Serialization
         /// <summary>魔数 "CHRO"。</summary>
         private const int Magic = 0x4348524F;
 
-        /// <summary>当前序列化格式版本。</summary>
-        public const int Version = 1;
+        /// <summary>当前序列化格式版本。v2：属性/特质实例追加 templateRef+values，尾部追加 属性模板/特质模板/分组标签/数字格式 四块。</summary>
+        public const int Version = 2;
 
         /// <summary>可正确解析的最低格式版本。</summary>
         private const int MinReadableVersion = 1;
@@ -50,7 +50,11 @@ namespace Ale.Chronicle.Serialization
                 WriteArray(w, dto.characterTemplates, WriteCharacterTemplate);
                 WriteArray(w, dto.characters, WriteCharacter);
 
-                // 未来追加的数据块写在此处，读取端按版本号跳读以兼容旧文件。
+                // v2 追加块（读取端按版本号跳读以兼容旧文件）
+                WriteArray(w, dto.coreAttributeTemplates, WriteCoreAttributeTemplate);
+                WriteArray(w, dto.traitTemplates, WriteTraitTemplate);
+                WriteArray(w, dto.groupTags, WriteGroupTag);
+                WriteArray(w, dto.numberFormatConfigs, WriteNumberFormatConfig);
             }
             return stream.ToArray();
         }
@@ -90,13 +94,20 @@ namespace Ale.Chronicle.Serialization
                 version            = version,
                 enumTypes          = ReadArray(r, ReadEnumType),
                 tags               = ReadArray(r, ReadTag),
-                coreAttributes     = ReadArray(r, ReadCoreAttribute),
-                traits             = ReadArray(r, ReadTrait),
+                coreAttributes     = ReadArray(r, br => ReadCoreAttribute(br, version)),
+                traits             = ReadArray(r, br => ReadTrait(br, version)),
                 characterTemplates = ReadArray(r, ReadCharacterTemplate),
                 characters         = ReadArray(r, ReadCharacter),
             };
 
-            // 未来版本追加的数据块在此按 version 门控读取（当前 v1 无）。
+            // v2 追加块：旧 v1 文件到 characters 即结束，按版本号跳读兼容。
+            if (version >= 2)
+            {
+                dto.coreAttributeTemplates = ReadArray(r, ReadCoreAttributeTemplate);
+                dto.traitTemplates         = ReadArray(r, ReadTraitTemplate);
+                dto.groupTags              = ReadArray(r, ReadGroupTag);
+                dto.numberFormatConfigs    = ReadArray(r, ReadNumberFormatConfig);
+            }
 
             FromDto(dto, target, resolver);
         }
@@ -117,6 +128,10 @@ namespace Ale.Chronicle.Serialization
                 characterTemplates = ToolkitDtoMapper.ToArray(db.CharacterTemplates, t => ToDto(t, resolver)),
                 characters         = ToolkitDtoMapper.ToArrayFiltered(db.Characters,
                                         c => c != null && !string.IsNullOrWhiteSpace(c.id), c => ToDto(c, resolver)),
+                coreAttributeTemplates = ToolkitDtoMapper.ToArray(db.CoreAttributeTemplates, t => ToDto(t, resolver)),
+                traitTemplates         = ToolkitDtoMapper.ToArray(db.TraitTemplates, t => ToDto(t, resolver)),
+                groupTags              = ToolkitDtoMapper.ToArray(db.GroupTags, g => ToolkitDtoMapper.ToDto(g, resolver)),
+                numberFormatConfigs    = ToolkitDtoMapper.ToArray(db.NumberFormatConfigs, c => ToDto(c, resolver)),
             };
         }
 
@@ -128,6 +143,10 @@ namespace Ale.Chronicle.Serialization
             target.Traits.Clear();
             target.CharacterTemplates.Clear();
             target.Characters.Clear();
+            target.CoreAttributeTemplates.Clear();
+            target.TraitTemplates.Clear();
+            target.GroupTags.Clear();
+            target.NumberFormatConfigs.Clear();
             if (dto == null) return;
 
             if (dto.enumTypes != null)          foreach (var e in dto.enumTypes)          target.EnumTypesList.Add(FromDto(e, resolver));
@@ -136,6 +155,10 @@ namespace Ale.Chronicle.Serialization
             if (dto.traits != null)             foreach (var t in dto.traits)             target.Traits.Add(FromDto(t, resolver));
             if (dto.characterTemplates != null) foreach (var t in dto.characterTemplates) target.CharacterTemplates.Add(FromDto(t, resolver));
             if (dto.characters != null)         foreach (var c in dto.characters)         target.Characters.Add(FromDto(c, resolver));
+            if (dto.coreAttributeTemplates != null) foreach (var t in dto.coreAttributeTemplates) target.CoreAttributeTemplates.Add(FromDto(t, resolver));
+            if (dto.traitTemplates != null)         foreach (var t in dto.traitTemplates)         target.TraitTemplates.Add(FromDto(t, resolver));
+            if (dto.groupTags != null)              foreach (var g in dto.groupTags)              target.GroupTags.Add(ToolkitDtoMapper.FromDto<ChronicleGroupTag>(g, resolver));
+            if (dto.numberFormatConfigs != null)    foreach (var c in dto.numberFormatConfigs)    target.NumberFormatConfigs.Add(FromDto(c, resolver));
         }
 
         // ── 枚举类型 ────────────────────────────────────────────────────────────────
@@ -209,6 +232,7 @@ namespace Ale.Chronicle.Serialization
             return new CoreAttributeDefinitionDto
             {
                 id              = d.id,
+                templateRef     = d.templateRef,
                 displayName     = ToolkitDtoMapper.ToDto(d.displayName, resolver),
                 abbreviation    = ToolkitDtoMapper.ToDto(d.abbreviation, resolver),
                 description     = ToolkitDtoMapper.ToDto(d.description, resolver),
@@ -217,6 +241,7 @@ namespace Ale.Chronicle.Serialization
                 minValue        = d.minValue,
                 maxValue        = d.maxValue,
                 defaultBase     = d.defaultBase,
+                values          = ToolkitDtoMapper.ToDto(d.values, resolver),
             };
         }
 
@@ -225,6 +250,7 @@ namespace Ale.Chronicle.Serialization
             var d = new CoreAttributeDefinition
             {
                 id              = dto.id,
+                templateRef     = dto.templateRef,
                 displayName     = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
                 abbreviation    = ToolkitDtoMapper.TextFromDto(dto.abbreviation, resolver),
                 description     = ToolkitDtoMapper.TextFromDto(dto.description, resolver),
@@ -234,6 +260,8 @@ namespace Ale.Chronicle.Serialization
                 maxValue        = dto.maxValue,
                 defaultBase     = dto.defaultBase,
             };
+            ToolkitDtoMapper.FromDto(dto.values, d.values, resolver);
+            d.InvalidateEntryCache();
             d.Normalize();
             return d;
         }
@@ -277,6 +305,7 @@ namespace Ale.Chronicle.Serialization
             return new TraitDefinitionDto
             {
                 id                    = t.id,
+                templateRef           = t.templateRef,
                 displayName           = ToolkitDtoMapper.ToDto(t.displayName, resolver),
                 description           = ToolkitDtoMapper.ToDto(t.description, resolver),
                 icon                  = ToolkitDtoMapper.ToDto(t.icon, resolver),
@@ -296,6 +325,7 @@ namespace Ale.Chronicle.Serialization
                 aiWeights             = ToolkitDtoMapper.ToArray(t.aiWeights,
                                             a => new TraitAiWeightDto { axisRef = a.axisRef, weight = a.weight }),
                 eligibilityJson       = ConditionJson.ToJson(t.eligibility ?? new ConditionExpression(), pretty: false),
+                values                = ToolkitDtoMapper.ToDto(t.values, resolver),
             };
         }
 
@@ -304,6 +334,7 @@ namespace Ale.Chronicle.Serialization
             var t = new TraitDefinition
             {
                 id                    = dto.id,
+                templateRef           = dto.templateRef,
                 displayName           = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
                 description           = ToolkitDtoMapper.TextFromDto(dto.description, resolver),
                 icon                  = dto.icon != null ? ToolkitDtoMapper.FromDto(dto.icon, resolver) : new AttributeValue(EFieldType.Sprite),
@@ -325,8 +356,98 @@ namespace Ale.Chronicle.Serialization
                 foreach (var c in dto.compatibilities) t.compatibilities.Add(new TraitCompatibility(c.otherTraitRef, c.opinionDelta));
             if (dto.aiWeights != null)
                 foreach (var a in dto.aiWeights) t.aiWeights.Add(new TraitAiWeight(a.axisRef, a.weight));
+            ToolkitDtoMapper.FromDto(dto.values, t.values, resolver);
+            t.InvalidateEntryCache();
             t.Normalize();
             return t;
+        }
+
+        // ── 属性模板 / 特质模板 / 数字格式 ─────────────────────────────────────────────
+
+        private static CoreAttributeTemplateDto ToDto(CoreAttributeTemplate t, IAssetRefResolver resolver)
+        {
+            var dto = new CoreAttributeTemplateDto
+            {
+                categoryEnumRef = t.categoryEnumRef,
+                minValue        = t.minValue,
+                maxValue        = t.maxValue,
+                defaultBase     = t.defaultBase,
+            };
+            ToolkitDtoMapper.FillTemplateDto(dto, t, resolver);
+            return dto;
+        }
+
+        private static CoreAttributeTemplate FromDto(CoreAttributeTemplateDto dto, IAssetRefResolver resolver)
+        {
+            var t = new CoreAttributeTemplate();
+            ToolkitDtoMapper.FillTemplate(t, dto, resolver);
+            t.categoryEnumRef = dto.categoryEnumRef;
+            t.minValue        = dto.minValue;
+            t.maxValue        = dto.maxValue;
+            t.defaultBase     = dto.defaultBase;
+            return t;
+        }
+
+        private static TraitTemplateDto ToDto(TraitTemplate t, IAssetRefResolver resolver)
+        {
+            var dto = new TraitTemplateDto
+            {
+                categoryEnumRef     = t.categoryEnumRef,
+                lifetime            = (int)t.lifetime,
+                defaultDurationDays = t.defaultDurationDays,
+            };
+            ToolkitDtoMapper.FillTemplateDto(dto, t, resolver);
+            return dto;
+        }
+
+        private static TraitTemplate FromDto(TraitTemplateDto dto, IAssetRefResolver resolver)
+        {
+            var t = new TraitTemplate();
+            ToolkitDtoMapper.FillTemplate(t, dto, resolver);
+            t.categoryEnumRef     = dto.categoryEnumRef;
+            t.lifetime            = (ETraitLifetime)dto.lifetime;
+            t.defaultDurationDays = dto.defaultDurationDays;
+            return t;
+        }
+
+        private static NumberFormatConfigDto ToDto(NumberFormatConfig c, IAssetRefResolver resolver)
+        {
+            return new NumberFormatConfigDto
+            {
+                name = c.name,
+                locales = ToolkitDtoMapper.ToArray(c.locales, loc => new NumberFormatLocaleDto
+                {
+                    languageCode = loc.languageCode,
+                    rules = ToolkitDtoMapper.ToArray(loc.rules, r => new NumberFormatRuleDto
+                    {
+                        threshold     = r.threshold,
+                        divisor       = r.divisor,
+                        suffixText    = ToolkitDtoMapper.ToDto(r.suffixText, resolver),
+                        decimalPlaces = r.decimalPlaces,
+                    })
+                })
+            };
+        }
+
+        private static NumberFormatConfig FromDto(NumberFormatConfigDto dto, IAssetRefResolver resolver)
+        {
+            var c = new NumberFormatConfig { name = dto.name };
+            if (dto.locales == null) return c;
+            foreach (var locDto in dto.locales)
+            {
+                var loc = new NumberFormatLocale { languageCode = locDto.languageCode };
+                if (locDto.rules != null)
+                    foreach (var r in locDto.rules)
+                        loc.rules.Add(new NumberFormatRule
+                        {
+                            threshold     = r.threshold,
+                            divisor       = r.divisor,
+                            suffixText    = ToolkitDtoMapper.TextFromDto(r.suffixText, resolver),
+                            decimalPlaces = r.decimalPlaces,
+                        });
+                c.locales.Add(loc);
+            }
+            return c;
         }
 
         // ── 角色模板 ────────────────────────────────────────────────────────────────
@@ -433,11 +554,13 @@ namespace Ale.Chronicle.Serialization
             w.Write(d.minValue);
             w.Write(d.maxValue);
             w.Write(d.defaultBase);
+            WriteStr(w, d.templateRef);   // v2
+            WriteEntries(w, d.values);    // v2
         }
 
-        private static CoreAttributeDefinitionDto ReadCoreAttribute(BinaryReader r)
+        private static CoreAttributeDefinitionDto ReadCoreAttribute(BinaryReader r, int version)
         {
-            return new CoreAttributeDefinitionDto
+            var dto = new CoreAttributeDefinitionDto
             {
                 id              = ReadStr(r),
                 displayName     = ReadValue(r),
@@ -449,6 +572,12 @@ namespace Ale.Chronicle.Serialization
                 maxValue        = r.ReadSingle(),
                 defaultBase     = r.ReadSingle(),
             };
+            if (version >= 2)
+            {
+                dto.templateRef = ReadStr(r);
+                dto.values      = ReadEntries(r);
+            }
+            return dto;
         }
 
         private static void WriteModifier(BinaryWriter w, ModifierDefinitionDto m)
@@ -498,11 +627,13 @@ namespace Ale.Chronicle.Serialization
             w.Write(t.birthChance);
             WriteArray(w, t.aiWeights, (bw, a) => { WriteStr(bw, a.axisRef); bw.Write(a.weight); });
             WriteStr(w, t.eligibilityJson);
+            WriteStr(w, t.templateRef);   // v2
+            WriteEntries(w, t.values);    // v2
         }
 
-        private static TraitDefinitionDto ReadTrait(BinaryReader r)
+        private static TraitDefinitionDto ReadTrait(BinaryReader r, int version)
         {
-            return new TraitDefinitionDto
+            var dto = new TraitDefinitionDto
             {
                 id                    = ReadStr(r),
                 displayName           = ReadValue(r),
@@ -523,6 +654,12 @@ namespace Ale.Chronicle.Serialization
                 aiWeights             = ReadArray(r, br => new TraitAiWeightDto { axisRef = ReadStr(br), weight = br.ReadSingle() }),
                 eligibilityJson       = ReadStr(r),
             };
+            if (version >= 2)
+            {
+                dto.templateRef = ReadStr(r);
+                dto.values      = ReadEntries(r);
+            }
+            return dto;
         }
 
         private static void WriteCharacterTemplate(BinaryWriter w, CharacterTemplateDto t)
@@ -590,6 +727,91 @@ namespace Ale.Chronicle.Serialization
                 fatherRef      = ReadStr(r),
                 motherRef      = ReadStr(r),
                 childRefs      = ReadStrArray(r),
+            };
+        }
+
+        // ── v2 追加块：属性模板 / 特质模板 / 数字格式（分组标签走 ToolkitBinaryCodec.WriteGroupTag/ReadGroupTag）──
+
+        private static void WriteCoreAttributeTemplate(BinaryWriter w, CoreAttributeTemplateDto t)
+        {
+            WriteStr(w, t.name);
+            WriteFloatArray(w, t.color);
+            WriteArray(w, t.attributes, WriteDefinition);
+            WriteStr(w, t.categoryEnumRef);
+            w.Write(t.minValue);
+            w.Write(t.maxValue);
+            w.Write(t.defaultBase);
+        }
+
+        private static CoreAttributeTemplateDto ReadCoreAttributeTemplate(BinaryReader r)
+        {
+            return new CoreAttributeTemplateDto
+            {
+                name            = ReadStr(r),
+                color           = ReadFloatArray(r),
+                attributes      = ReadArray(r, ReadDefinition),
+                categoryEnumRef = ReadStr(r),
+                minValue        = r.ReadSingle(),
+                maxValue        = r.ReadSingle(),
+                defaultBase     = r.ReadSingle(),
+            };
+        }
+
+        private static void WriteTraitTemplate(BinaryWriter w, TraitTemplateDto t)
+        {
+            WriteStr(w, t.name);
+            WriteFloatArray(w, t.color);
+            WriteArray(w, t.attributes, WriteDefinition);
+            WriteStr(w, t.categoryEnumRef);
+            w.Write(t.lifetime);
+            w.Write(t.defaultDurationDays);
+        }
+
+        private static TraitTemplateDto ReadTraitTemplate(BinaryReader r)
+        {
+            return new TraitTemplateDto
+            {
+                name                = ReadStr(r),
+                color               = ReadFloatArray(r),
+                attributes          = ReadArray(r, ReadDefinition),
+                categoryEnumRef     = ReadStr(r),
+                lifetime            = r.ReadInt32(),
+                defaultDurationDays = r.ReadSingle(),
+            };
+        }
+
+        private static void WriteNumberFormatConfig(BinaryWriter w, NumberFormatConfigDto c)
+        {
+            WriteStr(w, c.name);
+            WriteArray(w, c.locales, (bw, loc) =>
+            {
+                WriteStr(bw, loc.languageCode);
+                WriteArray(bw, loc.rules, (bw2, rule) =>
+                {
+                    bw2.Write(rule.threshold);
+                    bw2.Write(rule.divisor);
+                    WriteValue(bw2, rule.suffixText);
+                    bw2.Write(rule.decimalPlaces);
+                });
+            });
+        }
+
+        private static NumberFormatConfigDto ReadNumberFormatConfig(BinaryReader r)
+        {
+            return new NumberFormatConfigDto
+            {
+                name = ReadStr(r),
+                locales = ReadArray(r, br => new NumberFormatLocaleDto
+                {
+                    languageCode = ReadStr(br),
+                    rules = ReadArray(br, br2 => new NumberFormatRuleDto
+                    {
+                        threshold     = br2.ReadInt64(),
+                        divisor       = br2.ReadDouble(),
+                        suffixText    = ReadValue(br2),
+                        decimalPlaces = br2.ReadInt32(),
+                    })
+                })
             };
         }
 

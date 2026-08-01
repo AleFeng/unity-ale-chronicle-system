@@ -30,17 +30,36 @@ namespace Ale.Chronicle.Tests
 
             db.AddEnumType("性别", "男", "女");
 
+            // 属性模板 / 特质模板 / 分组标签 / 数字格式（v2 新列）
+            var attrTmpl = new CoreAttributeTemplate("体格类") { minValue = 0f, maxValue = 100f, defaultBase = 10f };
+            attrTmpl.attributes.Add(new AttributeDefinition("rarity", EFieldType.Int));
+            db.CoreAttributeTemplates.Add(attrTmpl);
+
+            var traitTmpl = new TraitTemplate("性格类");
+            traitTmpl.attributes.Add(new AttributeDefinition("severity", EFieldType.Float));
+            db.TraitTemplates.Add(traitTmpl);
+
+            db.GroupTags.Add(new ChronicleGroupTag("g1", "分组一"));
+            var nf = new NumberFormatConfig { name = "fmt" };
+            var loc = new NumberFormatLocale { languageCode = "" };
+            loc.rules.Add(new NumberFormatRule { threshold = 1000, divisor = 1000, decimalPlaces = 1 });
+            nf.locales.Add(loc);
+            db.NumberFormatConfigs.Add(nf);
+
             var tag = new Tag("战士标签");
             tag.displayNameText.SetTextValue(0, "战士");
             tag.attributes.Add(new AttributeDefinition("rank", EFieldType.Int));
             db.Tags.Add(tag);
 
-            var str = new CoreAttributeDefinition("str") { minValue = 0f, maxValue = 100f, defaultBase = 10f, categoryEnumRef = "体格" };
+            var str = new CoreAttributeDefinition("str") { templateRef = "体格类", minValue = 0f, maxValue = 100f, defaultBase = 10f, categoryEnumRef = "体格" };
             str.displayName.SetTextValue(0, "力量");
             db.CoreAttributes.Add(str);
+            str.RebuildAttributes(db);            // 生成 rarity 自定义字段
+            str.SetAttributeValue("rarity", 5);
 
             var brave = new TraitDefinition("brave")
             {
+                templateRef = "性格类",
                 lifetime = ETraitLifetime.Temporary,
                 defaultDurationDays = 30f,
                 durationStacksRefresh = true,
@@ -63,6 +82,8 @@ namespace Ale.Chronicle.Tests
             g.items.Add(it);
             brave.eligibility.groups.Add(g);
             db.Traits.Add(brave);
+            brave.RebuildAttributes(db);          // 生成 severity 自定义字段
+            brave.SetAttributeValue("severity", 0.8f);
 
             var tmpl = new CharacterTemplate("平民") { raceRef = "human", attributePointBudget = 20, minAgeDays = 100 };
             tmpl.attributes.Add(new AttributeDefinition(WellKnownAttr.Name, EFieldType.String));
@@ -109,6 +130,8 @@ namespace Ale.Chronicle.Tests
             Assert.AreEqual(100f, str.maxValue, 1e-4f);
             Assert.AreEqual(10f, str.defaultBase, 1e-4f);
             Assert.AreEqual("体格", str.categoryEnumRef);
+            Assert.AreEqual("体格类", str.templateRef);                    // v2
+            Assert.AreEqual(5, str.GetAttributeValue<int>("rarity"));     // v2 values
 
             // 特质
             var brave = _dst.GetTrait("brave");
@@ -128,6 +151,8 @@ namespace Ale.Chronicle.Tests
             Assert.AreEqual("craven", brave.compatibilities[0].otherTraitRef);
             Assert.AreEqual(-20f, brave.compatibilities[0].opinionDelta, 1e-4f);
             Assert.AreEqual("boldness", brave.aiWeights[0].axisRef);
+            Assert.AreEqual("性格类", brave.templateRef);                            // v2
+            Assert.AreEqual(0.8f, brave.GetAttributeValue<float>("severity"), 1e-3f); // v2 values
 
             // eligibility 条件往返
             Assert.AreEqual(1, brave.eligibility.TotalItemCount());
@@ -159,6 +184,17 @@ namespace Ale.Chronicle.Tests
             Assert.AreEqual("brave", c.traits[0].traitRef);
             Assert.AreEqual(30f, c.traits[0].remainingDays, 1e-4f);
             Assert.AreEqual("birth", c.traits[0].sourceTag);
+
+            // v2 新列：属性模板 / 特质模板 / 分组标签 / 数字格式
+            var at = _dst.GetCoreAttributeTemplate("体格类");
+            Assert.IsNotNull(at);
+            Assert.AreEqual(1, at.attributes.Count);
+            Assert.AreEqual("rarity", at.attributes[0].id);
+            Assert.IsNotNull(_dst.GetTraitTemplate("性格类"));
+            Assert.IsNotNull(_dst.GetGroupTag("g1"));
+            var fmt = _dst.GetNumberFormatConfig("fmt");
+            Assert.IsNotNull(fmt);
+            Assert.AreEqual(1000, fmt.locales[0].rules[0].threshold);
         }
     }
 }
