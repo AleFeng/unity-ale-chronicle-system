@@ -89,10 +89,10 @@ namespace Ale.Chronicle.DemoEditor
         /// 保存 Prefab（<see cref="PrefabUtility.SaveAsPrefabAsset(GameObject, string, out bool)"/> 就地覆盖、保 GUID）
         /// 并销毁临时 GameObject。ATK_TMP &amp;&amp; ATK_LOCALIZATION 下先给根节点挂本地化字体事件。
         /// </summary>
-        private static void SavePrefab(GameObject root, string path)
+        private static void SavePrefab(GameObject root, string path, bool attachFont = true)
         {
 #if ATK_TMP && ATK_LOCALIZATION
-            AttachFontEvent(root);
+            if (attachFont) AttachFontEvent(root);
 #endif
             MovePrimaryUiwToTop(root);
             PrefabUtility.SaveAsPrefabAsset(root, path, out bool saved);

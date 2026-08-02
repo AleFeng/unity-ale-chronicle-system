@@ -11,6 +11,21 @@ namespace Ale.Chronicle.DemoEditor
     /// <summary>技能系统预制体（过滤按钮 / 条目 / 列表 / Tooltip / 技能面板）的构建。移植自 inventory DemoWizard，改绑 chronicle 组件。</summary>
     public static partial class ChronicleDemoWizard
     {
+        /// <summary>
+        /// 与 <c>UiTextBuilder.AddText</c> 相同，但生成的文本节点<b>不挂 LocalizedTextEvent</b>
+        /// （内容保持字面量，不做运行时本地化）。用于占位性的演示条目文本。
+        /// </summary>
+        static Component AddStaticText(GameObject go, string text, int fontSize, Color color,
+            TextAnchor anchor = TextAnchor.MiddleCenter, FontStyle fontStyle = FontStyle.Normal)
+        {
+            var comp = AddText(go, text, fontSize, color, anchor, fontStyle);
+#if ATK_TMP && ATK_LOCALIZATION
+            var loc = comp.GetComponent<LocalizedTextEvent>();
+            if (loc != null) Object.DestroyImmediate(loc);
+#endif
+            return comp;
+        }
+
         /// <summary>构建 PF_FilterTabBtn（分组页签按钮：Button + Image + Label(TMP)；由 UiwFilterTabBar 逐标签实例化）。</summary>
         static void BuildFilterTabBtnPrefab()
         {
@@ -27,7 +42,7 @@ namespace Ale.Chronicle.DemoEditor
             // 标签（UiwFilterTabBar 运行时按分组显示名改写此文本）
             var labelGo = ChildGameObject("Label", root.transform);
             Stretch(labelGo.AddComponent<RectTransform>());
-            AddText(labelGo, "全部", 12, Color.white);
+            AddStaticText(labelGo, "全部", 12, Color.white);
 
             SavePrefab(root, path);
         }
@@ -71,7 +86,7 @@ namespace Ale.Chronicle.DemoEditor
             nameRt.pivot = new Vector2(0.5f, 0f);
             nameRt.sizeDelta = new Vector2(-4f, 18f);
             nameRt.anchoredPosition = new Vector2(0f, 2f);
-            var nameTxt = AddText(nameGo, "技能名", 10, Color.white);
+            var nameTxt = AddStaticText(nameGo, "技能名", 10, Color.white);
             SetSerializedRef(entry, "nameText", nameTxt);
 
             SavePrefab(root, path);
@@ -122,13 +137,13 @@ namespace Ale.Chronicle.DemoEditor
             var nameGo = ChildGameObject("NameText", textCol.transform);
             nameGo.AddComponent<RectTransform>();
             SetLayoutElement(nameGo, minH: 20, prefH: 20);
-            var nameTxt = AddText(nameGo, "技能名", 14, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            var nameTxt = AddStaticText(nameGo, "技能名", 14, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
             SetSerializedRef(entry, "nameText", nameTxt);
 
             var descGo = ChildGameObject("DescText", textCol.transform);
             descGo.AddComponent<RectTransform>();
             SetLayoutElement(descGo, flexH: 1, minH: 20, prefH: 22);
-            var descTxt = AddText(descGo, "技能描述", 11, new Color(0.72f, 0.72f, 0.80f), TextAnchor.UpperLeft);
+            var descTxt = AddStaticText(descGo, "技能描述", 11, new Color(0.72f, 0.72f, 0.80f), TextAnchor.UpperLeft);
             SetSerializedRef(entry, "descText", descTxt);
 
             SavePrefab(root, path);
@@ -154,7 +169,7 @@ namespace Ale.Chronicle.DemoEditor
             comp.content    = contentRt;
             comp.scrollRect = sr;
 
-            SavePrefab(root, path);
+            SavePrefab(root, path, attachFont: false);   // 列表无文本节点，不挂 LocalizedFontEvent
         }
 
         /// <summary>构建 PF_UiwSkillOrderList（技能顺序列表：ScrollRect + 虚拟滚动 UiwSkillOrderList）。</summary>
@@ -174,7 +189,7 @@ namespace Ale.Chronicle.DemoEditor
             comp.content    = contentRt;
             comp.scrollRect = sr;
 
-            SavePrefab(root, path);
+            SavePrefab(root, path, attachFont: false);   // 列表无文本节点，不挂 LocalizedFontEvent
         }
 
         /// <summary>构建 PF_UiwSkillTooltip（技能悬停弹窗：图标 + 名称 + 位阶名 + 描述；由 ChronicleRuntimeManager 全局实例化）。</summary>
