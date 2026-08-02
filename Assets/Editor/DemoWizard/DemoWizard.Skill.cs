@@ -5,6 +5,9 @@ using Ale.Chronicle.Runtime.UI;
 using Ale.Toolkit.Runtime.UI;   // EListScrollDirection, UiwFilterTabBar
 using static Ale.Toolkit.Editor.UiPrefabBuilder;
 using static Ale.Toolkit.Editor.UiTextBuilder;
+#if ATK_TMP
+using TMPro;
+#endif
 
 namespace Ale.Chronicle.DemoEditor
 {
@@ -47,7 +50,7 @@ namespace Ale.Chronicle.DemoEditor
             SavePrefab(root, path);
         }
 
-        /// <summary>构建 PF_UiwSkillCell（技能网格条目：位阶背景框 + 图标 + 名称，支持悬停弹窗）。</summary>
+        /// <summary>构建 PF_UiwSkillCell（技能网格条目：阶级背景框 + 图标 + 名称，支持悬停弹窗）。</summary>
         static void BuildSkillCellPrefab()
         {
             string path = BeginPrefab(KPfSkillCell);
@@ -57,12 +60,12 @@ namespace Ale.Chronicle.DemoEditor
             root.AddComponent<Image>().color = new Color(0.14f, 0.14f, 0.20f, 0.90f); // 兼作悬停射线目标
 
             var entry = root.AddComponent<UiwSkillEntry>();
-            entry.rankAttrId           = "位阶";
+            entry.rankAttrId           = "阶级";
             entry.rankBackgroundAttrId = "背景框";
             entry.fallbackToId         = true;
             entry.showTooltip          = true;
 
-            // 位阶背景框（铺满整格，位于图标之下；无位阶数据时运行时自动隐藏）
+            // 阶级背景框（铺满整格，位于图标之下；无阶级数据时运行时自动隐藏）
             var rankGo = ChildGameObject("RankBackground", root.transform);
             Stretch(rankGo.AddComponent<RectTransform>());
             var rankImg = rankGo.AddComponent<Image>();
@@ -92,7 +95,7 @@ namespace Ale.Chronicle.DemoEditor
             SavePrefab(root, path);
         }
 
-        /// <summary>构建 PF_UiwSkillDetail（技能列表条目：图标(含位阶背景框) + 名称 + 描述，支持悬停弹窗）。</summary>
+        /// <summary>构建 PF_UiwSkillDetail（技能列表条目：图标(含阶级背景框) + 名称 + 描述，支持悬停弹窗）。</summary>
         static void BuildSkillDetailPrefab()
         {
             string path = BeginPrefab(KPfSkillDetail);
@@ -104,12 +107,12 @@ namespace Ale.Chronicle.DemoEditor
             SetHlg(root, new RectOffset(6, 6, 4, 4), 8f, TextAnchor.MiddleLeft, true, true, false, false);
 
             var entry = root.AddComponent<UiwSkillEntry>();
-            entry.rankAttrId           = "位阶";
+            entry.rankAttrId           = "阶级";
             entry.rankBackgroundAttrId = "背景框";
             entry.fallbackToId         = true;
             entry.showTooltip          = true;
 
-            // 图标容器（位阶背景框 + 图标）
+            // 图标容器（阶级背景框 + 图标）
             var iconRoot = ChildGameObject("IconRoot", root.transform);
             iconRoot.AddComponent<RectTransform>();
             SetLayoutElement(iconRoot, minW: 48, prefW: 48, minH: 48, prefH: 48);
@@ -192,7 +195,7 @@ namespace Ale.Chronicle.DemoEditor
             SavePrefab(root, path, attachFont: false);   // 列表无文本节点，不挂 LocalizedFontEvent
         }
 
-        /// <summary>构建 PF_UiwSkillTooltip（技能悬停弹窗：图标 + 名称 + 位阶名 + 描述；由 ChronicleRuntimeManager 全局实例化）。</summary>
+        /// <summary>构建 PF_UiwSkillTooltip（技能悬停弹窗：图标 + 名称 + 阶级名 + 描述；由 ChronicleRuntimeManager 全局实例化）。</summary>
         static void BuildSkillTooltipPrefab()
         {
             string path = BeginPrefab(KPfSkillTooltip);
@@ -207,12 +210,12 @@ namespace Ale.Chronicle.DemoEditor
             SetVlg(root, new RectOffset(10, 10, 8, 8), 4f, TextAnchor.UpperLeft, true, true, true, false);
 
             var tip = root.AddComponent<UiwSkillTooltip>();
-            tip.rankAttrId     = "位阶";
+            tip.rankAttrId     = "阶级";
             tip.rankNameAttrId = "名称";
             tip.panel          = rt;
             tip.canvasGroup    = cg;
 
-            // 顶部行：图标 + 名称 + 位阶名
+            // 顶部行：图标 + 名称 + 阶级名
             var headRow = ChildGameObject("Header", root.transform);
             headRow.AddComponent<RectTransform>();
             SetLayoutElement(headRow, minH: 32, prefH: 32);
@@ -234,7 +237,7 @@ namespace Ale.Chronicle.DemoEditor
             var rankGo = ChildGameObject("RankNameText", headRow.transform);
             rankGo.AddComponent<RectTransform>();
             SetLayoutElement(rankGo, minW: 72, prefW: 72, minH: 28, prefH: 28);
-            var rankTxt = AddText(rankGo, "位阶", 12, Hex("FFD24D"), TextAnchor.MiddleRight);
+            var rankTxt = AddText(rankGo, "阶级", 12, Hex("FFD24D"), TextAnchor.MiddleRight);
             SetSerializedRef(tip, "rankNameText", rankTxt);
 
             // 描述
@@ -253,6 +256,54 @@ namespace Ale.Chronicle.DemoEditor
 
             SavePrefab(root, path);
         }
+
+#if ATK_TMP
+        /// <summary>构建搜索输入框（ATK_TMP：TMP_InputField，含 TextArea + Placeholder + Text）；返回其组件。</summary>
+        static Component MakeSearchInput(string name, Transform parent, string placeholder)
+        {
+            var go = ChildGameObject(name, parent);
+            go.AddComponent<RectTransform>();
+            var bg = go.AddComponent<Image>();
+            bg.color = new Color(0.16f, 0.16f, 0.22f, 1f);
+
+            var input = go.AddComponent<TMP_InputField>();
+            input.targetGraphic = bg;
+
+            var textArea = ChildGameObject("Text Area", go.transform);
+            var taRt = textArea.AddComponent<RectTransform>();
+            taRt.anchorMin = Vector2.zero; taRt.anchorMax = Vector2.one;
+            taRt.offsetMin = new Vector2(8f, 4f); taRt.offsetMax = new Vector2(-8f, -4f);
+            textArea.AddComponent<RectMask2D>();
+
+            var ph  = MakeInputTmpText("Placeholder", textArea.transform, placeholder, new Color(0.60f, 0.60f, 0.68f, 1f));
+            var txt = MakeInputTmpText("Text", textArea.transform, string.Empty, Color.white);
+
+            input.textViewport  = taRt;
+            input.textComponent = txt;
+            input.placeholder   = ph;
+            input.fontAsset     = txt.font;
+
+            return input;
+        }
+
+        /// <summary>TMP_InputField 内部文本节点（应用向导默认字体，不做本地化）。</summary>
+        static TextMeshProUGUI MakeInputTmpText(string name, Transform parent, string text, Color color)
+        {
+            var go = ChildGameObject(name, parent);
+            Stretch(go.AddComponent<RectTransform>());
+            var t = go.AddComponent<TextMeshProUGUI>();
+            t.text = text;
+            t.fontSize = 12;
+            t.color = color;
+            var font = DefaultTmpFont?.Invoke();
+            if (font != null) t.font = font;
+            return t;
+        }
+#else
+        /// <summary>构建搜索输入框（非 ATK_TMP：旧版 UnityEngine.UI.InputField）；返回其组件。</summary>
+        static Component MakeSearchInput(string name, Transform parent, string placeholder)
+            => MakeInputField(name, parent, placeholder);
+#endif
 
         /// <summary>构建 PF_UiwSkillView（技能主界面：标题 + 视图切换 + 搜索 + 主/副分组页签 + 网格/顺序列表）。</summary>
         static void BuildSkillViewPrefab(GameObject gridListPrefab, GameObject orderListPrefab, Button filterButtonPrefab)
@@ -294,10 +345,10 @@ namespace Ale.Chronicle.DemoEditor
             view.viewModeToggleButton = toggleBtn;
             SetSerializedRef(view, "viewModeToggleLabel", toggleLbl);
 
-            // 搜索行
-            var searchInput = MakeInputField("SearchInput", panelGo.transform, "搜索技能名称…");
+            // 搜索行（ATK_TMP 下为 TMP_InputField，与 UiwSkillView.searchInput 的条件类型一致；经 SetSerializedRef 类型无关接线）
+            var searchInput = MakeSearchInput("SearchInput", panelGo.transform, "搜索技能名称…");
             SetLayoutElement(searchInput.gameObject, minH: 26, prefH: 26);
-            view.searchInput = searchInput;
+            SetSerializedRef(view, "searchInput", searchInput);
 
             // 主 / 副分组页签行：各一横向 ScrollView（标签过多可横向滚动），按钮复用 PF_FilterTabBtn。
             // 主 / 副为两个 AND 筛选条件（两者都满足的技能才显示）。

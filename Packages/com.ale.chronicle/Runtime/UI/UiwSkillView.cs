@@ -1,8 +1,13 @@
+#if ATK_TMP
+using UiInputField = TMPro.TMP_InputField;
+#else
+using UiInputField = UnityEngine.UI.InputField;
+#endif
+
 using Ale.Toolkit.Runtime.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Ale.Chronicle.Runtime.UI
 {
@@ -195,8 +200,8 @@ namespace Ale.Chronicle.Runtime.UI
         #region 搜索
         
         [Header("搜索")]
-        [Tooltip("搜索输入框（按名称 / ID 过滤）。")]
-        public InputField searchInput;
+        [Tooltip("搜索输入框（按名称 / ID 过滤）。ATK_TMP 开启时为 TMP_InputField，否则为 UnityEngine.UI.InputField。")]
+        public UiInputField searchInput;
         
         /// <summary>搜索栏文本变化时，更新搜索关键字并刷新技能列表。</summary>
         private void OnSearchChanged(string value)
@@ -205,7 +210,7 @@ namespace Ale.Chronicle.Runtime.UI
             var active = ActiveList();
 
             // 启用「全部」且开始搜索时：主 / 副分组页签都切到「全部」（重建高亮，不触发回调），使搜索跨全部分组。
-            if (showAllTab && !string.IsNullOrEmpty(_search) && active != null)
+            if (showAllTab && !string.IsNullOrEmpty(_search) && active)
             {
                 if (active.filterBar && !string.IsNullOrEmpty(active.filterBar.ActiveFilter))
                     active.filterBar.SetFilters(_primaryTokens, showAllTab, autoApply: false);
