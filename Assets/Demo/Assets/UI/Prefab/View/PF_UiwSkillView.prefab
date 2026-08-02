@@ -209,10 +209,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u641C\u7D22..."
+  m_text: Search...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
-  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -471,10 +471,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u6280\u80FD"
+  m_text: Skill
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
-  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -692,8 +692,28 @@ MonoBehaviour:
   titleLabel: {fileID: 3989452795369287327}
   viewModeToggleButton: {fileID: 5118047194915478973}
   viewModeToggleLabel: {fileID: 1079318473481667534}
-  orderModeLabel: "\u5217\u8868"
-  gridModeLabel: "\u7F51\u683C"
+  orderModeLabel:
+    fallback: "\u5217\u8868"
+    localized:
+      m_TableReference:
+        m_TableCollectionName: GUID:7b88e45053cb23747bb3df47c005bc67
+      m_TableEntryReference:
+        m_KeyId: 45888716800
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  gridModeLabel:
+    fallback: "\u7F51\u683C"
+    localized:
+      m_TableReference:
+        m_TableCollectionName: GUID:7b88e45053cb23747bb3df47c005bc67
+      m_TableEntryReference:
+        m_KeyId: 25003789176946688
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
   source: 0
   characterId: 
   titleText: "\u6280\u80FD"
@@ -701,6 +721,9 @@ MonoBehaviour:
   gridList: {fileID: 6721732142870319979}
   showAllTab: 1
   searchInput: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []
 --- !u!222 &8763614328550352457
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -871,8 +894,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u5217\u8868"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
-  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1008,8 +1031,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u200B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
-  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1420,7 +1443,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1644033235697993630, guid: 1489b64b86d861b49be8708d8def8f49, type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3610013363080416156, guid: 1489b64b86d861b49be8708d8def8f49, type: 3}
       propertyPath: m_Name
@@ -1645,7 +1668,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7215792473967300359, guid: 99ed90becc8fa094189417b376c41521, type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7839262565376517680, guid: 99ed90becc8fa094189417b376c41521, type: 3}
       propertyPath: m_Name

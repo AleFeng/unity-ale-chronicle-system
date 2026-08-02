@@ -16,15 +16,19 @@ MonoBehaviour:
   m_TableCollectionNameGuidString: 7b88e45053cb23747bb3df47c005bc67
   m_Entries:
   - m_Id: 45888716800
-    m_Key: "\u5217\u8868"
+    m_Key: List
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25003789176946688
+    m_Key: Grid
     m_Metadata:
       m_Items: []
   - m_Id: 24980449825538048
-    m_Key: "\u641C\u7D22..."
+    m_Key: Search...
     m_Metadata:
       m_Items: []
   - m_Id: 108614533120
-    m_Key: "\u6280\u80FD"
+    m_Key: Skill
     m_Metadata:
       m_Items: []
   m_Metadata:

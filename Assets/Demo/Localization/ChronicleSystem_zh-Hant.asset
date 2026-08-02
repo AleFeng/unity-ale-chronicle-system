@@ -19,15 +19,19 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 45888716800
-    m_Localized: List
+    m_Localized: "\u5217\u8868"
     m_Metadata:
       m_Items: []
   - m_Id: 108614533120
-    m_Localized: Skill
+    m_Localized: "\u6280\u80FD"
     m_Metadata:
       m_Items: []
   - m_Id: 24980449825538048
-    m_Localized: Search...
+    m_Localized: "\u641C\u7D22..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25003789176946688
+    m_Localized: "\u7F51\u683C"
     m_Metadata:
       m_Items: []
   references:
