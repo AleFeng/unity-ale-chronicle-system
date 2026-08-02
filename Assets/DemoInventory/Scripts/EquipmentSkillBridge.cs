@@ -65,6 +65,15 @@ namespace Ale.Chronicle.Inventory
                 Resync(groupId);
         }
 
+        /// <summary>运行时配置需同步的装备组与键，并立即全量重算（供整合 Demo 驱动等代码接线）。</summary>
+        public void Configure(IEnumerable<string> newGroupIds, string equipAttrId = null, string provider = null)
+        {
+            groupIds = newGroupIds != null ? new List<string>(newGroupIds) : new List<string>();
+            if (!string.IsNullOrEmpty(equipAttrId)) equipSkillAttrId = equipAttrId;
+            if (!string.IsNullOrEmpty(provider))    providerKey      = provider;
+            ResyncAll();
+        }
+
         /// <summary>重算某装备组当前已装备道具授予的技能并集，整体同步到对应角色的 Chronicle 提供层。</summary>
         public void Resync(string groupId)
         {
