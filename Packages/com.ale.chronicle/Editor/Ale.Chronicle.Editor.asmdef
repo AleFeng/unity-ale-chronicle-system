@@ -3,7 +3,9 @@
     "rootNamespace": "Ale.Chronicle.Editor",
     "references": [
         "Ale.Chronicle.Runtime",
+        "Ale.Chronicle.Runtime.UI",
         "Ale.Toolkit.Runtime",
+        "Ale.Toolkit.Runtime.UI",
         "Ale.Toolkit.Editor",
         "Ale.Condition.Core",
         "Ale.Condition.Editor"
