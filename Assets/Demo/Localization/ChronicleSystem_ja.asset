@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
-  m_Name: CharacterSystem_fr
+  m_Name: ChronicleSystem_ja
   m_EditorClassIdentifier: 
   m_LocaleId:
-    m_Code: fr
+    m_Code: ja
   m_SharedData: {fileID: 11400000, guid: 7b88e45053cb23747bb3df47c005bc67, type: 2}
   m_Metadata:
     m_Items: []
   m_TableData:
   - m_Id: 45888716800
-    m_Localized: Story Node Name
+    m_Localized: "\u30EA\u30B9\u30C8"
     m_Metadata:
       m_Items: []
   - m_Id: 108614533120
-    m_Localized: Here, a brief description of the story's key points is provided.
+    m_Localized: "\u30B9\u30AD\u30EB"
     m_Metadata:
       m_Items: []
   references:
