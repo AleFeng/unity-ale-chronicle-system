@@ -3,6 +3,7 @@
     "rootNamespace": "Ale.Chronicle.Tests",
     "references": [
         "Ale.Chronicle.Runtime",
+        "Ale.Chronicle.Runtime.UI",
         "Ale.Toolkit.Runtime",
         "Ale.Condition.Core",
         "UnityEngine.TestRunner",
