@@ -4,6 +4,9 @@
   "displayName": "Ale Chronicle",
   "description": "编年史系统（Chronicle System）：角色配置与百万级人生模拟。基于 com.ale.toolkit 的 Schema 引擎 / 编辑器三列框架 / 序列化，与 Ale.Condition 条件系统。",
   "unity": "2022.3",
+  "documentationUrl": "https://github.com/AleFeng/unity-ale-chronicle-system/blob/main/Packages/com.ale.chronicle/README.md",
+  "changelogUrl": "https://github.com/AleFeng/unity-ale-chronicle-system/blob/main/Packages/com.ale.chronicle/CHANGELOG.md",
+  "licensesUrl": "https://github.com/AleFeng/unity-ale-chronicle-system/blob/main/Packages/com.ale.chronicle/LICENSE.md",
   "keywords": [
     "chronicle",
     "character",
