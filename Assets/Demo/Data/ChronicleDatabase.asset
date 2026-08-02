@@ -14,7 +14,79 @@ MonoBehaviour:
   m_EditorClassIdentifier: Ale.Chronicle.Runtime::Ale.Chronicle.ChronicleDatabase
   enumTypes: []
   tags: []
-  coreAttributes: []
+  coreAttributes:
+  - id: attr_1
+    templateRef: 
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65B0\u5C5E\u6027"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 0
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    values: []
   traits: []
   characterTemplates: []
-  characters: []
+  characters:
+  - id: char_1
+    templateRef: 
+    values: []
+    coreAttributes: []
+    traits: []
+    fatherRef: 
+    motherRef: 
+    childRefs: []
+  coreAttributeTemplates: []
+  traitTemplates: []
+  groupTags: []
+  numberFormatConfigs: []
+  skillTemplates: []
+  skills: []
