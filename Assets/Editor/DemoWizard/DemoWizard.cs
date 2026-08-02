@@ -20,8 +20,9 @@ namespace Ale.Chronicle.DemoEditor
     {
         // ── 目录 ──────────────────────────────────────────────────────────────
         private const string DemoRoot = "Assets/Demo";
-        private static string PrefabRoot => DemoRoot + "/Assets/UI/Prefab";
-        private static string DataDir    => DemoRoot + "/Data";
+        private static string PrefabRoot  => DemoRoot + "/Assets/UI/Prefab";
+        private static string DataDir     => DemoRoot + "/Data";
+        private static string ManagerPath => DemoRoot + "/" + KPfDemoManager + ".prefab";
 
         // ── 预制体名（统一 PF_组件类名）────────────────────────────────────────
         private const string KPfFilterTabBtn   = "PF_FilterTabBtn";       // 过滤按钮（UiwFilterTabBar 的按钮）→ Tab/
@@ -31,6 +32,7 @@ namespace Ale.Chronicle.DemoEditor
         private const string KPfSkillOrderList = "PF_UiwSkillOrderList";  // 技能顺序列表 UiwSkillOrderList    → ItemList/
         private const string KPfSkillTooltip   = "PF_UiwSkillTooltip";    // 技能悬停弹窗 UiwSkillTooltip      → Tool/
         private const string KPfSkillView      = "PF_UiwSkillView";       // 技能主界面 UiwSkillView          → View/
+        private const string KPfDemoManager    = "ChronicleDemoManager";  // 演示宿主（Demo 入口，置于 Demo 根）
 
         /// <summary>预制体 → 子文件夹（与 Runtime/UI 组件所在子目录一致）。</summary>
         private static string PrefabSubfolder(string name)
@@ -51,6 +53,7 @@ namespace Ale.Chronicle.DemoEditor
         /// <summary>预制体资产路径。</summary>
         private static string Pfb(string name)
         {
+            if (name == KPfDemoManager) return ManagerPath;   // 宿主置于 Demo 根，非 Prefab 子目录
             string sub = PrefabSubfolder(name);
             return string.IsNullOrEmpty(sub)
                 ? PrefabRoot + "/" + name + ".prefab"

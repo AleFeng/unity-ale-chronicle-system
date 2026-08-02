@@ -15,7 +15,7 @@ namespace Ale.Chronicle.DemoEditor
         private readonly Dictionary<string, bool> _selected   = new Dictionary<string, bool>();
         private readonly Dictionary<string, bool> _catFoldout = new Dictionary<string, bool>();
 
-        [MenuItem("Tools/Ale Toolkit/Chronicle System/Demo Wizard", priority = 1102)]
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Demo Wizard")]
         public static void Open()
         {
             var w = GetWindow<DemoWizardWindow>(true, "Chronicle Demo Wizard", true);

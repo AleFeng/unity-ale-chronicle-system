@@ -26,7 +26,8 @@ namespace Ale.Chronicle.DemoEditor
         // 分类（窗口按此分组显示，顺序即显示顺序）
         public const string CatCommon = "通用";
         public const string CatSkill  = "技能系统";
-        public static readonly string[] Categories = { CatCommon, CatSkill };
+        public const string CatDemo   = "演示（运行入口）";
+        public static readonly string[] Categories = { CatCommon, CatSkill, CatDemo };
 
         private static List<GenItem> _items;
 
@@ -55,6 +56,12 @@ namespace Ale.Chronicle.DemoEditor
                     AssetDatabase.LoadAssetAtPath<GameObject>(Pfb(KPfSkillGridList)),
                     AssetDatabase.LoadAssetAtPath<GameObject>(Pfb(KPfSkillOrderList)),
                     LoadPrefabComp<Button>(Pfb(KPfFilterTabBtn))) },
+            new GenItem { Category = CatDemo, Key = "DemoManager", DisplayName = $"演示宿主 {KPfDemoManager}",
+                AssetPath = Pfb(KPfDemoManager), DepKeys = new[] { "SkillView", "SkillTooltip" },
+                Build = () => BuildDemoManagerPrefab(
+                    AssetDatabase.LoadAssetAtPath<GameObject>(Pfb(KPfSkillView)),
+                    AssetDatabase.LoadAssetAtPath<GameObject>(Pfb(KPfSkillTooltip)),
+                    AssetDatabase.LoadAssetAtPath<ChronicleDatabase>(DataDir + "/ChronicleDatabase.asset")) },
         };
 
         /// <summary>生成全部：统一覆盖确认一次，按拓扑序构建。</summary>
