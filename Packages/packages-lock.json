@@ -6,6 +6,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.ale.inventory": {
+      "version": "file:../../unity-ale-inventory-system/Packages/com.ale.inventory",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.ale.toolkit": {
       "version": "file:../../unity-ale-toolkit/Packages/com.ale.toolkit",
       "depth": 0,
