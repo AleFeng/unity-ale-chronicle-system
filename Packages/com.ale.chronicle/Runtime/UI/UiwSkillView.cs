@@ -41,10 +41,6 @@ namespace Ale.Chronicle.Runtime.UI
         // 主 / 副分组页签栏（UiwFilterTabBar）引用已移到技能列表组件（网格 / 顺序列表）上，
         // 与搜索一起构成列表基类内建的过滤管线；本视图只提供页签 token 与匹配谓词。
 
-        [Header("搜索")]
-        [Tooltip("搜索输入框（按名称 / ID 过滤）。")]
-        public InputField searchInput;
-
         private string _search = string.Empty; // 当前搜索过滤 token（名称 / ID；null / 空 = 全部）
         private bool   _subscribed; // 是否已订阅事件（避免重复订阅）
 
@@ -197,7 +193,11 @@ namespace Ale.Chronicle.Runtime.UI
         #endregion
 
         #region 搜索
-
+        
+        [Header("搜索")]
+        [Tooltip("搜索输入框（按名称 / ID 过滤）。")]
+        public InputField searchInput;
+        
         /// <summary>搜索栏文本变化时，更新搜索关键字并刷新技能列表。</summary>
         private void OnSearchChanged(string value)
         {
@@ -239,11 +239,11 @@ namespace Ale.Chronicle.Runtime.UI
         public void Refresh()
             => Refresh(SkillCollector.Collect(source, ConfigIdForSource()));
 
-        /// <summary>用已采集好的技能列表刷新（供 <see cref="Open"/> 与页签构建共用同一次采集）。</summary>
+        /// <summary>用已采集好的技能列表刷新（供 Open 与页签构建共用同一次采集）。</summary>
         private void Refresh(List<Skill> skills)
         {
             var active = ActiveList();
-            if (active == null) return;
+            if (!active) return;
 
             // 源为采集到的全部技能；主 / 副分组（AND）+ 搜索 过滤由列表基类内建管线完成。
             active.SetExtraFilter(s => MatchesSearch(s, _search), refresh: false);

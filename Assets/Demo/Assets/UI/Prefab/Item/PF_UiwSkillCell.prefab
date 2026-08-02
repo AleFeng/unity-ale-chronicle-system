@@ -203,8 +203,7 @@ MonoBehaviour:
       m_Calls: []
   texts:
   - {fileID: 9210210537266747095}
-  textEvents:
-  - {fileID: 5813477189283749041}
+  textEvents: []
   fontMaterial:
     m_TableReference:
       m_TableCollectionName: GUID:ab2ea891866ea8844b4bf5c4b0334771
@@ -299,7 +298,6 @@ GameObject:
   - component: {fileID: 952852593010372}
   - component: {fileID: 4390741101982366771}
   - component: {fileID: 9210210537266747095}
-  - component: {fileID: 5813477189283749041}
   m_Layer: 0
   m_Name: NameText
   m_TagString: Untagged
@@ -356,8 +354,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
-  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -426,34 +424,3 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &5813477189283749041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7048876279256275632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecbb2647f9ce6a4eb114f87a56e12f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Ale.Toolkit.UI.Localization::Ale.Toolkit.Runtime.UI.LocalizedTextEvent
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: 
-    m_TableEntryReference:
-      m_KeyId: 0
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  _text: {fileID: 9210210537266747095}
-  _fontEvent: {fileID: 4671789802917323013}
-  passiveUpdate: 1
-  references:
-    version: 2
-    RefIds: []

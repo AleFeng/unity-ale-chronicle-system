@@ -26,6 +26,10 @@ MonoBehaviour:
     m_Localized: Skill
     m_Metadata:
       m_Items: []
+  - m_Id: 24980449825538048
+    m_Localized: Search...
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
