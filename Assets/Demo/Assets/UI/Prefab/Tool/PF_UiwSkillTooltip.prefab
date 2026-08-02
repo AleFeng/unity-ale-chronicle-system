@@ -265,7 +265,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4283290367
   m_fontColor: {r: 1, g: 0.8235294, b: 0.3019608, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -455,7 +455,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4292922572
   m_fontColor: {r: 0.8, g: 0.8, b: 0.88, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -490,7 +490,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 0
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -635,7 +635,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 3e31b9fdb695d7248a67344e6613b1f8, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -899,7 +899,7 @@ MonoBehaviour:
   nameText: {fileID: 4482218563424617036}
   descText: {fileID: 6083092624498716342}
   rankNameText: {fileID: 4743127591040864021}
-  rankAttrId: "\u4F4D\u9636"
+  rankAttrId: "\u9636\u7EA7"
   rankNameAttrId: "\u540D\u79F0"
   customFieldKeys: []
   customFieldContainer: {fileID: 3276104420587441372}
@@ -1013,9 +1013,9 @@ MonoBehaviour:
   - {fileID: 7161955840111045613}
   fontMaterial:
     m_TableReference:
-      m_TableCollectionName: 
+      m_TableCollectionName: GUID:ab2ea891866ea8844b4bf5c4b0334771
     m_TableEntryReference:
-      m_KeyId: 0
+      m_KeyId: 7149264896
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0

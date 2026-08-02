@@ -69,13 +69,13 @@ namespace Ale.Chronicle.Runtime.UI
     }
 
     /// <summary>
-    /// 技能「位阶」枚举解析辅助：从技能的位阶枚举属性字段解析出对应枚举项，
+    /// 技能「阶级」枚举解析辅助：从技能的阶级枚举属性字段解析出对应枚举项，
     /// 供条目背景框（枚举项「背景框」Sprite）与 Tooltip（枚举项「名称」）共用。镜像道具 UI 的品质背景解析链。
     /// </summary>
     public static class SkillRankUtil
     {
         /// <summary>
-        /// 解析技能「位阶」枚举属性对应的枚举项。<paramref name="rankAttrId"/> 为技能上的枚举属性字段 ID；
+        /// 解析技能「阶级」枚举属性对应的枚举项。<paramref name="rankAttrId"/> 为技能上的枚举属性字段 ID；
         /// 解析链：该属性的枚举值 + 枚举类型引用 → 枚举类型 → 按值取枚举项。无 / 解析不到返回 null。
         /// </summary>
         public static EnumItem Resolve(Skill skill, string rankAttrId)

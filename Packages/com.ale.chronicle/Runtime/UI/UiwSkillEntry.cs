@@ -13,7 +13,7 @@ namespace Ale.Chronicle.Runtime.UI
 {
     /// <summary>
     /// 技能条目显示组件（网格 / 顺序列表共用；网格预制体可不接描述与自定义字段）。
-    /// 显示：图标、名称、「位阶」枚举项背景框，以及可选的描述与自定义属性字段行。
+    /// 显示：图标、名称、「阶级」枚举项背景框，以及可选的描述与自定义属性字段行。
     /// 鼠标悬停经 <see cref="UiwSkillTooltip"/> 弹出技能详情
     /// （进入 / 移出 / 停用三条路径由基类 <see cref="UiwHoverTooltipSource"/> 统一处理）。
     /// </summary>
@@ -29,12 +29,12 @@ namespace Ale.Chronicle.Runtime.UI
         [Tooltip("名称为空时是否回退显示技能 ID。")]
         public bool fallbackToId = true;
 
-        [Header("位阶背景框")]
-        [Tooltip("「位阶」枚举项背景框图片，Sprite 从位阶枚举项的属性中读取。未配置则不显示。")]
+        [Header("阶级背景框")]
+        [Tooltip("「阶级」枚举项背景框图片，Sprite 从阶级枚举项的属性中读取。未配置则不显示。")]
         public Image rankBackground;
-        [Tooltip("技能上「位阶」枚举属性字段 ID。")]
-        public string rankAttrId = "位阶";
-        [Tooltip("位阶枚举项上「背景框」属性字段 ID（存 Sprite）。")]
+        [Tooltip("技能上「阶级」枚举属性字段 ID。")]
+        public string rankAttrId = "阶级";
+        [Tooltip("阶级枚举项上「背景框」属性字段 ID（存 Sprite）。")]
         public string rankBackgroundAttrId = "背景框";
 
         [Header("自定义属性字段（可选，详情行）")]
@@ -93,7 +93,7 @@ namespace Ale.Chronicle.Runtime.UI
             ClearCustomLines();
         }
 
-        // 图标 / 位阶背景的异步绑定槽（内建代次守卫，对象池复用时避免错图）。见 SpriteSlot。
+        // 图标 / 阶级背景的异步绑定槽（内建代次守卫，对象池复用时避免错图）。见 SpriteSlot。
         private readonly SpriteSlot _iconSlot   = new SpriteSlot();
         private readonly SpriteSlot _rankBgSlot = new SpriteSlot();
 

@@ -13,7 +13,7 @@ using UnityEngine.UI;
 namespace Ale.Chronicle.Runtime.UI
 {
     /// <summary>
-    /// 技能信息悬停弹窗（实现 <see cref="ISkillTooltip"/>）。渲染技能固定字段（图标 / 名称 / 描述）、「位阶」枚举项名称，
+    /// 技能信息悬停弹窗（实现 <see cref="ISkillTooltip"/>）。渲染技能固定字段（图标 / 名称 / 描述）、「阶级」枚举项名称，
     /// 以及组件上配置的自定义属性字段 Key 列表对应的值。
     ///
     /// <para>预制体配置在 <see cref="ChronicleRuntimeManager"/> 的 <c>skillTooltipPrefab</c> 上，运行时由其全局实例化一次，
@@ -31,13 +31,13 @@ namespace Ale.Chronicle.Runtime.UI
         public SkillText nameText;
         [Tooltip("技能描述文本。")]
         public SkillText descText;
-        [Tooltip("「位阶」枚举项名称文本（可选）。")]
+        [Tooltip("「阶级」枚举项名称文本（可选）。")]
         public SkillText rankNameText;
 
-        [Header("位阶")]
-        [Tooltip("技能上「位阶」枚举属性字段 ID。")]
-        public string rankAttrId = "位阶";
-        [Tooltip("位阶枚举项上「名称」属性字段 ID（String / LocalizedString）。")]
+        [Header("阶级")]
+        [Tooltip("技能上「阶级」枚举属性字段 ID。")]
+        public string rankAttrId = "阶级";
+        [Tooltip("阶级枚举项上「名称」属性字段 ID（String / LocalizedString）。")]
         public string rankNameAttrId = "名称";
 
         [Header("自定义属性字段")]
