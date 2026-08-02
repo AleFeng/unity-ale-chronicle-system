@@ -1,7 +1,8 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Ale.Chronicle.Runtime.UI;
-using Ale.Toolkit.Runtime.UI;   // EListScrollDirection
+using Ale.Toolkit.Runtime.UI;   // EListScrollDirection, UiwFilterTabBar
 using static Ale.Toolkit.Editor.UiPrefabBuilder;
 using static Ale.Toolkit.Editor.UiTextBuilder;
 
@@ -236,6 +237,86 @@ namespace Ale.Chronicle.DemoEditor
             tip.customFieldContainer = fieldsGo.transform;
 
             SavePrefab(root, path);
+        }
+
+        /// <summary>构建 PF_UiwSkillView（技能主界面：标题 + 视图切换 + 搜索 + 主/副分组页签 + 网格/顺序列表）。</summary>
+        static void BuildSkillViewPrefab(GameObject gridListPrefab, GameObject orderListPrefab, Button filterButtonPrefab)
+        {
+            string path = BeginPrefab(KPfSkillView);
+
+            var panelGo = NewGameObject(KPfSkillView);
+            var panelRt = panelGo.AddComponent<RectTransform>();
+            panelRt.anchorMin = panelRt.anchorMax = panelRt.pivot = new Vector2(0.5f, 0.5f);
+            panelRt.sizeDelta = new Vector2(420f, 560f);
+            panelRt.anchoredPosition = Vector2.zero;
+            panelGo.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.16f, 0.97f);
+            SetVlg(panelGo, new RectOffset(6, 6, 6, 6), 4f, TextAnchor.UpperLeft, true, true, true, false);
+
+            var view = panelGo.AddComponent<UiwSkillView>();
+            view.source     = ESkillSource.Database;
+            view.titleText  = "技能";
+            view.showAllTab = true;
+
+            // 标题行（标题 + 视图切换按钮）
+            var headerRow = MakeRow("Header", panelGo.transform, 36f, Hex("0D0D17"));
+            SetHlg(headerRow, new RectOffset(10, 6, 0, 0), 6f, TextAnchor.MiddleLeft, true, true, false, true);
+            var titleGo = ChildGameObject("TitleText", headerRow.transform);
+            titleGo.AddComponent<RectTransform>();
+            titleGo.AddComponent<LayoutElement>().flexibleWidth = 1f;
+            var titleTxt = AddText(titleGo, "技能  [编辑器测试 — Play 后自动打开]", 13,
+                new Color(0.85f, 0.85f, 0.92f), TextAnchor.MiddleLeft, FontStyle.Bold);
+            SetSerializedRef(view, "titleLabel", titleTxt);
+
+            var toggleGo = ChildGameObject("ViewModeToggle", headerRow.transform);
+            toggleGo.AddComponent<RectTransform>();
+            SetLayoutElement(toggleGo, minW: 56, prefW: 56, minH: 26, prefH: 26);
+            var toggleImg = toggleGo.AddComponent<Image>(); toggleImg.color = Hex("2A2A4A");
+            var toggleBtn = toggleGo.AddComponent<Button>(); toggleBtn.targetGraphic = toggleImg;
+            SetButtonColors(toggleBtn, Hex("2A2A4A"), Hex("3A3A6A"), Hex("1E1E36"));
+            var toggleLblGo = ChildGameObject("Label", toggleGo.transform);
+            Stretch(toggleLblGo.AddComponent<RectTransform>());
+            var toggleLbl = AddText(toggleLblGo, "列表", 12, Color.white);
+            view.viewModeToggleButton = toggleBtn;
+            SetSerializedRef(view, "viewModeToggleLabel", toggleLbl);
+
+            // 搜索行
+            var searchInput = MakeInputField("SearchInput", panelGo.transform, "搜索技能名称…");
+            SetLayoutElement(searchInput.gameObject, minH: 26, prefH: 26);
+            view.searchInput = searchInput;
+
+            // 主 / 副分组页签行：各一横向 ScrollView（标签过多可横向滚动），按钮复用 PF_FilterTabBtn。
+            // 主 / 副为两个 AND 筛选条件（两者都满足的技能才显示）。
+            BuildFilterTabScroll("PrimaryGroupTabScroll", panelGo.transform, filterButtonPrefab, 30f, out var primaryBar);
+            BuildFilterTabScroll("SecondaryGroupTabScroll", panelGo.transform, filterButtonPrefab, 30f, out var secondaryBar);
+            if (!filterButtonPrefab) Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_FilterTabBtn，技能分组页签无按钮。");
+
+            // 列表容器（网格 + 顺序两个列表实例叠放，由视图切换显示其一）
+            var listHost = ChildGameObject("ListHost", panelGo.transform);
+            listHost.AddComponent<RectTransform>();
+            var listHostLe = listHost.AddComponent<LayoutElement>();
+            listHostLe.flexibleHeight = 1f; listHostLe.preferredHeight = 9000f;
+
+            if (orderListPrefab)
+            {
+                var orderInst = (GameObject)PrefabUtility.InstantiatePrefab(orderListPrefab, listHost.transform);
+                Stretch((RectTransform)orderInst.transform);
+                view.orderList = orderInst.GetComponent<UiwSkillOrderList>();
+            }
+            else Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_UiwSkillOrderList。");
+
+            if (gridListPrefab)
+            {
+                var gridInst = (GameObject)PrefabUtility.InstantiatePrefab(gridListPrefab, listHost.transform);
+                Stretch((RectTransform)gridInst.transform);
+                view.gridList = gridInst.GetComponent<UiwSkillGridList>();
+            }
+            else Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_UiwSkillGridList。");
+
+            // 主 / 副分组过滤栏引用配置在技能列表组件上（网格 + 顺序两列表各引用同一对栏；仅激活的列表响应其事件）。
+            if (view.orderList) { view.orderList.filterBar = primaryBar; view.orderList.secondaryFilterBar = secondaryBar; }
+            if (view.gridList)  { view.gridList.filterBar  = primaryBar; view.gridList.secondaryFilterBar  = secondaryBar; }
+
+            SavePrefab(panelGo, path);
         }
     }
 }

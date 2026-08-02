@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;                              // Button
 using Ale.Chronicle.Runtime.UI;                    // UiwSkillEntry
 using Ale.Toolkit.Editor;                          // UiTextBuilder, ToolkitPrefabFonts
 using static Ale.Toolkit.Editor.UiPrefabBuilder;   // LoadPrefabComp
@@ -48,6 +49,12 @@ namespace Ale.Chronicle.DemoEditor
                 Build = () => BuildSkillOrderListPrefab(LoadPrefabComp<UiwSkillEntry>(Pfb(KPfSkillDetail))) },
             new GenItem { Category = CatSkill, Key = "SkillTooltip", DisplayName = $"技能悬停弹窗 {KPfSkillTooltip}",
                 AssetPath = Pfb(KPfSkillTooltip), DepKeys = new string[0], Build = () => BuildSkillTooltipPrefab() },
+            new GenItem { Category = CatSkill, Key = "SkillView", DisplayName = $"技能主界面 {KPfSkillView}",
+                AssetPath = Pfb(KPfSkillView), DepKeys = new[] { "SkillGridList", "SkillOrderList", "FilterTabBtn" },
+                Build = () => BuildSkillViewPrefab(
+                    AssetDatabase.LoadAssetAtPath<GameObject>(Pfb(KPfSkillGridList)),
+                    AssetDatabase.LoadAssetAtPath<GameObject>(Pfb(KPfSkillOrderList)),
+                    LoadPrefabComp<Button>(Pfb(KPfFilterTabBtn))) },
         };
 
         /// <summary>生成全部：统一覆盖确认一次，按拓扑序构建。</summary>
