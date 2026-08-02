@@ -17,7 +17,8 @@ namespace Ale.Chronicle.Runtime.UI
     /// 无运行时可变状态，故为静态工具类。
     ///
     /// <para>目录来源经 <see cref="ChronicleDataManager.GetAllSkills"/> 取全部已注册技能；
-    /// 角色已学来源经 <see cref="SkillRuntimeManager.GetLearnedSkills"/> 取该角色已学技能。</para>
+    /// 角色已学来源经 <see cref="SkillRuntimeManager.GetEffectiveSkills"/> 取该角色<b>有效</b>技能
+    /// （永久已学 ∪ 装备等外部来源提供）。</para>
     /// </summary>
     public static class SkillCollector
     {
@@ -42,12 +43,13 @@ namespace Ale.Chronicle.Runtime.UI
             return dm != null ? dm.GetAllSkills() : new List<Skill>();
         }
 
-        /// <summary>角色来源：读取 <see cref="SkillRuntimeManager"/> 中该角色的已学技能（按学习顺序）。</summary>
+        /// <summary>角色来源：读取 <see cref="SkillRuntimeManager"/> 中该角色的<b>有效</b>技能
+        /// （永久已学 ∪ 装备等外部来源提供，保序）。</summary>
         private static List<Skill> CollectFromCharacter(string characterId)
         {
             var mgr = SkillRuntimeManager.Instance;
             if (mgr == null || string.IsNullOrEmpty(characterId)) return new List<Skill>();
-            return mgr.GetLearnedSkills(characterId);
+            return mgr.GetEffectiveSkills(characterId);
         }
     }
 }
