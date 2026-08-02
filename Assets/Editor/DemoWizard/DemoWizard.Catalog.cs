@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using Ale.Toolkit.Editor;   // UiTextBuilder, ToolkitPrefabFonts
+using Ale.Chronicle.Runtime.UI;                    // UiwSkillEntry
+using Ale.Toolkit.Editor;                          // UiTextBuilder, ToolkitPrefabFonts
+using static Ale.Toolkit.Editor.UiPrefabBuilder;   // LoadPrefabComp
 
 namespace Ale.Chronicle.DemoEditor
 {
@@ -38,6 +40,14 @@ namespace Ale.Chronicle.DemoEditor
                 AssetPath = Pfb(KPfSkillCell), DepKeys = new string[0], Build = () => BuildSkillCellPrefab() },
             new GenItem { Category = CatSkill, Key = "SkillDetail", DisplayName = $"技能列表条目 {KPfSkillDetail}",
                 AssetPath = Pfb(KPfSkillDetail), DepKeys = new string[0], Build = () => BuildSkillDetailPrefab() },
+            new GenItem { Category = CatSkill, Key = "SkillGridList", DisplayName = $"技能网格列表 {KPfSkillGridList}",
+                AssetPath = Pfb(KPfSkillGridList), DepKeys = new[] { "SkillCell" },
+                Build = () => BuildSkillGridListPrefab(LoadPrefabComp<UiwSkillEntry>(Pfb(KPfSkillCell))) },
+            new GenItem { Category = CatSkill, Key = "SkillOrderList", DisplayName = $"技能顺序列表 {KPfSkillOrderList}",
+                AssetPath = Pfb(KPfSkillOrderList), DepKeys = new[] { "SkillDetail" },
+                Build = () => BuildSkillOrderListPrefab(LoadPrefabComp<UiwSkillEntry>(Pfb(KPfSkillDetail))) },
+            new GenItem { Category = CatSkill, Key = "SkillTooltip", DisplayName = $"技能悬停弹窗 {KPfSkillTooltip}",
+                AssetPath = Pfb(KPfSkillTooltip), DepKeys = new string[0], Build = () => BuildSkillTooltipPrefab() },
         };
 
         /// <summary>生成全部：统一覆盖确认一次，按拓扑序构建。</summary>

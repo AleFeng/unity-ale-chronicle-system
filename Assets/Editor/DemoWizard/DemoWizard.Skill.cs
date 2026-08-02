@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Ale.Chronicle.Runtime.UI;
+using Ale.Toolkit.Runtime.UI;   // EListScrollDirection
 using static Ale.Toolkit.Editor.UiPrefabBuilder;
 using static Ale.Toolkit.Editor.UiTextBuilder;
 
@@ -128,6 +129,111 @@ namespace Ale.Chronicle.DemoEditor
             SetLayoutElement(descGo, flexH: 1, minH: 20, prefH: 22);
             var descTxt = AddText(descGo, "技能描述", 11, new Color(0.72f, 0.72f, 0.80f), TextAnchor.UpperLeft);
             SetSerializedRef(entry, "descText", descTxt);
+
+            SavePrefab(root, path);
+        }
+
+        /// <summary>构建 PF_UiwSkillGridList（技能网格列表：ScrollRect + 虚拟滚动 UiwSkillGridList，纵向滚动·自动列数）。</summary>
+        static void BuildSkillGridListPrefab(UiwSkillEntry cellPrefab)
+        {
+            string path = BeginPrefab(KPfSkillGridList);
+
+            var root = NewGameObject(KPfSkillGridList);
+            Stretch(root.AddComponent<RectTransform>());
+            var comp = root.AddComponent<UiwSkillGridList>();
+            comp.cellPrefab      = cellPrefab;
+            comp.bufferCount     = 1;
+            comp.scrollDirection = EListScrollDirection.Vertical;
+            comp.spacing         = new Vector2(6f, 6f);
+            comp.padding         = new Vector2(6f, 6f);
+            if (!cellPrefab) Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_UiwSkillCell，技能网格列表条目为空。");
+
+            // ScrollRect + Viewport + Content + 竖直滚动条骨架（沿用 Unity 默认惯性衰减 0.135）
+            var sr = MakeVerticalScrollView(root, out var contentRt, decelerationRate: 0.135f);
+            comp.content    = contentRt;
+            comp.scrollRect = sr;
+
+            SavePrefab(root, path);
+        }
+
+        /// <summary>构建 PF_UiwSkillOrderList（技能顺序列表：ScrollRect + 虚拟滚动 UiwSkillOrderList）。</summary>
+        static void BuildSkillOrderListPrefab(UiwSkillEntry detailPrefab)
+        {
+            string path = BeginPrefab(KPfSkillOrderList);
+
+            var root = NewGameObject(KPfSkillOrderList);
+            Stretch(root.AddComponent<RectTransform>());
+            var comp = root.AddComponent<UiwSkillOrderList>();
+            comp.cellPrefab  = detailPrefab;
+            comp.bufferCount = 1;
+            if (!detailPrefab) Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_UiwSkillDetail，技能顺序列表条目为空。");
+
+            // ScrollRect + Viewport + Content + 竖直滚动条骨架（沿用 Unity 默认惯性衰减 0.135）
+            var sr = MakeVerticalScrollView(root, out var contentRt, decelerationRate: 0.135f);
+            comp.content    = contentRt;
+            comp.scrollRect = sr;
+
+            SavePrefab(root, path);
+        }
+
+        /// <summary>构建 PF_UiwSkillTooltip（技能悬停弹窗：图标 + 名称 + 位阶名 + 描述；由 ChronicleRuntimeManager 全局实例化）。</summary>
+        static void BuildSkillTooltipPrefab()
+        {
+            string path = BeginPrefab(KPfSkillTooltip);
+
+            var root = NewGameObject(KPfSkillTooltip);
+            var rt   = root.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(360f, 150f);
+            rt.pivot     = new Vector2(0f, 1f);   // 左上角，便于按光标定位
+            root.AddComponent<Image>().color = new Color(0.06f, 0.06f, 0.10f, 0.96f);
+            var cg = root.AddComponent<CanvasGroup>();
+            cg.blocksRaycasts = false;
+            SetVlg(root, new RectOffset(10, 10, 8, 8), 4f, TextAnchor.UpperLeft, true, true, true, false);
+
+            var tip = root.AddComponent<UiwSkillTooltip>();
+            tip.rankAttrId     = "位阶";
+            tip.rankNameAttrId = "名称";
+            tip.panel          = rt;
+            tip.canvasGroup    = cg;
+
+            // 顶部行：图标 + 名称 + 位阶名
+            var headRow = ChildGameObject("Header", root.transform);
+            headRow.AddComponent<RectTransform>();
+            SetLayoutElement(headRow, minH: 32, prefH: 32);
+            SetHlg(headRow, new RectOffset(0, 0, 0, 0), 6f, TextAnchor.MiddleLeft, true, true, false, false);
+
+            var iconGo = ChildGameObject("Icon", headRow.transform);
+            iconGo.AddComponent<RectTransform>();
+            SetLayoutElement(iconGo, minW: 30, prefW: 30, minH: 30, prefH: 30);
+            var iconImg = iconGo.AddComponent<Image>();
+            iconImg.color = Color.white; iconImg.preserveAspect = true; iconImg.raycastTarget = false;
+            tip.iconImage = iconImg;
+
+            var nameGo = ChildGameObject("NameText", headRow.transform);
+            nameGo.AddComponent<RectTransform>();
+            SetLayoutElement(nameGo, flexW: 1, minH: 28, prefH: 28);
+            var nameTxt = AddText(nameGo, "技能名", 15, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            SetSerializedRef(tip, "nameText", nameTxt);
+
+            var rankGo = ChildGameObject("RankNameText", headRow.transform);
+            rankGo.AddComponent<RectTransform>();
+            SetLayoutElement(rankGo, minW: 72, prefW: 72, minH: 28, prefH: 28);
+            var rankTxt = AddText(rankGo, "位阶", 12, Hex("FFD24D"), TextAnchor.MiddleRight);
+            SetSerializedRef(tip, "rankNameText", rankTxt);
+
+            // 描述
+            var descGo = ChildGameObject("DescText", root.transform);
+            descGo.AddComponent<RectTransform>();
+            SetLayoutElement(descGo, flexH: 1, minH: 40, prefH: 60);
+            var descTxt = AddText(descGo, "技能描述", 12, new Color(0.80f, 0.80f, 0.88f), TextAnchor.UpperLeft);
+            SetSerializedRef(tip, "descText", descTxt);
+
+            // 自定义属性字段容器（预留：填 customFieldKeys + customFieldLinePrefab 即逐行显示；此处默认空，不显示）
+            var fieldsGo = ChildGameObject("CustomFields", root.transform);
+            fieldsGo.AddComponent<RectTransform>();
+            SetLayoutElement(fieldsGo, minH: 0, prefH: 0);
+            SetVlg(fieldsGo, new RectOffset(0, 0, 0, 0), 2f, TextAnchor.UpperLeft, true, true, true, false);
+            tip.customFieldContainer = fieldsGo.transform;
 
             SavePrefab(root, path);
         }
