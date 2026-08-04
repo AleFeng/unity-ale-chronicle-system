@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Ale.Chronicle;
 using Ale.Toolkit.Runtime;
 using Ale.Toolkit.Editor;
 using UnityEditor;
@@ -59,7 +58,7 @@ namespace Ale.Chronicle.Editor
             if (string.IsNullOrEmpty(term)) return true;
             term = term.ToLowerInvariant();
             if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
-            string name = e.displayText != null ? e.displayText.GetTextValue(0) : null;
+            string name = e.displayText != null ? e.displayText.GetTextValue() : null;
             return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
         }
 
@@ -118,10 +117,10 @@ namespace Ale.Chronicle.Editor
 
             GUI.Label(new Rect(contentX, valY, idW, valH), string.IsNullOrEmpty(e.id) ? "(空 ID)" : e.id, IdStyle);
 
-            string name = e.displayText != null ? e.displayText.GetTextValue(0) : null;
+            string name = e.displayText != null ? e.displayText.GetTextValue() : null;
             GUI.Label(new Rect(nameX, valY, nameW, valH), string.IsNullOrEmpty(name) ? "—" : name, SubStyle);
 
-            string desc = e.descriptionText != null ? e.descriptionText.GetTextValue(0) : null;
+            string desc = e.descriptionText != null ? e.descriptionText.GetTextValue() : null;
             GUI.Label(new Rect(descX, valY, descW, valH), string.IsNullOrEmpty(desc) ? "—" : desc, SubStyle);
 
             var    grp     = db.GetGroupTag(e.primaryGroupTag);

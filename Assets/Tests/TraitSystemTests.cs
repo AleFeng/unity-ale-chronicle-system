@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Ale.Chronicle;
 using Ale.Toolkit.Runtime;
 using Ale.Condition;
 

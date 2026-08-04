@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Ale.Chronicle;
 using Ale.Toolkit.Editor;
 
 namespace Ale.Chronicle.Editor
@@ -12,7 +11,7 @@ namespace Ale.Chronicle.Editor
     /// <see cref="IChronicleEditorContext"/>），向下转型安全。
     /// </summary>
     public abstract class EditorMasterListPanel<T>
-        : Ale.Toolkit.Editor.EditorMasterListPanel<ChronicleDatabase, T> where T : class
+        : EditorMasterListPanel<ChronicleDatabase, T> where T : class
     {
         public sealed override void DrawInspector(IEditorDbContext<ChronicleDatabase> ctx, T item)
             => DrawInspector((IChronicleEditorContext)ctx, item);
@@ -29,7 +28,7 @@ namespace Ale.Chronicle.Editor
 
     /// <summary>中栏实体列表面板的编年史别名。重复 id 经 <see cref="Kind"/> + <see cref="IChronicleEditorContext.DuplicateIdsOf"/> 提供。</summary>
     public abstract class EditorEntityListPanel<TEntity, TTemplate>
-        : Ale.Toolkit.Editor.EditorEntityListPanel<ChronicleDatabase, TEntity, TTemplate>
+        : EditorEntityListPanel<ChronicleDatabase, TEntity, TTemplate>
         where TEntity : class where TTemplate : class
     {
         protected EditorEntityListPanel(string dragId) : base(dragId) { }
@@ -55,7 +54,7 @@ namespace Ale.Chronicle.Editor
 
     /// <summary>三列系统页签的编年史别名。</summary>
     public abstract class EditorThreeColumnTab<TEntity>
-        : Ale.Toolkit.Editor.EditorThreeColumnTab<ChronicleDatabase, TEntity> where TEntity : class
+        : EditorThreeColumnTab<ChronicleDatabase, TEntity> where TEntity : class
     {
         protected sealed override TEntity DrawEntityList(IEditorDbContext<ChronicleDatabase> ctx, TEntity displaySelected)
             => DrawEntityList((IChronicleEditorContext)ctx, displaySelected);

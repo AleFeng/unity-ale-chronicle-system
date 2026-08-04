@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Ale.Chronicle;
-using Ale.Toolkit.Runtime;
 using Ale.Toolkit.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -61,7 +59,7 @@ namespace Ale.Chronicle.Editor
             if (string.IsNullOrEmpty(term)) return true;
             term = term.ToLowerInvariant();
             if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
-            string name = e.displayName != null ? e.displayName.GetTextValue(0) : null;
+            string name = e.displayName != null ? e.displayName.GetTextValue() : null;
             return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
         }
 
@@ -109,7 +107,7 @@ namespace Ale.Chronicle.Editor
             GUI.Label(new Rect(tierX,    keyRow.y, tierW, keyRow.height), "位阶", KeyStyle);
 
             GUI.Label(new Rect(contentX, valY, idW, valH), string.IsNullOrEmpty(e.id) ? "(空 ID)" : e.id, IdStyle);
-            string name = e.displayName != null ? e.displayName.GetTextValue(0) : null;
+            string name = e.displayName != null ? e.displayName.GetTextValue() : null;
             GUI.Label(new Rect(nameX, valY, nameW, valH), string.IsNullOrEmpty(name) ? "—" : name, SubStyle);
             GUI.Label(new Rect(kindX, valY, kindW, valH), e.kind == ETitleKind.RankTitle ? "阶级" : "称号", SubStyle);
             GUI.Label(new Rect(tierX, valY, tierW, valH), e.kind == ETitleKind.RankTitle ? e.rankTier.ToString() : "—", SubStyle);
@@ -124,7 +122,7 @@ namespace Ale.Chronicle.Editor
 
         protected override string RowLabel(RankLadder item)
         {
-            string name = item.displayName != null ? item.displayName.GetTextValue(0) : null;
+            string name = item.displayName != null ? item.displayName.GetTextValue() : null;
             return !string.IsNullOrEmpty(name) ? name : (string.IsNullOrEmpty(item.id) ? "(未命名)" : item.id);
         }
 

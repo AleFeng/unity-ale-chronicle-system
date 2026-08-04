@@ -11,9 +11,9 @@ namespace Ale.Chronicle.Editor
         // 脚手架自检：证明 Editor 程序集可引用 toolkit editor / condition editor / chronicle runtime。
         internal static Type[] Probe() => new[]
         {
-            typeof(IEditorContext),                                  // Ale.Toolkit.Editor
+            typeof(IEditorContext),                                 // Ale.Toolkit.Editor
             typeof(Ale.Condition.Editor.ConditionEvaluatorCatalog), // Ale.Condition.Editor
-            typeof(Ale.Chronicle.ChronicleInfo),                    // Ale.Chronicle.Runtime
+            typeof(ChronicleInfo),                                  // Ale.Chronicle.Runtime
         };
     }
 }
