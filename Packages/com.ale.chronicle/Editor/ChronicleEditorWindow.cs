@@ -65,10 +65,10 @@ namespace Ale.Chronicle.Editor
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "角色", "属性", "特质", "技能", "职业", "头衔", "通用" };
+        protected override string[] SystemTabLabels => new[] { "通用", "角色", "属性", "特质", "职业", "技能", "头衔" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _characterTab, _attributeTab, _traitTab, _skillTab, _professionTab, _titleTab, _generalTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _generalTab, _characterTab, _attributeTab, _traitTab, _professionTab, _skillTab, _titleTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
