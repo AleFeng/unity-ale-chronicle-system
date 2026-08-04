@@ -16,6 +16,8 @@ namespace Ale.Chronicle.Editor
         Skill,
         Profession,
         ProfessionTree,
+        Title,
+        RankLadder,
     }
 
     /// <summary>
