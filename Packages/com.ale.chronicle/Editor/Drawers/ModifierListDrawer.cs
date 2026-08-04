@@ -34,7 +34,7 @@ namespace Ale.Chronicle.Editor
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUI.BeginChangeCheck();
-                string target  = AttrIdPopup("目标属性", m.targetAttributeId, db);
+                string target  = ChronicleEditorFields.CoreAttrPopup("目标属性", m.targetAttributeId, db);
                 var    op      = (EModifierOperation)EditorGUILayout.EnumPopup("运算", m.operation);
                 float  mag     = EditorGUILayout.FloatField("幅度", m.magnitude);
                 var    dur     = (EModifierDuration)EditorGUILayout.EnumPopup("时效", m.duration);
@@ -74,26 +74,6 @@ namespace Ale.Chronicle.Editor
                 list.Add(new ModifierDefinition());
                 ctx.MarkDirty();
             }
-        }
-
-        /// <summary>目标属性 id 下拉（源自数据库核心属性）；无核心属性时退化为文本框，悬空值保留在列表首位。</summary>
-        private static string AttrIdPopup(string label, string current, ChronicleDatabase db)
-        {
-            var ids = new List<string>();
-            if (db != null)
-                foreach (var a in db.CoreAttributes)
-                    if (a != null && !string.IsNullOrEmpty(a.id) && !ids.Contains(a.id))
-                        ids.Add(a.id);
-
-            if (ids.Count == 0)
-                return EditorGUILayout.TextField(label, current);
-
-            if (!string.IsNullOrEmpty(current) && !ids.Contains(current))
-                ids.Insert(0, current);   // 保留悬空引用，避免下拉把它清掉
-
-            int idx    = Mathf.Max(0, ids.IndexOf(current));
-            int newIdx = EditorGUILayout.Popup(label, idx, ids.ToArray());
-            return ids[newIdx];
         }
     }
 }

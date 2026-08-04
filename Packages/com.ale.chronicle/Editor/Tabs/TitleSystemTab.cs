@@ -176,7 +176,7 @@ namespace Ale.Chronicle.Editor
             var kind = (ETitleKind)EditorGUILayout.EnumPopup("类型", title.kind);
             if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo("修改头衔类型"); title.kind = kind; ctx.MarkDirty(); }
 
-            DrawGroupPopup(ctx, title);
+            ChronicleEditorFields.GroupPopup(ctx, title.groupTagRef, "修改头衔分组", v => title.groupTagRef = v);
 
             if (title.kind == ETitleKind.RankTitle)
             {
@@ -215,51 +215,11 @@ namespace Ale.Chronicle.Editor
             DrawAcquisitionConditions(ctx, title);
         }
 
-        private static void DrawGroupPopup(IChronicleEditorContext ctx, TitleDefinition title)
-        {
-            var db = ctx.Database;
-            if (db.GroupTags.Count == 0)
-            {
-                EditorGUILayout.LabelField("分组", "（无分组标签；在「通用 → 分组标签」添加）");
-                return;
-            }
-            var ids    = new List<string> { "" };
-            var labels = new List<string> { "（无）" };
-            foreach (var g in db.GroupTags)
-                if (g != null && !string.IsNullOrEmpty(g.id)) { ids.Add(g.id); labels.Add(g.PlainName()); }
-
-            int idx = Mathf.Max(0, ids.IndexOf(title.groupTagRef ?? ""));
-            EditorGUI.BeginChangeCheck();
-            int newIdx = EditorGUILayout.Popup("分组", idx, labels.ToArray());
-            if (EditorGUI.EndChangeCheck())
-            {
-                ctx.RecordUndo("修改头衔分组");
-                title.groupTagRef = newIdx <= 0 ? null : ids[newIdx];
-                ctx.MarkDirty();
-            }
-        }
-
         private static void DrawAcquisitionConditions(IChronicleEditorContext ctx, TitleDefinition title)
         {
             EditorGUILayout.LabelField("获得条件", ToolkitEditorStyles.Header);
-            var so = ctx.Serialized;
-            if (so == null || ctx.Database == null)
-            {
-                EditorGUILayout.HelpBox("条件编辑暂不可用（无序列化对象）。", MessageType.None);
-                return;
-            }
-            so.Update();
-            var arr = so.FindProperty("titles");
-            int idx = ctx.Database.Titles.IndexOf(title);
-            if (arr == null || idx < 0 || idx >= arr.arraySize)
-            {
-                EditorGUILayout.HelpBox("条件编辑暂不可用。", MessageType.None);
-                return;
-            }
-            var prop = arr.GetArrayElementAtIndex(idx).FindPropertyRelative("acquisitionConditions");
-            if (prop == null) return;
-            EditorGUILayout.PropertyField(prop, new GUIContent("条件"), true);
-            so.ApplyModifiedProperties();
+            ChronicleEditorFields.InlineCondition(ctx, "titles",
+                () => ctx.Database.Titles.IndexOf(title), "acquisitionConditions");
         }
     }
 

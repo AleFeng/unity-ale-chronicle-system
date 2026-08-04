@@ -211,7 +211,7 @@ namespace Ale.Chronicle.Editor
             // ── 互斥 / 相性 / AI 权重 ─────────────────────────────────────────────
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("互斥特质", ToolkitEditorStyles.Header);
-            StringListEditor(ctx, "互斥特质 id", trait.incompatibleTraitRefs);
+            ChronicleEditorFields.StringList(ctx, trait.incompatibleTraitRefs, "互斥特质 id", "+ 添加", 80f);
 
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("相性", ToolkitEditorStyles.Header);
@@ -229,56 +229,11 @@ namespace Ale.Chronicle.Editor
             // ── 获得条件（Condition System 内联绘制器）──────────────────────────────
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("获得条件 (eligibility)", ToolkitEditorStyles.Header);
-            DrawEligibility(ctx, trait);
-        }
-
-        /// <summary>
-        /// 通过数据库 SerializedObject 取到该特质的 <c>eligibility</c> 属性，交由 Ale.Condition 的
-        /// 内联 <c>[CustomPropertyDrawer(typeof(ConditionExpression))]</c> 渲染（声明字段即配即用）。
-        /// </summary>
-        private static void DrawEligibility(IChronicleEditorContext ctx, TraitDefinition trait)
-        {
-            var so = ctx.Serialized;
-            if (so == null || ctx.Database == null)
-            {
-                EditorGUILayout.HelpBox("条件编辑暂不可用（无序列化对象）。", MessageType.None);
-                return;
-            }
-
-            so.Update();
-            var traitsProp = so.FindProperty("traits");
-            int idx = ctx.Database.Traits.IndexOf(trait);
-            if (traitsProp == null || idx < 0 || idx >= traitsProp.arraySize)
-            {
-                EditorGUILayout.HelpBox("条件编辑暂不可用。", MessageType.None);
-                return;
-            }
-
-            var eligProp = traitsProp.GetArrayElementAtIndex(idx).FindPropertyRelative("eligibility");
-            if (eligProp == null) return;
-
-            EditorGUILayout.PropertyField(eligProp, new GUIContent("条件"), true);
-            so.ApplyModifiedProperties();
+            ChronicleEditorFields.InlineCondition(ctx, "traits",
+                () => ctx.Database.Traits.IndexOf(trait), "eligibility");
         }
 
         // ── 列表小编辑器 ───────────────────────────────────────────────────────────
-
-        private static void StringListEditor(IChronicleEditorContext ctx, string label, List<string> list)
-        {
-            if (list == null) return;
-            int removeAt = -1;
-            for (int i = 0; i < list.Count; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                string v = EditorGUILayout.TextField(list[i]);
-                if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo("修改" + label); list[i] = v; ctx.MarkDirty(); }
-                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = i;
-                EditorGUILayout.EndHorizontal();
-            }
-            if (removeAt >= 0) { ctx.RecordUndo("删除" + label); list.RemoveAt(removeAt); ctx.MarkDirty(); }
-            if (GUILayout.Button("+ 添加", GUILayout.Width(80))) { ctx.RecordUndo("添加" + label); list.Add(""); ctx.MarkDirty(); }
-        }
 
         private static void CompatibilityListEditor(IChronicleEditorContext ctx, List<TraitCompatibility> list)
         {

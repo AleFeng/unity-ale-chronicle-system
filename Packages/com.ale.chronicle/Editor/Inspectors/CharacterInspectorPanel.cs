@@ -45,7 +45,7 @@ namespace Ale.Chronicle.Editor
                 ctx.MarkDirty();
             }
             EditorGUILayout.LabelField("子女 id", EditorStyles.miniBoldLabel);
-            StringListEditor(ctx, "子女", c.childRefs);
+            ChronicleEditorFields.StringList(ctx, c.childRefs, "子女", "+ 添加子女", 90f);
 
             // ── 特质芯片 ──────────────────────────────────────────────────────────
             EditorGUILayout.Space(4);
@@ -306,23 +306,6 @@ namespace Ale.Chronicle.Editor
             if (newIdx <= 0) return "";
             if (newIdx <= options.Count) return options[newIdx - 1];
             return current;   // 悬空值保留
-        }
-
-        private static void StringListEditor(IChronicleEditorContext ctx, string noun, List<string> list)
-        {
-            if (list == null) return;
-            int removeAt = -1;
-            for (int i = 0; i < list.Count; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                string v = EditorGUILayout.TextField(list[i]);
-                if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo("修改" + noun); list[i] = v; ctx.MarkDirty(); }
-                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = i;
-                EditorGUILayout.EndHorizontal();
-            }
-            if (removeAt >= 0) { ctx.RecordUndo("删除" + noun); list.RemoveAt(removeAt); ctx.MarkDirty(); }
-            if (GUILayout.Button("+ 添加" + noun, GUILayout.Width(90))) { ctx.RecordUndo("添加" + noun); list.Add(""); ctx.MarkDirty(); }
         }
     }
 }

@@ -125,26 +125,9 @@ namespace Ale.Chronicle.Editor
             }
 
             EditorGUILayout.LabelField("出生必带特质 id", EditorStyles.miniBoldLabel);
-            StringListEditor(ctx, "必带特质", tmpl.guaranteedTraitRefs);
+            ChronicleEditorFields.StringList(ctx, tmpl.guaranteedTraitRefs, "必带特质", "+ 添加必带特质", 100f);
             EditorGUILayout.LabelField("随机特质候选池 id", EditorStyles.miniBoldLabel);
-            StringListEditor(ctx, "候选特质", tmpl.randomTraitPoolRefs);
-        }
-
-        private static void StringListEditor(IChronicleEditorContext ctx, string noun, List<string> list)
-        {
-            if (list == null) return;
-            int removeAt = -1;
-            for (int i = 0; i < list.Count; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                string v = EditorGUILayout.TextField(list[i]);
-                if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo("修改" + noun); list[i] = v; ctx.MarkDirty(); }
-                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = i;
-                EditorGUILayout.EndHorizontal();
-            }
-            if (removeAt >= 0) { ctx.RecordUndo("删除" + noun); list.RemoveAt(removeAt); ctx.MarkDirty(); }
-            if (GUILayout.Button("+ 添加" + noun, GUILayout.Width(100))) { ctx.RecordUndo("添加" + noun); list.Add(""); ctx.MarkDirty(); }
+            ChronicleEditorFields.StringList(ctx, tmpl.randomTraitPoolRefs, "候选特质", "+ 添加候选特质", 100f);
         }
     }
 }

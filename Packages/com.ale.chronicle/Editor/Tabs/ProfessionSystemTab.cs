@@ -169,7 +169,7 @@ namespace Ale.Chronicle.Editor
             AttributeFieldDrawer.Draw(ctx, "显示名", prof.displayName, null);
             AttributeFieldDrawer.Draw(ctx, "说明",   prof.description, null);
             AttributeFieldDrawer.Draw(ctx, "图标",   prof.icon, null);
-            DrawGroupPopup(ctx, prof);
+            ChronicleEditorFields.GroupPopup(ctx, prof.groupTagRef, "修改职业分组", v => prof.groupTagRef = v);
 
             EditorGUI.BeginChangeCheck();
             int maxLevel = EditorGUILayout.IntField("等级上限", prof.maxLevel);
@@ -191,32 +191,6 @@ namespace Ale.Chronicle.Editor
 
             EditorGUILayout.Space(6);
             DrawRequirements(ctx, prof);
-        }
-
-        // ── 分组 ────────────────────────────────────────────────────────────────
-
-        private static void DrawGroupPopup(IChronicleEditorContext ctx, ProfessionDefinition prof)
-        {
-            var db = ctx.Database;
-            if (db.GroupTags.Count == 0)
-            {
-                EditorGUILayout.LabelField("分组", "（无分组标签；在「通用 → 分组标签」添加）");
-                return;
-            }
-            var ids    = new List<string> { "" };
-            var labels = new List<string> { "（无）" };
-            foreach (var g in db.GroupTags)
-                if (g != null && !string.IsNullOrEmpty(g.id)) { ids.Add(g.id); labels.Add(g.PlainName()); }
-
-            int idx = Mathf.Max(0, ids.IndexOf(prof.groupTagRef ?? ""));
-            EditorGUI.BeginChangeCheck();
-            int newIdx = EditorGUILayout.Popup("分组", idx, labels.ToArray());
-            if (EditorGUI.EndChangeCheck())
-            {
-                ctx.RecordUndo("修改职业分组");
-                prof.groupTagRef = newIdx <= 0 ? null : ids[newIdx];
-                ctx.MarkDirty();
-            }
         }
 
         // ── 经验曲线 ──────────────────────────────────────────────────────────────
@@ -324,7 +298,7 @@ namespace Ale.Chronicle.Editor
 
                 EditorGUILayout.BeginHorizontal();
                 EditorGUI.BeginChangeCheck();
-                string attrId = CoreAttrPopup("目标属性", g.coreAttrId, db);
+                string attrId = ChronicleEditorFields.CoreAttrPopup("目标属性", g.coreAttrId, db);
                 if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo("修改成长目标"); g.coreAttrId = attrId; ctx.MarkDirty(); }
                 if (GUILayout.Button("✕", GUILayout.Width(22)))
                 {
@@ -378,8 +352,10 @@ namespace Ale.Chronicle.Editor
                 }
                 EditorGUILayout.EndHorizontal();
 
-                DrawStringList(ctx, "授予特质 id", u.grantTraitRefs, "修改解锁特质");
-                DrawStringList(ctx, "授予头衔 id", u.grantTitleRefs, "修改解锁头衔");
+                EditorGUILayout.LabelField("授予特质 id", EditorStyles.miniBoldLabel);
+                ChronicleEditorFields.StringList(ctx, u.grantTraitRefs, "授予特质 id", "+ 添加", 60f);
+                EditorGUILayout.LabelField("授予头衔 id", EditorStyles.miniBoldLabel);
+                ChronicleEditorFields.StringList(ctx, u.grantTitleRefs, "授予头衔 id", "+ 添加", 60f);
                 EditorGUILayout.EndVertical();
             }
             if (GUILayout.Button("+ 添加解锁", GUILayout.Width(90)))
@@ -393,63 +369,8 @@ namespace Ale.Chronicle.Editor
         private static void DrawRequirements(IChronicleEditorContext ctx, ProfessionDefinition prof)
         {
             EditorGUILayout.LabelField("从业 / 转职条件", ToolkitEditorStyles.Header);
-            var so = ctx.Serialized;
-            if (so == null || ctx.Database == null)
-            {
-                EditorGUILayout.HelpBox("条件编辑暂不可用（无序列化对象）。", MessageType.None);
-                return;
-            }
-            so.Update();
-            var arr = so.FindProperty("professions");
-            int idx = ctx.Database.Professions.IndexOf(prof);
-            if (arr == null || idx < 0 || idx >= arr.arraySize)
-            {
-                EditorGUILayout.HelpBox("条件编辑暂不可用。", MessageType.None);
-                return;
-            }
-            var reqProp = arr.GetArrayElementAtIndex(idx).FindPropertyRelative("requirements");
-            if (reqProp == null) return;
-            EditorGUILayout.PropertyField(reqProp, new GUIContent("条件"), true);
-            so.ApplyModifiedProperties();
-        }
-
-        // ── 小工具 ────────────────────────────────────────────────────────────────
-
-        private static string CoreAttrPopup(string label, string current, ChronicleDatabase db)
-        {
-            var ids = new List<string>();
-            if (db != null)
-                foreach (var a in db.CoreAttributes)
-                    if (a != null && !string.IsNullOrEmpty(a.id) && !ids.Contains(a.id)) ids.Add(a.id);
-
-            if (ids.Count == 0) return EditorGUILayout.TextField(label, current);
-            if (!string.IsNullOrEmpty(current) && !ids.Contains(current)) ids.Insert(0, current);
-            int idx    = Mathf.Max(0, ids.IndexOf(current));
-            int newIdx = EditorGUILayout.Popup(label, idx, ids.ToArray());
-            return ids[newIdx];
-        }
-
-        private static void DrawStringList(IChronicleEditorContext ctx, string label, List<string> list, string undo)
-        {
-            EditorGUILayout.LabelField(label, EditorStyles.miniBoldLabel);
-            for (int i = 0; i < list.Count; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                string v = EditorGUILayout.TextField(list[i]);
-                if (EditorGUI.EndChangeCheck()) { ctx.RecordUndo(undo); list[i] = v; ctx.MarkDirty(); }
-                if (GUILayout.Button("✕", GUILayout.Width(22)))
-                {
-                    ctx.RecordUndo(undo); list.RemoveAt(i); ctx.MarkDirty();
-                    EditorGUILayout.EndHorizontal();
-                    break;
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-            if (GUILayout.Button("+ 添加", GUILayout.Width(60)))
-            {
-                ctx.RecordUndo(undo); list.Add(""); ctx.MarkDirty();
-            }
+            ChronicleEditorFields.InlineCondition(ctx, "professions",
+                () => ctx.Database.Professions.IndexOf(prof), "requirements");
         }
     }
 
