@@ -31,6 +31,9 @@ namespace Ale.Chronicle.Serialization
         public ProfessionTreeDto[] professionTrees;
         public TitleDefinitionDto[] titles;
         public RankLadderDto[] rankLadders;
+        // v5 追加（职业 / 头衔模板）
+        public ProfessionTemplateDto[] professionTemplates;
+        public TitleTemplateDto[] titleTemplates;
     }
 
     [Serializable]
@@ -244,6 +247,7 @@ namespace Ale.Chronicle.Serialization
     public class ProfessionDefinitionDto
     {
         public string id;
+        public string templateRef;                 // v5
         public AttributeValueDto displayName;
         public AttributeValueDto description;
         public AttributeValueDto icon;
@@ -255,6 +259,14 @@ namespace Ale.Chronicle.Serialization
         /// <summary>requirements（ConditionExpression）的 Condition System JSON 串。</summary>
         public string requirementsJson;
         public string[] allowedRaceRefs;
+        public AttributeEntryDto[] values;         // v5：来自模板 schema 的自定义字段
+    }
+
+    /// <summary>职业模板 DTO：派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加默认预设。</summary>
+    [Serializable]
+    public class ProfessionTemplateDto : ConfigTemplateDto
+    {
+        public int maxLevel;
     }
 
     [Serializable]
@@ -287,6 +299,7 @@ namespace Ale.Chronicle.Serialization
     public class TitleDefinitionDto
     {
         public string id;
+        public string templateRef;                 // v5
         public AttributeValueDto displayName;
         public AttributeValueDto description;
         public AttributeValueDto icon;
@@ -301,6 +314,15 @@ namespace Ale.Chronicle.Serialization
         public bool isRevocable;
         public ModifierDefinitionDto[] modifiers;
         public ModifierDefinitionDto[] opinionModifiers;
+        public AttributeEntryDto[] values;         // v5：来自模板 schema 的自定义字段
+    }
+
+    /// <summary>头衔模板 DTO：派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加默认预设。</summary>
+    [Serializable]
+    public class TitleTemplateDto : ConfigTemplateDto
+    {
+        public int kind;
+        public bool isRevocable;
     }
 
     [Serializable]

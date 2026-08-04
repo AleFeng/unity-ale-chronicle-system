@@ -185,5 +185,83 @@ namespace Ale.Chronicle.Tests
             Assert.AreEqual(0, _dst.Titles.Count);
             Assert.AreEqual(0, _dst.RankLadders.Count);
         }
+
+        [Test]
+        public void BinaryRoundTrip_V5_PreservesTemplatesAndCustomFields()
+        {
+            _src = ScriptableObject.CreateInstance<ChronicleDatabase>();
+
+            // 职业模板（自定义字段 schema + 预设 maxLevel）
+            var profTpl = new ProfessionTemplate("战斗职业") { maxLevel = 30 };
+            profTpl.attributes.Add(new AttributeDefinition("power", EFieldType.Int));
+            _src.ProfessionTemplates.Add(profTpl);
+
+            // 头衔模板（预设 kind=Epithet / isRevocable=false + 自定义字段 schema）
+            var titleTpl = new TitleTemplate("荣誉称号") { kind = ETitleKind.Epithet, isRevocable = false };
+            titleTpl.attributes.Add(new AttributeDefinition("fame", EFieldType.Int));
+            _src.TitleTemplates.Add(titleTpl);
+
+            // 定义引用模板并按 schema 重建自定义字段
+            var warrior = new ProfessionDefinition("warrior", "战斗职业");
+            warrior.RebuildAttributes(_src);
+            _src.Professions.Add(warrior);
+
+            var champion = new TitleDefinition("champion", "荣誉称号");
+            champion.RebuildAttributes(_src);
+            _src.Titles.Add(champion);
+
+            byte[] bytes = ChronicleConfigSerializer.Export(_src);
+            _dst = ChronicleConfigSerializer.Import(bytes);
+
+            // 模板往返
+            var pt = _dst.GetProfessionTemplate("战斗职业");
+            Assert.IsNotNull(pt);
+            Assert.AreEqual(30, pt.maxLevel);
+            Assert.AreEqual(1, pt.attributes.Count);
+            Assert.AreEqual("power", pt.attributes[0].id);
+
+            var tt = _dst.GetTitleTemplate("荣誉称号");
+            Assert.IsNotNull(tt);
+            Assert.AreEqual(ETitleKind.Epithet, tt.kind);
+            Assert.IsFalse(tt.isRevocable);
+            Assert.AreEqual(1, tt.attributes.Count);
+            Assert.AreEqual("fame", tt.attributes[0].id);
+
+            // 定义的 templateRef + 自定义字段往返
+            var w = _dst.GetProfession("warrior");
+            Assert.AreEqual("战斗职业", w.templateRef);
+            Assert.AreEqual(1, w.values.Count);
+            Assert.AreEqual("power", w.values[0].id);
+
+            var c = _dst.GetTitle("champion");
+            Assert.AreEqual("荣誉称号", c.templateRef);
+            Assert.AreEqual(1, c.values.Count);
+            Assert.AreEqual("fame", c.values[0].id);
+        }
+
+        [Test]
+        public void OldV4File_Loads_WithEmptyProfessionAndTitleTemplates()
+        {
+            // 手工构造「全空 v4」字节流：魔数 + 版本4 + 16 个空块（6 基础 + 4 v2 + 2 v3 + 4 v4）。
+            // v5 读端应跳过 v5 模板块、职业/头衔块无 templateRef+values 尾部，均无异常。
+            byte[] bytes;
+            using (var ms = new MemoryStream())
+            {
+                using (var w = new BinaryWriter(ms, Encoding.UTF8))
+                {
+                    w.Write(0x4348524F);                       // "CHRO"
+                    w.Write(4);                                // version 4
+                    for (int i = 0; i < 16; i++) w.Write(0);   // 16 个空数组
+                }
+                bytes = ms.ToArray();
+            }
+
+            _dst = ChronicleConfigSerializer.Import(bytes);
+            Assert.IsNotNull(_dst);
+            Assert.AreEqual(0, _dst.Professions.Count);
+            Assert.AreEqual(0, _dst.Titles.Count);
+            Assert.AreEqual(0, _dst.ProfessionTemplates.Count);
+            Assert.AreEqual(0, _dst.TitleTemplates.Count);
+        }
     }
 }

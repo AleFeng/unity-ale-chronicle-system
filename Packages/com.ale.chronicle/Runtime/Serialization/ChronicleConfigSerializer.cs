@@ -25,8 +25,9 @@ namespace Ale.Chronicle.Serialization
 
         /// <summary>当前序列化格式版本。v2：属性/特质实例追加 templateRef+values，尾部追加 属性模板/特质模板/分组标签/数字格式 四块。
         /// v3：尾部追加 技能模板/技能 两块（技能分组标签复用统一 groupTags 池，不单列）。
-        /// v4：尾部追加 职业/转职树/头衔/阶级序列 四块，角色块尾追加 职业/头衔 持有字段。</summary>
-        public const int Version = 4;
+        /// v4：尾部追加 职业/转职树/头衔/阶级序列 四块，角色块尾追加 职业/头衔 持有字段。
+        /// v5：尾部追加 职业模板/头衔模板 两块，职业/头衔块尾追加 templateRef+values（自定义字段）。</summary>
+        public const int Version = 5;
 
         /// <summary>可正确解析的最低格式版本。</summary>
         private const int MinReadableVersion = 1;
@@ -67,6 +68,10 @@ namespace Ale.Chronicle.Serialization
                 WriteArray(w, dto.professionTrees, WriteProfessionTree);
                 WriteArray(w, dto.titles, WriteTitle);
                 WriteArray(w, dto.rankLadders, WriteRankLadder);
+
+                // v5 追加块（职业 / 头衔模板）
+                WriteArray(w, dto.professionTemplates, WriteProfessionTemplate);
+                WriteArray(w, dto.titleTemplates, WriteTitleTemplate);
             }
             return stream.ToArray();
         }
@@ -131,10 +136,17 @@ namespace Ale.Chronicle.Serialization
             // v4 追加块（职业 / 头衔系统）：旧 v3 文件到技能即结束。
             if (version >= 4)
             {
-                dto.professions     = ReadArray(r, ReadProfession);
+                dto.professions     = ReadArray(r, br => ReadProfession(br, version));
                 dto.professionTrees = ReadArray(r, ReadProfessionTree);
-                dto.titles          = ReadArray(r, ReadTitle);
+                dto.titles          = ReadArray(r, br => ReadTitle(br, version));
                 dto.rankLadders     = ReadArray(r, ReadRankLadder);
+            }
+
+            // v5 追加块（职业 / 头衔模板）：旧 v4 文件到阶级序列即结束。
+            if (version >= 5)
+            {
+                dto.professionTemplates = ReadArray(r, ReadProfessionTemplate);
+                dto.titleTemplates      = ReadArray(r, ReadTitleTemplate);
             }
 
             FromDto(dto, target, resolver);
@@ -171,6 +183,8 @@ namespace Ale.Chronicle.Serialization
                                             t => t != null && !string.IsNullOrWhiteSpace(t.id), t => ToDto(t, resolver)),
                 rankLadders            = ToolkitDtoMapper.ToArrayFiltered(db.RankLadders,
                                             l => l != null && !string.IsNullOrWhiteSpace(l.id), l => ToDto(l, resolver)),
+                professionTemplates    = ToolkitDtoMapper.ToArray(db.ProfessionTemplates, t => ToDto(t, resolver)),
+                titleTemplates         = ToolkitDtoMapper.ToArray(db.TitleTemplates, t => ToDto(t, resolver)),
             };
         }
 
@@ -188,8 +202,10 @@ namespace Ale.Chronicle.Serialization
             target.NumberFormatConfigs.Clear();
             target.SkillTemplates.Clear();
             target.Skills.Clear();
+            target.ProfessionTemplates.Clear();
             target.Professions.Clear();
             target.ProfessionTrees.Clear();
+            target.TitleTemplates.Clear();
             target.Titles.Clear();
             target.RankLadders.Clear();
             if (dto == null) return;
@@ -206,8 +222,10 @@ namespace Ale.Chronicle.Serialization
             if (dto.numberFormatConfigs != null)    foreach (var c in dto.numberFormatConfigs)    target.NumberFormatConfigs.Add(FromDto(c, resolver));
             if (dto.skillTemplates != null)         foreach (var t in dto.skillTemplates)         target.SkillTemplates.Add(FromDto(t, resolver));
             if (dto.skills != null)                 foreach (var s in dto.skills)                 target.Skills.Add(FromDto(s, resolver));
+            if (dto.professionTemplates != null)    foreach (var t in dto.professionTemplates)    target.ProfessionTemplates.Add(FromDto(t, resolver));
             if (dto.professions != null)            foreach (var p in dto.professions)            target.Professions.Add(FromDto(p, resolver));
             if (dto.professionTrees != null)        foreach (var t in dto.professionTrees)        target.ProfessionTrees.Add(FromDto(t, resolver));
+            if (dto.titleTemplates != null)         foreach (var t in dto.titleTemplates)         target.TitleTemplates.Add(FromDto(t, resolver));
             if (dto.titles != null)                 foreach (var t in dto.titles)                 target.Titles.Add(FromDto(t, resolver));
             if (dto.rankLadders != null)            foreach (var l in dto.rankLadders)            target.RankLadders.Add(FromDto(l, resolver));
         }
@@ -713,6 +731,7 @@ namespace Ale.Chronicle.Serialization
             return new ProfessionDefinitionDto
             {
                 id               = p.id,
+                templateRef      = p.templateRef,
                 displayName      = ToolkitDtoMapper.ToDto(p.displayName, resolver),
                 description      = ToolkitDtoMapper.ToDto(p.description, resolver),
                 icon             = ToolkitDtoMapper.ToDto(p.icon, resolver),
@@ -723,6 +742,7 @@ namespace Ale.Chronicle.Serialization
                 unlocks          = ToolkitDtoMapper.ToArray(p.unlocks, ToDto),
                 requirementsJson = ConditionJson.ToJson(p.requirements ?? new ConditionExpression(), pretty: false),
                 allowedRaceRefs  = ToolkitDtoMapper.ToArray(p.allowedRaceRefs),
+                values           = ToolkitDtoMapper.ToDto(p.values, resolver),
             };
         }
 
@@ -731,6 +751,7 @@ namespace Ale.Chronicle.Serialization
             var p = new ProfessionDefinition
             {
                 id              = dto.id,
+                templateRef     = dto.templateRef,
                 displayName     = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
                 description     = ToolkitDtoMapper.TextFromDto(dto.description, resolver),
                 icon            = dto.icon != null ? ToolkitDtoMapper.FromDto(dto.icon, resolver) : new AttributeValue(EFieldType.Sprite),
@@ -744,6 +765,8 @@ namespace Ale.Chronicle.Serialization
                 foreach (var g in dto.growth) p.growth.Add(FromDto(g, resolver));
             if (dto.unlocks != null)
                 foreach (var u in dto.unlocks) p.unlocks.Add(FromDto(u));
+            ToolkitDtoMapper.FromDto(dto.values, p.values, resolver);
+            p.InvalidateEntryCache();
             p.Normalize();
             return p;
         }
@@ -787,6 +810,7 @@ namespace Ale.Chronicle.Serialization
             return new TitleDefinitionDto
             {
                 id                        = t.id,
+                templateRef               = t.templateRef,
                 displayName               = ToolkitDtoMapper.ToDto(t.displayName, resolver),
                 description               = ToolkitDtoMapper.ToDto(t.description, resolver),
                 icon                      = ToolkitDtoMapper.ToDto(t.icon, resolver),
@@ -800,6 +824,7 @@ namespace Ale.Chronicle.Serialization
                 isRevocable               = t.isRevocable,
                 modifiers                 = ToolkitDtoMapper.ToArray(t.modifiers, ToDto),
                 opinionModifiers          = ToolkitDtoMapper.ToArray(t.opinionModifiers, ToDto),
+                values                    = ToolkitDtoMapper.ToDto(t.values, resolver),
             };
         }
 
@@ -808,6 +833,7 @@ namespace Ale.Chronicle.Serialization
             var t = new TitleDefinition
             {
                 id                    = dto.id,
+                templateRef           = dto.templateRef,
                 displayName           = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
                 description           = ToolkitDtoMapper.TextFromDto(dto.description, resolver),
                 icon                  = dto.icon != null ? ToolkitDtoMapper.FromDto(dto.icon, resolver) : new AttributeValue(EFieldType.Sprite),
@@ -824,6 +850,8 @@ namespace Ale.Chronicle.Serialization
                 foreach (var m in dto.modifiers) t.modifiers.Add(FromDto(m));
             if (dto.opinionModifiers != null)
                 foreach (var m in dto.opinionModifiers) t.opinionModifiers.Add(FromDto(m));
+            ToolkitDtoMapper.FromDto(dto.values, t.values, resolver);
+            t.InvalidateEntryCache();
             t.Normalize();
             return t;
         }
@@ -848,6 +876,39 @@ namespace Ale.Chronicle.Serialization
             };
             l.Normalize();
             return l;
+        }
+
+        // ── v5：职业模板 / 头衔模板 ─────────────────────────────────────────────────
+
+        private static ProfessionTemplateDto ToDto(ProfessionTemplate t, IAssetRefResolver resolver)
+        {
+            var dto = new ProfessionTemplateDto { maxLevel = t.maxLevel };
+            ToolkitDtoMapper.FillTemplateDto(dto, t, resolver);   // name / color / attributes
+            return dto;
+        }
+
+        private static ProfessionTemplate FromDto(ProfessionTemplateDto dto, IAssetRefResolver resolver)
+        {
+            var t = new ProfessionTemplate();
+            ToolkitDtoMapper.FillTemplate(t, dto, resolver);      // name / color / attributes
+            t.maxLevel = dto.maxLevel;
+            return t;
+        }
+
+        private static TitleTemplateDto ToDto(TitleTemplate t, IAssetRefResolver resolver)
+        {
+            var dto = new TitleTemplateDto { kind = (int)t.kind, isRevocable = t.isRevocable };
+            ToolkitDtoMapper.FillTemplateDto(dto, t, resolver);   // name / color / attributes
+            return dto;
+        }
+
+        private static TitleTemplate FromDto(TitleTemplateDto dto, IAssetRefResolver resolver)
+        {
+            var t = new TitleTemplate();
+            ToolkitDtoMapper.FillTemplate(t, dto, resolver);      // name / color / attributes
+            t.kind        = (ETitleKind)dto.kind;
+            t.isRevocable = dto.isRevocable;
+            return t;
         }
 
         #endregion
@@ -1314,11 +1375,13 @@ namespace Ale.Chronicle.Serialization
             WriteArray(w, p.unlocks, WriteUnlock);
             WriteStr(w, p.requirementsJson);
             WriteStrArray(w, p.allowedRaceRefs);
+            WriteStr(w, p.templateRef);   // v5
+            WriteEntries(w, p.values);    // v5
         }
 
-        private static ProfessionDefinitionDto ReadProfession(BinaryReader r)
+        private static ProfessionDefinitionDto ReadProfession(BinaryReader r, int version)
         {
-            return new ProfessionDefinitionDto
+            var dto = new ProfessionDefinitionDto
             {
                 id               = ReadStr(r),
                 displayName      = ReadValue(r),
@@ -1332,6 +1395,12 @@ namespace Ale.Chronicle.Serialization
                 requirementsJson = ReadStr(r),
                 allowedRaceRefs  = ReadStrArray(r),
             };
+            if (version >= 5)
+            {
+                dto.templateRef = ReadStr(r);
+                dto.values      = ReadEntries(r);
+            }
+            return dto;
         }
 
         private static void WriteProfessionTree(BinaryWriter w, ProfessionTreeDto t)
@@ -1375,11 +1444,13 @@ namespace Ale.Chronicle.Serialization
             w.Write(t.isRevocable);
             WriteArray(w, t.modifiers, WriteModifier);
             WriteArray(w, t.opinionModifiers, WriteModifier);
+            WriteStr(w, t.templateRef);   // v5
+            WriteEntries(w, t.values);    // v5
         }
 
-        private static TitleDefinitionDto ReadTitle(BinaryReader r)
+        private static TitleDefinitionDto ReadTitle(BinaryReader r, int version)
         {
-            return new TitleDefinitionDto
+            var dto = new TitleDefinitionDto
             {
                 id                        = ReadStr(r),
                 displayName               = ReadValue(r),
@@ -1396,6 +1467,12 @@ namespace Ale.Chronicle.Serialization
                 modifiers                 = ReadArray(r, ReadModifier),
                 opinionModifiers          = ReadArray(r, ReadModifier),
             };
+            if (version >= 5)
+            {
+                dto.templateRef = ReadStr(r);
+                dto.values      = ReadEntries(r);
+            }
+            return dto;
         }
 
         private static void WriteRankLadder(BinaryWriter w, RankLadderDto l)
@@ -1412,6 +1489,48 @@ namespace Ale.Chronicle.Serialization
                 id               = ReadStr(r),
                 displayName      = ReadValue(r),
                 orderedTitleRefs = ReadStrArray(r),
+            };
+        }
+
+        // ── v5 追加块：职业模板 / 头衔模板 ─────────────────────────────────────────────
+
+        private static void WriteProfessionTemplate(BinaryWriter w, ProfessionTemplateDto t)
+        {
+            WriteStr(w, t.name);
+            WriteFloatArray(w, t.color);
+            WriteArray(w, t.attributes, WriteDefinition);
+            w.Write(t.maxLevel);
+        }
+
+        private static ProfessionTemplateDto ReadProfessionTemplate(BinaryReader r)
+        {
+            return new ProfessionTemplateDto
+            {
+                name       = ReadStr(r),
+                color      = ReadFloatArray(r),
+                attributes = ReadArray(r, ReadDefinition),
+                maxLevel   = r.ReadInt32(),
+            };
+        }
+
+        private static void WriteTitleTemplate(BinaryWriter w, TitleTemplateDto t)
+        {
+            WriteStr(w, t.name);
+            WriteFloatArray(w, t.color);
+            WriteArray(w, t.attributes, WriteDefinition);
+            w.Write(t.kind);
+            w.Write(t.isRevocable);
+        }
+
+        private static TitleTemplateDto ReadTitleTemplate(BinaryReader r)
+        {
+            return new TitleTemplateDto
+            {
+                name        = ReadStr(r),
+                color       = ReadFloatArray(r),
+                attributes  = ReadArray(r, ReadDefinition),
+                kind        = r.ReadInt32(),
+                isRevocable = r.ReadBoolean(),
             };
         }
 
