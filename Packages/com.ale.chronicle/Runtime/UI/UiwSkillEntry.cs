@@ -16,8 +16,9 @@ namespace Ale.Chronicle.Runtime.UI
     /// 显示：图标、名称、「阶级」枚举项背景框，以及可选的描述与自定义属性字段行。
     /// 鼠标悬停经 <see cref="UiwSkillTooltip"/> 弹出技能详情
     /// （进入 / 移出 / 停用三条路径由基类 <see cref="UiwHoverTooltipSource"/> 统一处理）。
+    /// <para>继承 <see cref="UiwListFadeCell"/>：滚动分配 / 回收时由列表引擎统一驱动整格根 CanvasGroup 淡入淡出。</para>
     /// </summary>
-    public class UiwSkillEntry : UiwHoverTooltipSource
+    public class UiwSkillEntry : UiwListFadeCell
     {
         [Header("技能信息")]
         [Tooltip("技能图标图片。")]
