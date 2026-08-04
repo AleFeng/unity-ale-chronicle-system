@@ -14,6 +14,8 @@ namespace Ale.Chronicle.Editor
         EnumType,
         Tag,
         Skill,
+        Profession,
+        ProfessionTree,
     }
 
     /// <summary>
