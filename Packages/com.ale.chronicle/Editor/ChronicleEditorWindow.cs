@@ -99,7 +99,7 @@ namespace Ale.Chronicle.Editor
                 // 职业 / 转职树：反序列化 / 编辑后归一（幂等）；职业模板 schema 变动后同步自定义字段。
                 foreach (var p in db.Professions)     { p?.Normalize(); p?.RebuildAttributes(db); }
                 foreach (var t in db.ProfessionTrees) t?.Normalize();
-                foreach (var t in db.Titles)          t?.Normalize();
+                foreach (var t in db.Titles)          { t?.Normalize(); t?.RebuildAttributes(db); }
                 foreach (var l in db.RankLadders)     l?.Normalize();
             }
         }

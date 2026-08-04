@@ -6,9 +6,9 @@ using UnityEngine;
 namespace Ale.Chronicle.Editor
 {
     /// <summary>
-    /// 「职业」页签（三列）：左=转职树列表（选中后右列渲染缩进树结构编辑器）、中=职业列表（按分组过滤 / 搜索 / 添加）、
-    /// 右=职业 Inspector（选中职业时）或转职树 Inspector（选中左列转职树时）。
-    /// 职业无独立模板：中列以统一 <see cref="ChronicleDatabase.GroupTags"/> 池作过滤维（<c>TTemplate=ChronicleGroupTag</c>）。
+    /// 「职业」页签（三列）：左=职业模板 / 转职树两个子页签（模板列表 + 选中转职树后右列渲染缩进树结构编辑器）、
+    /// 中=职业列表（按模板过滤 / 搜索 / 从模板添加）、右=职业 Inspector（选中职业时）或模板 / 转职树 Inspector（选中左列条目时）。
+    /// 中列过滤维为职业模板（<c>TTemplate=ProfessionTemplate</c>）；分组标签降为检视器可编辑字段。
     /// </summary>
     public sealed class ProfessionSystemTab : EditorThreeColumnTab<ProfessionDefinition>
     {

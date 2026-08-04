@@ -6,20 +6,21 @@ using UnityEngine;
 namespace Ale.Chronicle.Editor
 {
     /// <summary>
-    /// 「头衔」页签（三列）：左=阶级序列列表（选中后右列渲染有序阶梯编辑器）、中=头衔列表（按分组过滤 / 搜索 / 添加）、
-    /// 右=头衔 Inspector（选中头衔时）或阶级序列 Inspector（选中左列序列时）。
-    /// 头衔无独立模板：中列以统一 <see cref="ChronicleDatabase.GroupTags"/> 池作过滤维（<c>TTemplate=ChronicleGroupTag</c>）。
+    /// 「头衔」页签（三列）：左=头衔模板 / 阶级序列两个子页签（模板列表 + 选中序列后右列渲染有序阶梯编辑器）、
+    /// 中=头衔列表（按模板过滤 / 搜索 / 从模板添加）、右=头衔 Inspector（选中头衔时）或模板 / 阶级序列 Inspector（选中左列条目时）。
+    /// 中列过滤维为头衔模板（<c>TTemplate=TitleTemplate</c>）；分组标签降为检视器可编辑字段。
     /// </summary>
     public sealed class TitleSystemTab : EditorThreeColumnTab<TitleDefinition>
     {
-        private readonly RankLadderListPanel _ladderPanel = new RankLadderListPanel();
-        private readonly TitleListPanel      _listPanel   = new TitleListPanel();
+        private readonly TitleTemplatePanel  _templatePanel = new TitleTemplatePanel();
+        private readonly RankLadderListPanel _ladderPanel   = new RankLadderListPanel();
+        private readonly TitleListPanel      _listPanel     = new TitleListPanel();
         private IEditorMasterListPanel<ChronicleDatabase>[] _leftPanels;
 
-        protected override string[] LeftSubTabs => new[] { "阶级序列" };
+        protected override string[] LeftSubTabs => new[] { "头衔模板", "阶级序列" };
 
         protected override IEditorMasterListPanel<ChronicleDatabase>[] LeftPanels
-            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _ladderPanel };
+            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _templatePanel, _ladderPanel };
 
         protected override string EntityNoun => "头衔";
 
@@ -35,23 +36,23 @@ namespace Ale.Chronicle.Editor
     }
 
     /// <summary>头衔列表面板（中列）：按分组标签过滤 + 搜索 + 添加，每行 id / 名称 / 类型 / 位阶。</summary>
-    public sealed class TitleListPanel : EditorEntityListPanel<TitleDefinition, ChronicleGroupTag>
+    public sealed class TitleListPanel : EditorEntityListPanel<TitleDefinition, TitleTemplate>
     {
         public TitleListPanel() : base("ChronicleTitleListDrag") { }
 
         protected override EChronicleEntityKind Kind => EChronicleEntityKind.Title;
         protected override string Noun => "头衔";
 
-        protected override List<TitleDefinition>   Entities(ChronicleDatabase db)  => db.Titles;
-        protected override List<ChronicleGroupTag> Templates(ChronicleDatabase db) => db.GroupTags;
-        protected override string TemplateName(ChronicleGroupTag t) => t.id;
-        protected override string TemplateRefOf(TitleDefinition e) => e.groupTagRef;
+        protected override List<TitleDefinition> Entities(ChronicleDatabase db)  => db.Titles;
+        protected override List<TitleTemplate>   Templates(ChronicleDatabase db) => db.TitleTemplates;   // 模板作过滤维
+        protected override string TemplateName(TitleTemplate t) => t.name;
+        protected override string TemplateRefOf(TitleDefinition e) => e.templateRef;
         protected override string IdOf(TitleDefinition e) => e.id;
 
         protected override Color RowDotColor(ChronicleDatabase db, TitleDefinition e)
         {
-            var g = db.GetGroupTag(e.groupTagRef);
-            return g != null ? g.color : Color.gray;
+            var t = db.GetTitleTemplate(e.templateRef);
+            return t != null ? t.color : Color.gray;
         }
 
         protected override string SearchName(ChronicleDatabase db, TitleDefinition e)
@@ -60,11 +61,13 @@ namespace Ale.Chronicle.Editor
         protected override TitleDefinition AddFromTemplate(IChronicleEditorContext ctx, string templateName)
         {
             var db = ctx.Database;
-            ctx.RecordUndo("添加头衔");
-            var title = new TitleDefinition(GenerateId(db, "title_", id => db.GetTitle(id) != null))
-            {
-                groupTagRef = templateName,
-            };
+            ctx.RecordUndo("从模板添加头衔");
+            var title = new TitleDefinition(GenerateId(db, "title_", id => db.GetTitle(id) != null), templateName);
+
+            // 从模板复制默认预设（种类 / 可剥夺）；自定义属性值由 RebuildAttributes 依模板 schema 初始化。
+            var t = db.GetTitleTemplate(templateName);
+            if (t != null) { title.kind = t.kind; title.isRevocable = t.isRevocable; }
+            title.RebuildAttributes(db);
             db.Titles.Add(title);
             ctx.MarkDirty();
             return title;
@@ -105,6 +108,30 @@ namespace Ale.Chronicle.Editor
             GUI.Label(new Rect(nameX, valY, nameW, valH), string.IsNullOrEmpty(name) ? "—" : name, SubStyle);
             GUI.Label(new Rect(kindX, valY, kindW, valH), e.kind == ETitleKind.RankTitle ? "阶级" : "称号", SubStyle);
             GUI.Label(new Rect(tierX, valY, tierW, valH), e.kind == ETitleKind.RankTitle ? e.rankTier.ToString() : "—", SubStyle);
+        }
+    }
+
+    /// <summary>头衔模板主列表面板（头衔页左列首个子页签）：绑定 <see cref="ChronicleDatabase.TitleTemplates"/>；专属字段=默认种类 / 可剥夺。</summary>
+    public sealed class TitleTemplatePanel : ChronicleTemplateListPanel<TitleTemplate>
+    {
+        protected override List<TitleTemplate> GetList(ChronicleDatabase db) => db.TitleTemplates;
+        protected override string Noun => "头衔模板";
+        protected override string NewNamePrefix => "title_template_";
+        protected override TitleTemplate NewTemplate(string name) => new TitleTemplate(name);
+        protected override string SchemaLabel => "自定义属性字段 schema";
+
+        protected override void DrawExtras(IChronicleEditorContext ctx, TitleTemplate tmpl)
+        {
+            EditorGUI.BeginChangeCheck();
+            var  kind        = (ETitleKind)EditorGUILayout.EnumPopup("默认种类", tmpl.kind);
+            bool isRevocable = EditorGUILayout.Toggle("默认可被剥夺", tmpl.isRevocable);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ctx.RecordUndo("修改头衔模板");
+                tmpl.kind        = kind;
+                tmpl.isRevocable = isRevocable;
+                ctx.MarkDirty();
+            }
         }
     }
 
@@ -168,6 +195,7 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
             ChronicleEntityHeader.DrawIdField(ctx, "头衔", title.id,
                 ctx.DuplicateIdsOf(EChronicleEntityKind.Title), v => title.id = v);
+            ChronicleEntityHeader.DrawTemplateRefReadonly(title.templateRef);
             AttributeFieldDrawer.Draw(ctx, "显示名", title.displayName, null);
             AttributeFieldDrawer.Draw(ctx, "说明",   title.description, null);
             AttributeFieldDrawer.Draw(ctx, "图标",   title.icon, null);
@@ -213,6 +241,11 @@ namespace Ale.Chronicle.Editor
 
             EditorGUILayout.Space(6);
             DrawAcquisitionConditions(ctx, title);
+
+            EditorGUILayout.Space(6);
+            var tmpl = db.GetTitleTemplate(title.templateRef);
+            ChronicleEntityHeader.DrawCustomAttributes(ctx, title.values, tmpl?.attributes,
+                "（该头衔暂无自定义属性字段；可在左侧「头衔模板」中添加）");
         }
 
         private static void DrawAcquisitionConditions(IChronicleEditorContext ctx, TitleDefinition title)
