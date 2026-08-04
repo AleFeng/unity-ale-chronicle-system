@@ -121,16 +121,34 @@ namespace Ale.Chronicle
         }
 
         /// <summary>
-        /// 把全部特质中作用于 <paramref name="targetAttributeId"/> 的修饰器（克隆、打好来源标记）追加进
-        /// <paramref name="into"/>；传空 <paramref name="targetAttributeId"/> 收集全部。特质定义经 <paramref name="src"/> 反查。
+        /// 把作用于 <paramref name="targetAttributeId"/> 的修饰器（克隆、打好来源标记）追加进 <paramref name="into"/>，
+        /// 三类来源统一汇入同一主干：① 特质（<c>trait:{id}</c>）；② 职业每级成长按当前等级折算（<c>prof:{id}:growth</c>）；
+        /// ③ 头衔加成（<c>title:{id}</c>）。传空 <paramref name="targetAttributeId"/> 收集全部；定义经 <paramref name="src"/> 反查。
+        /// <para>头衔的 <see cref="TitleDefinition.opinionModifiers"/> 面向社交轴，不在此收集。</para>
         /// </summary>
         public void CollectModifiers(string targetAttributeId, IChronicleSchemaSource src, List<ModifierDefinition> into)
         {
             if (src == null || into == null) return;
+
+            // ① 特质
             foreach (var ti in traits)
             {
                 var trait = src.GetTrait(ti.traitRef);
                 trait?.CollectModifiers(targetAttributeId, into);
+            }
+
+            // ② 职业每级成长（按角色当前等级折算）
+            foreach (var cp in professions)
+            {
+                var prof = src.GetProfession(cp.professionRef);
+                prof?.CollectGrowthModifiers(cp.level, targetAttributeId, into);
+            }
+
+            // ③ 头衔加成
+            foreach (var ct in titles)
+            {
+                var title = src.GetTitle(ct.titleRef);
+                title?.CollectModifiers(targetAttributeId, into);
             }
         }
 

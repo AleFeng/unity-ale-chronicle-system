@@ -37,8 +37,8 @@ namespace Ale.Chronicle
 
         /// <summary>
         /// <b>高层重载</b>：直接对一个角色的某核心属性汇流求值——从 <paramref name="character"/> 的核心属性基础值起，
-        /// 收集其全部特质中作用于 <paramref name="def"/> 的修饰器（经 <paramref name="src"/> 反查特质定义、
-        /// 打好来源标记），交由低层求值并按 <paramref name="def"/> 的 min/max 夹取。
+        /// 收集其作用于 <paramref name="def"/> 的全部修饰器（特质 / 职业每级成长 / 头衔加成，经 <paramref name="src"/>
+        /// 反查定义、打好来源标记），交由低层求值并按 <paramref name="def"/> 的 min/max 夹取。
         /// 编辑器「基础 → 当前 + 来源明细」预览与运行时共用此入口。
         /// </summary>
         public static ModifierEvaluation Evaluate(CharacterDefinition character, CoreAttributeDefinition def,
