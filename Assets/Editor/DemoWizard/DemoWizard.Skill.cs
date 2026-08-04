@@ -366,7 +366,7 @@ namespace Ale.Chronicle.DemoEditor
             {
                 var orderInst = (GameObject)PrefabUtility.InstantiatePrefab(orderListPrefab, listHost.transform);
                 Stretch((RectTransform)orderInst.transform);
-                view.orderList = orderInst.GetComponent<UiwSkillOrderList>();
+                view.skillOrderList = orderInst.GetComponent<UiwSkillOrderList>();
             }
             else Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_UiwSkillOrderList。");
 
@@ -374,13 +374,13 @@ namespace Ale.Chronicle.DemoEditor
             {
                 var gridInst = (GameObject)PrefabUtility.InstantiatePrefab(gridListPrefab, listHost.transform);
                 Stretch((RectTransform)gridInst.transform);
-                view.gridList = gridInst.GetComponent<UiwSkillGridList>();
+                view.skillGridList = gridInst.GetComponent<UiwSkillGridList>();
             }
             else Debug.LogWarning("[ChronicleDemoWizard] 缺少 PF_UiwSkillGridList。");
 
             // 主 / 副分组过滤栏引用配置在技能列表组件上（网格 + 顺序两列表各引用同一对栏；仅激活的列表响应其事件）。
-            if (view.orderList) { view.orderList.filterBar = primaryBar; view.orderList.secondaryFilterBar = secondaryBar; }
-            if (view.gridList)  { view.gridList.filterBar  = primaryBar; view.gridList.secondaryFilterBar  = secondaryBar; }
+            if (view.skillOrderList) { view.skillOrderList.filterBar = primaryBar; view.skillOrderList.secondaryFilterBar = secondaryBar; }
+            if (view.skillGridList)  { view.skillGridList.filterBar  = primaryBar; view.skillGridList.secondaryFilterBar  = secondaryBar; }
 
             SavePrefab(panelGo, path);
         }

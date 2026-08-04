@@ -798,10 +798,19 @@ MonoBehaviour:
       objAddresses: []
     values: []
   traits: []
-  characterTemplates: []
+  characterTemplates:
+  - name: "\u4EBA\u7C7B"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    raceRef: 
+    guaranteedTraitRefs: []
+    randomTraitPoolRefs: []
+    attributePointBudget: 0
+    minAgeDays: 0
+    maxAgeDays: 0
   characters:
   - id: char_1
-    templateRef: 
+    templateRef: "\u4EBA\u7C7B"
     values: []
     coreAttributes: []
     traits: []

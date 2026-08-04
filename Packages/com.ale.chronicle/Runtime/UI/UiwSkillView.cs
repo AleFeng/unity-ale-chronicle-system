@@ -36,9 +36,9 @@ namespace Ale.Chronicle.Runtime.UI
 
         [Header("技能列表")]
         [Tooltip("顺序（列表）技能列表。")]
-        public UiwSkillOrderList orderList;
+        public UiwSkillOrderList skillOrderList;
         [Tooltip("网格技能列表。")]
-        public UiwSkillGridList gridList;
+        public UiwSkillGridList skillGridList;
 
         [Header("分组页签")]
         [Tooltip("是否显示「全部」页签。")]
@@ -58,7 +58,7 @@ namespace Ale.Chronicle.Runtime.UI
             // 主 / 副分组页签栏事件由技能列表组件（UiwVirtualListBase）自管，此处不再订阅。
 
             // 视图模式（含无切换按钮时自动采用已配置的那个视图）由基类统一处理。
-            SetupViewModeToggle(orderList, gridList);
+            SetupViewModeToggle(skillOrderList, skillGridList);
             ApplyViewMode();
 
             base.Start();   // 接线 / 视图模式就绪后，由基类判断初始激活则自打开
@@ -172,15 +172,15 @@ namespace Ale.Chronicle.Runtime.UI
         {
             Func<Skill, string, string, bool> predicate =
                 (s, primary, secondary) => MatchesPrimary(s, primary) && MatchesSecondary(s, secondary);
-            if (gridList)  gridList.ConfigureFilter(predicate, _primaryTokens, _secondaryTokens, showAllTab);
-            if (orderList) orderList.ConfigureFilter(predicate, _primaryTokens, _secondaryTokens, showAllTab);
+            if (skillGridList)  skillGridList.ConfigureFilter(predicate, _primaryTokens, _secondaryTokens, showAllTab);
+            if (skillOrderList) skillOrderList.ConfigureFilter(predicate, _primaryTokens, _secondaryTokens, showAllTab);
         }
 
         /// <summary>当前激活的技能列表（网格 / 顺序），以基类类型返回以调用过滤 / 数据入口。</summary>
         private UiwVirtualListBase<Skill, UiwSkillEntry> ActiveList()
             => GridMode
-                ? (gridList  ? gridList  : orderList)
-                : (orderList ? orderList : gridList);
+                ? (skillGridList  ? skillGridList  : skillOrderList)
+                : (skillOrderList ? skillOrderList : skillGridList);
 
         /// <summary>获取分组标签的显示名（若未配置显示名，则回退 ID）。</summary>
         private static string GroupDisplayOf(ChronicleGroupTag tag)
@@ -229,8 +229,8 @@ namespace Ale.Chronicle.Runtime.UI
         /// <summary>激活当前模式对应的技能列表组件，隐藏另一个（基类 <see cref="UiwViewBase"/> 驱动）。</summary>
         protected override void OnApplyViewMode(bool gridMode)
         {
-            if (orderList) orderList.gameObject.SetActive(!gridMode);
-            if (gridList)  gridList.gameObject.SetActive(gridMode);
+            if (skillOrderList) skillOrderList.gameObject.SetActive(!gridMode);
+            if (skillGridList)  skillGridList.gameObject.SetActive(gridMode);
         }
 
         /// <summary>切换模式后重新采集并刷新列表。</summary>

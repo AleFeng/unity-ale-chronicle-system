@@ -717,8 +717,8 @@ MonoBehaviour:
   source: 0
   characterId: 
   titleText: "\u6280\u80FD"
-  orderList: {fileID: 1864608563211974460}
-  gridList: {fileID: 6721732142870319979}
+  skillOrderList: {fileID: 1864608563211974460}
+  skillGridList: {fileID: 6721732142870319979}
   showAllTab: 1
   searchInput: {fileID: 0}
   references:
