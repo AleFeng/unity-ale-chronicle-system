@@ -51,14 +51,7 @@ namespace Ale.Chronicle.Editor
             return t != null ? t.color : Color.gray;
         }
 
-        protected override bool Matches(ChronicleDatabase db, CoreAttributeDefinition e, string term)
-        {
-            if (string.IsNullOrEmpty(term)) return true;
-            term = term.ToLowerInvariant();
-            if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
-            string name = e.PlainName();
-            return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
-        }
+        protected override string SearchName(ChronicleDatabase db, CoreAttributeDefinition e) => e.PlainName();
 
         protected override CoreAttributeDefinition AddFromTemplate(IChronicleEditorContext ctx, string templateName)
         {

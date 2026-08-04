@@ -53,14 +53,8 @@ namespace Ale.Chronicle.Editor
             return t != null ? t.color : Color.gray;
         }
 
-        protected override bool Matches(ChronicleDatabase db, Skill e, string term)
-        {
-            if (string.IsNullOrEmpty(term)) return true;
-            term = term.ToLowerInvariant();
-            if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
-            string name = e.displayText != null ? e.displayText.GetTextValue() : null;
-            return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
-        }
+        protected override string SearchName(ChronicleDatabase db, Skill e)
+            => e.displayText != null ? e.displayText.GetTextValue() : null;
 
         protected override Skill AddFromTemplate(IChronicleEditorContext ctx, string templateName)
         {

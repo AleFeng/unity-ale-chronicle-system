@@ -50,6 +50,20 @@ namespace Ale.Chronicle.Editor
 
         /// <summary>复制末尾条目新建一个实体并加入数据库，返回之（含 RecordUndo / MarkDirty）。</summary>
         protected abstract TEntity QuickAdd(IChronicleEditorContext ctx);
+
+        // 中列搜索：id 小写前缀命中由基类统一处理，各域只需给出「名称」。
+        protected sealed override bool Matches(ChronicleDatabase db, TEntity e, string term)
+        {
+            if (string.IsNullOrEmpty(term)) return true;
+            term = term.ToLowerInvariant();
+            string id = IdOf(e);
+            if (!string.IsNullOrEmpty(id) && id.ToLowerInvariant().Contains(term)) return true;
+            string name = SearchName(db, e);
+            return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
+        }
+
+        /// <summary>搜索匹配用的「名称」（id 已由基类统一匹配；返回 null/空则只按 id 搜）。</summary>
+        protected abstract string SearchName(ChronicleDatabase db, TEntity e);
     }
 
     /// <summary>三列系统页签的编年史别名。</summary>

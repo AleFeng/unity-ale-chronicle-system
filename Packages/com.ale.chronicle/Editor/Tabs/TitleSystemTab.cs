@@ -54,14 +54,8 @@ namespace Ale.Chronicle.Editor
             return g != null ? g.color : Color.gray;
         }
 
-        protected override bool Matches(ChronicleDatabase db, TitleDefinition e, string term)
-        {
-            if (string.IsNullOrEmpty(term)) return true;
-            term = term.ToLowerInvariant();
-            if (!string.IsNullOrEmpty(e.id) && e.id.ToLowerInvariant().Contains(term)) return true;
-            string name = e.displayName != null ? e.displayName.GetTextValue() : null;
-            return !string.IsNullOrEmpty(name) && name.ToLowerInvariant().Contains(term);
-        }
+        protected override string SearchName(ChronicleDatabase db, TitleDefinition e)
+            => e.displayName != null ? e.displayName.GetTextValue() : null;
 
         protected override TitleDefinition AddFromTemplate(IChronicleEditorContext ctx, string templateName)
         {
