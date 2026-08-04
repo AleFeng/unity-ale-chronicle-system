@@ -24,8 +24,9 @@ namespace Ale.Chronicle.Serialization
         private const int Magic = 0x4348524F;
 
         /// <summary>当前序列化格式版本。v2：属性/特质实例追加 templateRef+values，尾部追加 属性模板/特质模板/分组标签/数字格式 四块。
-        /// v3：尾部追加 技能模板/技能 两块（技能分组标签复用统一 groupTags 池，不单列）。</summary>
-        public const int Version = 3;
+        /// v3：尾部追加 技能模板/技能 两块（技能分组标签复用统一 groupTags 池，不单列）。
+        /// v4：尾部追加 职业/转职树/头衔/阶级序列 四块，角色块尾追加 职业/头衔 持有字段。</summary>
+        public const int Version = 4;
 
         /// <summary>可正确解析的最低格式版本。</summary>
         private const int MinReadableVersion = 1;
@@ -60,6 +61,12 @@ namespace Ale.Chronicle.Serialization
                 // v3 追加块（技能系统）
                 WriteArray(w, dto.skillTemplates, WriteSkillTemplate);
                 WriteArray(w, dto.skills, WriteSkill);
+
+                // v4 追加块（职业 / 头衔系统）
+                WriteArray(w, dto.professions, WriteProfession);
+                WriteArray(w, dto.professionTrees, WriteProfessionTree);
+                WriteArray(w, dto.titles, WriteTitle);
+                WriteArray(w, dto.rankLadders, WriteRankLadder);
             }
             return stream.ToArray();
         }
@@ -102,7 +109,7 @@ namespace Ale.Chronicle.Serialization
                 coreAttributes     = ReadArray(r, br => ReadCoreAttribute(br, version)),
                 traits             = ReadArray(r, br => ReadTrait(br, version)),
                 characterTemplates = ReadArray(r, ReadCharacterTemplate),
-                characters         = ReadArray(r, ReadCharacter),
+                characters         = ReadArray(r, br => ReadCharacter(br, version)),
             };
 
             // v2 追加块：旧 v1 文件到 characters 即结束，按版本号跳读兼容。
@@ -119,6 +126,15 @@ namespace Ale.Chronicle.Serialization
             {
                 dto.skillTemplates = ReadArray(r, ReadSkillTemplate);
                 dto.skills         = ReadArray(r, ReadSkill);
+            }
+
+            // v4 追加块（职业 / 头衔系统）：旧 v3 文件到技能即结束。
+            if (version >= 4)
+            {
+                dto.professions     = ReadArray(r, ReadProfession);
+                dto.professionTrees = ReadArray(r, ReadProfessionTree);
+                dto.titles          = ReadArray(r, ReadTitle);
+                dto.rankLadders     = ReadArray(r, ReadRankLadder);
             }
 
             FromDto(dto, target, resolver);
@@ -147,6 +163,14 @@ namespace Ale.Chronicle.Serialization
                 skillTemplates         = ToolkitDtoMapper.ToArray(db.SkillTemplates, t => ToDto(t, resolver)),
                 skills                 = ToolkitDtoMapper.ToArrayFiltered(db.Skills,
                                             s => s != null && !string.IsNullOrWhiteSpace(s.id), s => ToDto(s, resolver)),
+                professions            = ToolkitDtoMapper.ToArrayFiltered(db.Professions,
+                                            p => p != null && !string.IsNullOrWhiteSpace(p.id), p => ToDto(p, resolver)),
+                professionTrees        = ToolkitDtoMapper.ToArrayFiltered(db.ProfessionTrees,
+                                            t => t != null && !string.IsNullOrWhiteSpace(t.id), t => ToDto(t, resolver)),
+                titles                 = ToolkitDtoMapper.ToArrayFiltered(db.Titles,
+                                            t => t != null && !string.IsNullOrWhiteSpace(t.id), t => ToDto(t, resolver)),
+                rankLadders            = ToolkitDtoMapper.ToArrayFiltered(db.RankLadders,
+                                            l => l != null && !string.IsNullOrWhiteSpace(l.id), l => ToDto(l, resolver)),
             };
         }
 
@@ -164,6 +188,10 @@ namespace Ale.Chronicle.Serialization
             target.NumberFormatConfigs.Clear();
             target.SkillTemplates.Clear();
             target.Skills.Clear();
+            target.Professions.Clear();
+            target.ProfessionTrees.Clear();
+            target.Titles.Clear();
+            target.RankLadders.Clear();
             if (dto == null) return;
 
             if (dto.enumTypes != null)          foreach (var e in dto.enumTypes)          target.EnumTypesList.Add(FromDto(e, resolver));
@@ -178,6 +206,10 @@ namespace Ale.Chronicle.Serialization
             if (dto.numberFormatConfigs != null)    foreach (var c in dto.numberFormatConfigs)    target.NumberFormatConfigs.Add(FromDto(c, resolver));
             if (dto.skillTemplates != null)         foreach (var t in dto.skillTemplates)         target.SkillTemplates.Add(FromDto(t, resolver));
             if (dto.skills != null)                 foreach (var s in dto.skills)                 target.Skills.Add(FromDto(s, resolver));
+            if (dto.professions != null)            foreach (var p in dto.professions)            target.Professions.Add(FromDto(p, resolver));
+            if (dto.professionTrees != null)        foreach (var t in dto.professionTrees)        target.ProfessionTrees.Add(FromDto(t, resolver));
+            if (dto.titles != null)                 foreach (var t in dto.titles)                 target.Titles.Add(FromDto(t, resolver));
+            if (dto.rankLadders != null)            foreach (var l in dto.rankLadders)            target.RankLadders.Add(FromDto(l, resolver));
         }
 
         // ── 枚举类型 ────────────────────────────────────────────────────────────────
@@ -575,6 +607,10 @@ namespace Ale.Chronicle.Serialization
                 fatherRef      = c.fatherRef,
                 motherRef      = c.motherRef,
                 childRefs      = ToolkitDtoMapper.ToArray(c.childRefs),
+                professions    = ToolkitDtoMapper.ToArray(c.professions,
+                                    cp => new CharacterProfessionDto { professionRef = cp.professionRef, level = cp.level, currentExp = cp.currentExp, isPrimary = cp.isPrimary }),
+                titles         = ToolkitDtoMapper.ToArray(c.titles,
+                                    ct => new CharacterTitleDto { titleRef = ct.titleRef, acquiredWorldDay = ct.acquiredWorldDay }),
             };
         }
 
@@ -589,8 +625,229 @@ namespace Ale.Chronicle.Serialization
             c.fatherRef = dto.fatherRef;
             c.motherRef = dto.motherRef;
             c.childRefs = ToolkitDtoMapper.FromDto(dto.childRefs);
+            if (dto.professions != null)
+                foreach (var cp in dto.professions) c.professions.Add(new CharacterProfession(cp.professionRef, cp.level, cp.currentExp, cp.isPrimary));
+            if (dto.titles != null)
+                foreach (var ct in dto.titles) c.titles.Add(new CharacterTitle(ct.titleRef, ct.acquiredWorldDay));
             c.InvalidateEntryCache();
             return c;
+        }
+
+        // ── v4：职业 ────────────────────────────────────────────────────────────────
+
+        private static ExpCurveDto ToDto(ExpCurve c, IAssetRefResolver resolver)
+        {
+            c ??= new ExpCurve();
+            return new ExpCurveDto
+            {
+                mode        = (int)c.mode,
+                baseExp     = c.baseExp,
+                exponent    = c.exponent,
+                linear      = c.linear,
+                perLevelExp = c.perLevelExp != null ? c.perLevelExp.ToArray() : null,
+                curveValue  = ToolkitDtoMapper.ToDto(c.curveValue, resolver),
+                curveScale  = c.curveScale,
+            };
+        }
+
+        private static ExpCurve FromDto(ExpCurveDto dto, IAssetRefResolver resolver)
+        {
+            var c = new ExpCurve
+            {
+                mode       = (EExpCurveMode)dto.mode,
+                baseExp    = dto.baseExp,
+                exponent   = dto.exponent,
+                linear     = dto.linear,
+                curveValue = dto.curveValue != null ? ToolkitDtoMapper.FromDto(dto.curveValue, resolver) : new AttributeValue(EFieldType.AnimationCurve),
+                curveScale = dto.curveScale,
+            };
+            if (dto.perLevelExp != null) c.perLevelExp.AddRange(dto.perLevelExp);
+            c.Normalize();
+            return c;
+        }
+
+        private static LevelGrowthEntryDto ToDto(LevelGrowthEntry g, IAssetRefResolver resolver)
+        {
+            return new LevelGrowthEntryDto
+            {
+                coreAttrId = g.coreAttrId,
+                perLevel   = g.perLevel,
+                useCurve   = g.useCurve,
+                levelCurve = ToolkitDtoMapper.ToDto(g.levelCurve, resolver),
+            };
+        }
+
+        private static LevelGrowthEntry FromDto(LevelGrowthEntryDto dto, IAssetRefResolver resolver)
+        {
+            return new LevelGrowthEntry
+            {
+                coreAttrId = dto.coreAttrId,
+                perLevel   = dto.perLevel,
+                useCurve   = dto.useCurve,
+                levelCurve = dto.levelCurve != null ? ToolkitDtoMapper.FromDto(dto.levelCurve, resolver) : new AttributeValue(EFieldType.AnimationCurve),
+            };
+        }
+
+        private static LevelUnlockDto ToDto(LevelUnlock u)
+        {
+            return new LevelUnlockDto
+            {
+                level          = u.level,
+                grantTraitRefs = ToolkitDtoMapper.ToArray(u.grantTraitRefs),
+                grantTitleRefs = ToolkitDtoMapper.ToArray(u.grantTitleRefs),
+            };
+        }
+
+        private static LevelUnlock FromDto(LevelUnlockDto dto)
+        {
+            return new LevelUnlock
+            {
+                level          = dto.level,
+                grantTraitRefs = ToolkitDtoMapper.FromDto(dto.grantTraitRefs),
+                grantTitleRefs = ToolkitDtoMapper.FromDto(dto.grantTitleRefs),
+            };
+        }
+
+        private static ProfessionDefinitionDto ToDto(ProfessionDefinition p, IAssetRefResolver resolver)
+        {
+            return new ProfessionDefinitionDto
+            {
+                id               = p.id,
+                displayName      = ToolkitDtoMapper.ToDto(p.displayName, resolver),
+                description      = ToolkitDtoMapper.ToDto(p.description, resolver),
+                icon             = ToolkitDtoMapper.ToDto(p.icon, resolver),
+                groupTagRef      = p.groupTagRef,
+                maxLevel         = p.maxLevel,
+                expCurve         = ToDto(p.expCurve ?? new ExpCurve(), resolver),
+                growth           = ToolkitDtoMapper.ToArray(p.growth, g => ToDto(g, resolver)),
+                unlocks          = ToolkitDtoMapper.ToArray(p.unlocks, ToDto),
+                requirementsJson = ConditionJson.ToJson(p.requirements ?? new ConditionExpression(), pretty: false),
+                allowedRaceRefs  = ToolkitDtoMapper.ToArray(p.allowedRaceRefs),
+            };
+        }
+
+        private static ProfessionDefinition FromDto(ProfessionDefinitionDto dto, IAssetRefResolver resolver)
+        {
+            var p = new ProfessionDefinition
+            {
+                id              = dto.id,
+                displayName     = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
+                description     = ToolkitDtoMapper.TextFromDto(dto.description, resolver),
+                icon            = dto.icon != null ? ToolkitDtoMapper.FromDto(dto.icon, resolver) : new AttributeValue(EFieldType.Sprite),
+                groupTagRef     = dto.groupTagRef,
+                maxLevel        = dto.maxLevel,
+                expCurve        = dto.expCurve != null ? FromDto(dto.expCurve, resolver) : new ExpCurve(),
+                requirements    = ConditionJson.FromJson(dto.requirementsJson),
+                allowedRaceRefs = ToolkitDtoMapper.FromDto(dto.allowedRaceRefs),
+            };
+            if (dto.growth != null)
+                foreach (var g in dto.growth) p.growth.Add(FromDto(g, resolver));
+            if (dto.unlocks != null)
+                foreach (var u in dto.unlocks) p.unlocks.Add(FromDto(u));
+            p.Normalize();
+            return p;
+        }
+
+        private static ProfessionTreeDto ToDto(ProfessionTree t, IAssetRefResolver resolver)
+        {
+            return new ProfessionTreeDto
+            {
+                id          = t.id,
+                displayName = ToolkitDtoMapper.ToDto(t.displayName, resolver),
+                nodes       = ToolkitDtoMapper.ToArray(t.nodes, n => new ProfessionTreeNodeDto
+                {
+                    professionRef       = n.professionRef,
+                    childProfessionRefs = ToolkitDtoMapper.ToArray(n.childProfessionRefs),
+                }),
+            };
+        }
+
+        private static ProfessionTree FromDto(ProfessionTreeDto dto, IAssetRefResolver resolver)
+        {
+            var t = new ProfessionTree
+            {
+                id          = dto.id,
+                displayName = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
+            };
+            if (dto.nodes != null)
+                foreach (var n in dto.nodes)
+                    t.nodes.Add(new ProfessionTreeNode
+                    {
+                        professionRef       = n.professionRef,
+                        childProfessionRefs = ToolkitDtoMapper.FromDto(n.childProfessionRefs),
+                    });
+            t.Normalize();
+            return t;
+        }
+
+        // ── v4：头衔 ────────────────────────────────────────────────────────────────
+
+        private static TitleDefinitionDto ToDto(TitleDefinition t, IAssetRefResolver resolver)
+        {
+            return new TitleDefinitionDto
+            {
+                id                        = t.id,
+                displayName               = ToolkitDtoMapper.ToDto(t.displayName, resolver),
+                description               = ToolkitDtoMapper.ToDto(t.description, resolver),
+                icon                      = ToolkitDtoMapper.ToDto(t.icon, resolver),
+                kind                      = (int)t.kind,
+                groupTagRef               = t.groupTagRef,
+                rankTier                  = t.rankTier,
+                heritable                 = t.heritable,
+                successionPolicyRef       = t.successionPolicyRef,
+                isUnique                  = t.isUnique,
+                acquisitionConditionsJson = ConditionJson.ToJson(t.acquisitionConditions ?? new ConditionExpression(), pretty: false),
+                isRevocable               = t.isRevocable,
+                modifiers                 = ToolkitDtoMapper.ToArray(t.modifiers, ToDto),
+                opinionModifiers          = ToolkitDtoMapper.ToArray(t.opinionModifiers, ToDto),
+            };
+        }
+
+        private static TitleDefinition FromDto(TitleDefinitionDto dto, IAssetRefResolver resolver)
+        {
+            var t = new TitleDefinition
+            {
+                id                    = dto.id,
+                displayName           = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
+                description           = ToolkitDtoMapper.TextFromDto(dto.description, resolver),
+                icon                  = dto.icon != null ? ToolkitDtoMapper.FromDto(dto.icon, resolver) : new AttributeValue(EFieldType.Sprite),
+                kind                  = (ETitleKind)dto.kind,
+                groupTagRef           = dto.groupTagRef,
+                rankTier              = dto.rankTier,
+                heritable             = dto.heritable,
+                successionPolicyRef   = dto.successionPolicyRef,
+                isUnique              = dto.isUnique,
+                acquisitionConditions = ConditionJson.FromJson(dto.acquisitionConditionsJson),
+                isRevocable           = dto.isRevocable,
+            };
+            if (dto.modifiers != null)
+                foreach (var m in dto.modifiers) t.modifiers.Add(FromDto(m));
+            if (dto.opinionModifiers != null)
+                foreach (var m in dto.opinionModifiers) t.opinionModifiers.Add(FromDto(m));
+            t.Normalize();
+            return t;
+        }
+
+        private static RankLadderDto ToDto(RankLadder l, IAssetRefResolver resolver)
+        {
+            return new RankLadderDto
+            {
+                id               = l.id,
+                displayName      = ToolkitDtoMapper.ToDto(l.displayName, resolver),
+                orderedTitleRefs = ToolkitDtoMapper.ToArray(l.orderedTitleRefs),
+            };
+        }
+
+        private static RankLadder FromDto(RankLadderDto dto, IAssetRefResolver resolver)
+        {
+            var l = new RankLadder
+            {
+                id               = dto.id,
+                displayName      = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
+                orderedTitleRefs = ToolkitDtoMapper.FromDto(dto.orderedTitleRefs),
+            };
+            l.Normalize();
+            return l;
         }
 
         #endregion
@@ -786,11 +1043,24 @@ namespace Ale.Chronicle.Serialization
             WriteStr(w, c.fatherRef);
             WriteStr(w, c.motherRef);
             WriteStrArray(w, c.childRefs);
+            // v4：角色块尾追加 职业 / 头衔 持有字段
+            WriteArray(w, c.professions, (bw, cp) =>
+            {
+                WriteStr(bw, cp.professionRef);
+                bw.Write(cp.level);
+                bw.Write(cp.currentExp);
+                bw.Write(cp.isPrimary);
+            });
+            WriteArray(w, c.titles, (bw, ct) =>
+            {
+                WriteStr(bw, ct.titleRef);
+                bw.Write(ct.acquiredWorldDay);
+            });
         }
 
-        private static CharacterDefinitionDto ReadCharacter(BinaryReader r)
+        private static CharacterDefinitionDto ReadCharacter(BinaryReader r, int version)
         {
-            return new CharacterDefinitionDto
+            var dto = new CharacterDefinitionDto
             {
                 id             = ReadStr(r),
                 templateRef    = ReadStr(r),
@@ -807,6 +1077,23 @@ namespace Ale.Chronicle.Serialization
                 motherRef      = ReadStr(r),
                 childRefs      = ReadStrArray(r),
             };
+            // v4：角色块尾的 职业 / 头衔 持有字段（旧 v3 文件无此尾部）
+            if (version >= 4)
+            {
+                dto.professions = ReadArray(r, br => new CharacterProfessionDto
+                {
+                    professionRef = ReadStr(br),
+                    level         = br.ReadInt32(),
+                    currentExp    = br.ReadInt32(),
+                    isPrimary     = br.ReadBoolean(),
+                });
+                dto.titles = ReadArray(r, br => new CharacterTitleDto
+                {
+                    titleRef         = ReadStr(br),
+                    acquiredWorldDay = br.ReadInt32(),
+                });
+            }
+            return dto;
         }
 
         // ── v2 追加块：属性模板 / 特质模板 / 数字格式（分组标签走 ToolkitBinaryCodec.WriteGroupTag/ReadGroupTag）──
@@ -947,6 +1234,184 @@ namespace Ale.Chronicle.Serialization
                 primaryGroupTag    = ReadStr(r),
                 secondaryGroupTags = ReadStrArray(r),
                 values             = ReadEntries(r),
+            };
+        }
+
+        // ── v4 追加块：职业 / 转职树 / 头衔 / 阶级序列 ─────────────────────────────────
+
+        private static void WriteExpCurve(BinaryWriter w, ExpCurveDto c)
+        {
+            c ??= new ExpCurveDto();
+            w.Write(c.mode);
+            w.Write(c.baseExp);
+            w.Write(c.exponent);
+            w.Write(c.linear);
+            WriteArray(w, c.perLevelExp, (bw, i) => bw.Write(i));
+            WriteValue(w, c.curveValue);
+            w.Write(c.curveScale);
+        }
+
+        private static ExpCurveDto ReadExpCurve(BinaryReader r)
+        {
+            return new ExpCurveDto
+            {
+                mode        = r.ReadInt32(),
+                baseExp     = r.ReadSingle(),
+                exponent    = r.ReadSingle(),
+                linear      = r.ReadSingle(),
+                perLevelExp = ReadArray(r, br => br.ReadInt32()),
+                curveValue  = ReadValue(r),
+                curveScale  = r.ReadSingle(),
+            };
+        }
+
+        private static void WriteGrowth(BinaryWriter w, LevelGrowthEntryDto g)
+        {
+            WriteStr(w, g.coreAttrId);
+            w.Write(g.perLevel);
+            w.Write(g.useCurve);
+            WriteValue(w, g.levelCurve);
+        }
+
+        private static LevelGrowthEntryDto ReadGrowth(BinaryReader r)
+        {
+            return new LevelGrowthEntryDto
+            {
+                coreAttrId = ReadStr(r),
+                perLevel   = r.ReadSingle(),
+                useCurve   = r.ReadBoolean(),
+                levelCurve = ReadValue(r),
+            };
+        }
+
+        private static void WriteUnlock(BinaryWriter w, LevelUnlockDto u)
+        {
+            w.Write(u.level);
+            WriteStrArray(w, u.grantTraitRefs);
+            WriteStrArray(w, u.grantTitleRefs);
+        }
+
+        private static LevelUnlockDto ReadUnlock(BinaryReader r)
+        {
+            return new LevelUnlockDto
+            {
+                level          = r.ReadInt32(),
+                grantTraitRefs = ReadStrArray(r),
+                grantTitleRefs = ReadStrArray(r),
+            };
+        }
+
+        private static void WriteProfession(BinaryWriter w, ProfessionDefinitionDto p)
+        {
+            WriteStr(w, p.id);
+            WriteValue(w, p.displayName);
+            WriteValue(w, p.description);
+            WriteValue(w, p.icon);
+            WriteStr(w, p.groupTagRef);
+            w.Write(p.maxLevel);
+            WriteExpCurve(w, p.expCurve);
+            WriteArray(w, p.growth, WriteGrowth);
+            WriteArray(w, p.unlocks, WriteUnlock);
+            WriteStr(w, p.requirementsJson);
+            WriteStrArray(w, p.allowedRaceRefs);
+        }
+
+        private static ProfessionDefinitionDto ReadProfession(BinaryReader r)
+        {
+            return new ProfessionDefinitionDto
+            {
+                id               = ReadStr(r),
+                displayName      = ReadValue(r),
+                description      = ReadValue(r),
+                icon             = ReadValue(r),
+                groupTagRef      = ReadStr(r),
+                maxLevel         = r.ReadInt32(),
+                expCurve         = ReadExpCurve(r),
+                growth           = ReadArray(r, ReadGrowth),
+                unlocks          = ReadArray(r, ReadUnlock),
+                requirementsJson = ReadStr(r),
+                allowedRaceRefs  = ReadStrArray(r),
+            };
+        }
+
+        private static void WriteProfessionTree(BinaryWriter w, ProfessionTreeDto t)
+        {
+            WriteStr(w, t.id);
+            WriteValue(w, t.displayName);
+            WriteArray(w, t.nodes, (bw, n) =>
+            {
+                WriteStr(bw, n.professionRef);
+                WriteStrArray(bw, n.childProfessionRefs);
+            });
+        }
+
+        private static ProfessionTreeDto ReadProfessionTree(BinaryReader r)
+        {
+            return new ProfessionTreeDto
+            {
+                id          = ReadStr(r),
+                displayName = ReadValue(r),
+                nodes       = ReadArray(r, br => new ProfessionTreeNodeDto
+                {
+                    professionRef       = ReadStr(br),
+                    childProfessionRefs = ReadStrArray(br),
+                }),
+            };
+        }
+
+        private static void WriteTitle(BinaryWriter w, TitleDefinitionDto t)
+        {
+            WriteStr(w, t.id);
+            WriteValue(w, t.displayName);
+            WriteValue(w, t.description);
+            WriteValue(w, t.icon);
+            w.Write(t.kind);
+            WriteStr(w, t.groupTagRef);
+            w.Write(t.rankTier);
+            w.Write(t.heritable);
+            WriteStr(w, t.successionPolicyRef);
+            w.Write(t.isUnique);
+            WriteStr(w, t.acquisitionConditionsJson);
+            w.Write(t.isRevocable);
+            WriteArray(w, t.modifiers, WriteModifier);
+            WriteArray(w, t.opinionModifiers, WriteModifier);
+        }
+
+        private static TitleDefinitionDto ReadTitle(BinaryReader r)
+        {
+            return new TitleDefinitionDto
+            {
+                id                        = ReadStr(r),
+                displayName               = ReadValue(r),
+                description               = ReadValue(r),
+                icon                      = ReadValue(r),
+                kind                      = r.ReadInt32(),
+                groupTagRef               = ReadStr(r),
+                rankTier                  = r.ReadInt32(),
+                heritable                 = r.ReadBoolean(),
+                successionPolicyRef       = ReadStr(r),
+                isUnique                  = r.ReadBoolean(),
+                acquisitionConditionsJson = ReadStr(r),
+                isRevocable               = r.ReadBoolean(),
+                modifiers                 = ReadArray(r, ReadModifier),
+                opinionModifiers          = ReadArray(r, ReadModifier),
+            };
+        }
+
+        private static void WriteRankLadder(BinaryWriter w, RankLadderDto l)
+        {
+            WriteStr(w, l.id);
+            WriteValue(w, l.displayName);
+            WriteStrArray(w, l.orderedTitleRefs);
+        }
+
+        private static RankLadderDto ReadRankLadder(BinaryReader r)
+        {
+            return new RankLadderDto
+            {
+                id               = ReadStr(r),
+                displayName      = ReadValue(r),
+                orderedTitleRefs = ReadStrArray(r),
             };
         }
 

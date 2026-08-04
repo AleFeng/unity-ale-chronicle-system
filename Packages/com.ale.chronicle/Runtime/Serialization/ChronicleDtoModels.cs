@@ -26,6 +26,11 @@ namespace Ale.Chronicle.Serialization
         // v3 追加（技能系统）
         public SkillTemplateDto[] skillTemplates;
         public SkillDto[] skills;
+        // v4 追加（职业 / 头衔系统）
+        public ProfessionDefinitionDto[] professions;
+        public ProfessionTreeDto[] professionTrees;
+        public TitleDefinitionDto[] titles;
+        public RankLadderDto[] rankLadders;
     }
 
     [Serializable]
@@ -200,5 +205,116 @@ namespace Ale.Chronicle.Serialization
         public string fatherRef;
         public string motherRef;
         public string[] childRefs;
+        public CharacterProfessionDto[] professions;   // v4
+        public CharacterTitleDto[] titles;             // v4
+    }
+
+    // ── v4：职业系统 DTO ─────────────────────────────────────────────────────────
+
+    [Serializable]
+    public class ExpCurveDto
+    {
+        public int mode;
+        public float baseExp;
+        public float exponent;
+        public float linear;
+        public int[] perLevelExp;
+        public AttributeValueDto curveValue;   // AnimationCurve 承载于 AttributeValue
+        public float curveScale;
+    }
+
+    [Serializable]
+    public class LevelGrowthEntryDto
+    {
+        public string coreAttrId;
+        public float perLevel;
+        public bool useCurve;
+        public AttributeValueDto levelCurve;   // AnimationCurve
+    }
+
+    [Serializable]
+    public class LevelUnlockDto
+    {
+        public int level;
+        public string[] grantTraitRefs;
+        public string[] grantTitleRefs;
+    }
+
+    [Serializable]
+    public class ProfessionDefinitionDto
+    {
+        public string id;
+        public AttributeValueDto displayName;
+        public AttributeValueDto description;
+        public AttributeValueDto icon;
+        public string groupTagRef;
+        public int maxLevel;
+        public ExpCurveDto expCurve;
+        public LevelGrowthEntryDto[] growth;
+        public LevelUnlockDto[] unlocks;
+        /// <summary>requirements（ConditionExpression）的 Condition System JSON 串。</summary>
+        public string requirementsJson;
+        public string[] allowedRaceRefs;
+    }
+
+    [Serializable]
+    public class ProfessionTreeNodeDto
+    {
+        public string professionRef;
+        public string[] childProfessionRefs;
+    }
+
+    [Serializable]
+    public class ProfessionTreeDto
+    {
+        public string id;
+        public AttributeValueDto displayName;
+        public ProfessionTreeNodeDto[] nodes;
+    }
+
+    [Serializable]
+    public class CharacterProfessionDto
+    {
+        public string professionRef;
+        public int level;
+        public int currentExp;
+        public bool isPrimary;
+    }
+
+    // ── v4：头衔系统 DTO ─────────────────────────────────────────────────────────
+
+    [Serializable]
+    public class TitleDefinitionDto
+    {
+        public string id;
+        public AttributeValueDto displayName;
+        public AttributeValueDto description;
+        public AttributeValueDto icon;
+        public int kind;
+        public string groupTagRef;
+        public int rankTier;
+        public bool heritable;
+        public string successionPolicyRef;
+        public bool isUnique;
+        /// <summary>acquisitionConditions（ConditionExpression）的 Condition System JSON 串。</summary>
+        public string acquisitionConditionsJson;
+        public bool isRevocable;
+        public ModifierDefinitionDto[] modifiers;
+        public ModifierDefinitionDto[] opinionModifiers;
+    }
+
+    [Serializable]
+    public class RankLadderDto
+    {
+        public string id;
+        public AttributeValueDto displayName;
+        public string[] orderedTitleRefs;
+    }
+
+    [Serializable]
+    public class CharacterTitleDto
+    {
+        public string titleRef;
+        public int acquiredWorldDay;
     }
 }

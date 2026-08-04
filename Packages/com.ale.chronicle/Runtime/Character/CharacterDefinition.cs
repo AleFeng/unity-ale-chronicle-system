@@ -43,8 +43,15 @@ namespace Ale.Chronicle
         /// <summary>子女角色 id 列表。</summary>
         public List<string> childRefs = new List<string>();
 
-        // TODO(子系统)：种族 / 职业(多职业·等级绑定职业) / 社交(关系条目) / 头衔 / 健康(多部位·能力层) / 文化
-        //   等字段留空占位，随各自子系统作为「产出 Modifier 汇入同一主干」的加性切片落地。
+        /// <summary>角色起始职业配装（等级 / 经验）。运行时可变进度由 <c>ProfessionRuntimeManager</c> 持有。</summary>
+        public List<CharacterProfession> professions = new List<CharacterProfession>();
+
+        /// <summary>角色起始头衔配装。运行时持有由 <c>TitleRuntimeManager</c> 持有。</summary>
+        public List<CharacterTitle> titles = new List<CharacterTitle>();
+
+        // TODO(子系统)：种族 / 社交(关系条目) / 健康(多部位·能力层) / 文化 等字段留空占位，
+        //   随各自子系统作为「产出 Modifier 汇入同一主干」的加性切片落地。
+        //   职业成长 + 头衔加成的 CollectModifiers 汇流在 Step 6 落地。
 
         // 实现 AttributeOwner：把 values 暴露给基类懒加载字典缓存。
         protected override List<AttributeEntry> AttributeEntries => values;
@@ -154,6 +161,8 @@ namespace Ale.Chronicle
                 childRefs = new List<string>(childRefs),
                 coreAttributes = new List<CoreAttributeValue>(coreAttributes),
                 traits = new List<CharacterTraitInstance>(traits),
+                professions = new List<CharacterProfession>(professions),
+                titles = new List<CharacterTitle>(titles),
             };
             foreach (var e in values)
                 clone.values.Add(e != null ? e.Clone() : new AttributeEntry());
