@@ -27,11 +27,11 @@
 | **属性系统** | 核心属性模板、核心属性（取值范围 / 分类枚举 / 默认基础值 / 图标） | `CoreAttributeResolver`（基础值 + 修正器合流，带来源拆解、min/max 钳制） |
 | **特质系统** | 特质模板、特质（生命周期 / 修正器 / 硬互斥 / 软兼容 / 遗传 / AI 权重 / 获得条件） | `TraitDefinition.CollectModifiers` → 属性合流；条件求值经 `Ale.Condition` |
 | **技能系统** | 技能模板、技能（显示名 / 描述 / 图标 / 主+副分组标签 / 自定义属性） | `SkillRuntimeManager`（永久学会 + 外部提供者 两层 + 一次性使用派发） |
-| **职业系统** | 职业（等级上限 / 经验曲线 / 每级成长 / 解锁 / 从业条件）、转职树 | `ProfessionRuntimeManager`（`AddExp` 按曲线升级 + 等级解锁）；成长汇入核心属性 |
-| **头衔系统** | 头衔（阶级头衔 / 称号 · 位阶 / 修饰器 / 获得条件）、阶级序列 | `TitleRuntimeManager`（授予 / 晋升替换 / 唯一头衔易主）；加成汇入核心属性 |
+| **职业系统** | 职业模板、职业（等级上限 / 经验曲线 / 每级成长 / 解锁 / 从业条件）、转职树 | `ProfessionRuntimeManager`（`AddExp` 按曲线升级 + 等级解锁）；成长汇入核心属性 |
+| **头衔系统** | 头衔模板、头衔（阶级头衔 / 称号 · 位阶 / 修饰器 / 获得条件）、阶级序列 | `TitleRuntimeManager`（授予 / 晋升替换 / 唯一头衔易主）；加成汇入核心属性 |
 | **通用（General）** | 枚举类型、功能标签、分组标签、数字格式 | 被上述领域引用（枚举下拉、字段成组、技能/职业/头衔分组、数值格式化） |
 
-> **角色 / 属性 / 特质 / 技能** 采用 **模板（蓝图）+ 定义 / 实例** 模式，共享 toolkit 的 `AttributeOwner` Schema，`RebuildAttributes` 按 Schema 增补 / 移除字段，深拷贝 `Clone` 支持「以此为模板」。**职业 / 头衔** 为定长强类型定义（无独立模板、字段固定），中列以分组标签作过滤维；**转职树 / 阶级序列** 是组织职业 / 头衔的结构对象。
+> **六大领域统一采用 模板（蓝图）+ 定义 / 实例 模式**：共享 toolkit 的 `AttributeOwner` Schema，`RebuildAttributes` 按 Schema 增补 / 移除自定义字段，深拷贝 `Clone` 支持「以此为模板」。定义各有其固定的强类型字段（职业的 `expCurve/growth/unlocks`、头衔的 `kind/rankTier/modifiers` 等），另经模板承载**可选的自定义字段与默认预设**；各页中列均以**模板**作过滤维（分组标签降为检视器可编辑字段）。**转职树 / 阶级序列** 是额外组织职业 / 头衔的结构对象。
 
 ---
 
@@ -60,14 +60,16 @@
 - 运行时的**已学 / 提供 / 使用**语义见下文 [技能运行时](#技能运行时两层模型--一次性使用)。
 
 ### 职业系统（Profession）
-- **职业条目** `ProfessionDefinition`：显示信息 / 分组标签 / 等级上限 `maxLevel` / 经验曲线 `ExpCurve` / 每级成长 `LevelGrowthEntry` / 等级解锁 `LevelUnlock` / 从业条件（`Ale.Condition`）/ 允许种族（预留）。
+- **职业模板** `ProfessionTemplate`（`ConfigTemplateBase`）：一族职业的蓝图——名称 / 色点 / 自定义字段 schema + 预设「默认等级上限」。编辑器职业页左列首个子页签，中列以其作过滤维。
+- **职业条目** `ProfessionDefinition`（`AttributeOwner`）：`templateRef` 来源模板 / 显示信息 / 分组标签 / 等级上限 `maxLevel` / 经验曲线 `ExpCurve` / 每级成长 `LevelGrowthEntry` / 等级解锁 `LevelUnlock` / 从业条件（`Ale.Condition`）/ 允许种族（预留）/ 模板 schema 驱动的自定义字段 `values`（`RebuildAttributes` 对账）。「从模板添加」复制预设并按 schema 建字段。
 - **经验曲线** `ExpCurve` 三模式：**公式**（`baseExp × level^exponent + linear`）/ **表格**（逐级显式）/ **曲线**（`AnimationCurve`，经 `AttributeValue` 承载），统一 `ExpToNext` / `TotalExpForLevel` 求值。
 - **每级成长汇流**：`CollectGrowthModifiers(level, …)` 按角色当前等级把成长折算为 `Add` 修正器（`sourceTag = "prof:{id}:growth"`）汇入核心属性——与特质同栈、升级即刷新。
 - **转职树** `ProfessionTree`：职业间「父 → 子 = 可转职为」的进阶 DAG（`ProfessionTreeNode.childProfessionRefs`）；编辑器左列列出、右列缩进结构编辑（加子带**防环**，`Validate` 亦做成环 DFS 检测）。
 - **运行时** `ProfessionRuntimeManager`（`ISaveable`）：习得 / 放弃 / 单一主职业；`AddExp` 按曲线跑升级循环、`maxLevel` 封顶，每升级触发 `OnLevelUp` 并施加 `LevelUnlock`（授头衔经 `TitleRuntimeManager`、授特质经 `OnUnlockTrait` 事件）。
 
 ### 头衔系统（Title）
-- **头衔条目** `TitleDefinition`，`ETitleKind` 两类：**阶级头衔（RankTitle）**——有位阶 `rankTier`、可继承（预留）、逐级晋升同时只持其一；**称号（Epithet）**——靠事迹获得、多为唯一。另含 `isUnique` / `isRevocable` / 修饰器（汇入核心属性 `title:{id}`）/ 好感修饰器（社交轴，暂不汇入核心）/ 获得条件（`Ale.Condition`）。
+- **头衔模板** `TitleTemplate`（`ConfigTemplateBase`）：一族头衔的蓝图——名称 / 色点 / 自定义字段 schema + 预设「默认种类 / 可剥夺」。编辑器头衔页左列首个子页签，中列以其作过滤维。
+- **头衔条目** `TitleDefinition`（`AttributeOwner`），`ETitleKind` 两类：**阶级头衔（RankTitle）**——有位阶 `rankTier`、可继承（预留）、逐级晋升同时只持其一；**称号（Epithet）**——靠事迹获得、多为唯一。另含 `templateRef` 来源模板 / `isUnique` / `isRevocable` / 修饰器（汇入核心属性 `title:{id}`）/ 好感修饰器（社交轴，暂不汇入核心）/ 获得条件（`Ale.Condition`）/ 模板 schema 驱动的自定义字段 `values`。
 - **阶级序列** `RankLadder`：承载阶级头衔的有序阶梯（低 → 高）；编辑器左列列出、右列有序链编辑（加菜单仅列阶级头衔，`Validate` 校验成员须为 RankTitle）。
 - **运行时** `TitleRuntimeManager`（`ISaveable`）：`Grant` 授予——阶级头衔按阶梯「晋升替换」（同序列只持其一）、唯一头衔从他人剥夺并触发 `OnTitleTransferred`；`Revoke` 受 `isRevocable` 约束；`GetHighestRankTier` 查序列最高位阶。
 
@@ -121,7 +123,7 @@
 - **`SkillRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：见上。
 - **`ProfessionRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：每角色职业进度（等级 / 经验 / 主职业）；`AddExp` 按 `ExpCurve` 升级 + 施加 `LevelUnlock`；存档持进度。
 - **`TitleRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：每角色持有头衔；阶级头衔「一序列一持有」晋升替换、唯一头衔易主；存档持持有。
-- **二进制导出**：`ChronicleConfigSerializer` 把 `ChronicleDatabase` ↔ 紧凑二进制。魔数 `CHRO`、**当前格式 `Version = 4`**、`MinReadableVersion = 1`；按版本追加块（v2 加属性/特质模板 + 分组标签 + 数字格式 + 模板引用/属性值；v3 追加技能模板 + 技能；**v4 追加 职业 / 转职树 / 头衔 / 阶级序列，及角色的职业 / 头衔 持有字段**）——**append-only 向后兼容**，旧版本导出的二进制仍可导入。对象引用经 `IAssetRefResolver` 以 GUID 承载；特质 / 职业 / 头衔的条件表达式以条件系统 JSON 存储。
+- **二进制导出**：`ChronicleConfigSerializer` 把 `ChronicleDatabase` ↔ 紧凑二进制。魔数 `CHRO`、**当前格式 `Version = 5`**、`MinReadableVersion = 1`；按版本追加块（v2 加属性/特质模板 + 分组标签 + 数字格式 + 模板引用/属性值；v3 追加技能模板 + 技能；v4 追加 职业 / 转职树 / 头衔 / 阶级序列，及角色的职业 / 头衔 持有字段；**v5 追加 职业模板 / 头衔模板 两块，并在职业 / 头衔块尾追加 `templateRef` + 自定义字段 `values`**）——**append-only 向后兼容**，旧版本（含 v3 / v4）导出的二进制仍可导入。对象引用经 `IAssetRefResolver` 以 GUID 承载；特质 / 职业 / 头衔的条件表达式以条件系统 JSON 存储。
 
 ---
 
@@ -238,7 +240,7 @@ Packages/com.ale.chronicle/          ← 包根
 
 ## 测试
 
-工程 `Assets/Tests/`（程序集 `Ale.Chronicle.Tests`，EditMode NUnit）含 18 个测试文件，覆盖数据库 / 数据管理器 / 二进制序列化（含 v4 往返 + 旧 v3 兼容）/ 属性合流 / 条件求值 / 特质 / 模板层 / 角色组合 / 技能数据 / 技能运行时 / 技能 UI / **职业与头衔（ExpCurve 三模式 / 数据库校验含成环 / 汇流 / 新条件判定器 / 运行时管理器升级·解锁·一序列一持有·唯一头衔）**。
+工程 `Assets/Tests/`（程序集 `Ale.Chronicle.Tests`，EditMode NUnit）含 18 个测试文件，覆盖数据库 / 数据管理器 / 二进制序列化（含 v5 往返、模板 + 自定义字段往返、旧 v3 / v4 兼容）/ 属性合流 / 条件求值 / 特质 / 模板层 / 角色组合 / 技能数据 / 技能运行时 / 技能 UI / **职业与头衔（ExpCurve 三模式 / 数据库校验含成环 / 汇流 / 新条件判定器 / 运行时管理器升级·解锁·一序列一持有·唯一头衔）**。
 
 ---
 

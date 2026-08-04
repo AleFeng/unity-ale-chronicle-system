@@ -6,7 +6,7 @@
 
 ## [0.2.0] - 2026-08-04
 
-新增**职业系统（Profession）**与**头衔系统（Title）**两大配置域，接续 0.1.0 中 `CharacterDefinition` 预留的「产出 Modifier 汇入同一主干」切片；序列化升级至 v4（append-only 向后兼容，旧 v3 存档可载）。
+新增**职业系统（Profession）**与**头衔系统（Title）**两大配置域，接续 0.1.0 中 `CharacterDefinition` 预留的「产出 Modifier 汇入同一主干」切片；并为职业 / 头衔补齐**模板层**（`ProfessionTemplate` / `TitleTemplate`，`templateRef` + schema 自定义字段），使六大领域模板模式统一。序列化随之升级至 **v5**（append-only 向后兼容，旧 v3 / v4 存档均可载）。
 
 ### 新增
 
@@ -19,17 +19,19 @@
   - `ProfessionRuntimeManager`——习得 / 放弃 / 单一主职业；**`AddExp`** 按 `ExpCurve` 跑升级循环、`maxLevel` 封顶，每升级触发 `OnLevelUp` 并施加 `LevelUnlock`（授头衔经 `TitleRuntimeManager`、授特质经 `OnUnlockTrait` 事件）；存档持每角色职业进度。
   - `TitleRuntimeManager`——**`Grant`**：阶级头衔按阶梯「晋升替换」（同序列只持其一）、唯一头衔从他人剥夺并触发 `OnTitleTransferred`；`Revoke` 受 `isRevocable` 约束；`GetHighestRankTier` 查某序列最高位阶；存档持每角色持有头衔。
 - **条件系统**：新增 4 个 `[ConditionEvaluator]`——`Chronicle.HasProfession` / `Chronicle.ProfessionLevelAtLeast` / `Chronicle.HasTitle` / `Chronicle.HasRankAtLeast`；`IChronicleConditionSource` 相应新增 4 个查询方法。
-- **数据库**：`ChronicleDatabase` 增 `Professions` / `ProfessionTrees` / `Titles` / `RankLadders` 四列表（+ 访问器 + id 查询）；`Validate` 增职业 / 头衔悬空引用检查、**转职树成环 DFS 检测**、阶级序列须为阶级头衔校验；`CloneFrom` 覆盖新列表。运行时 `ChronicleDataManager` 增四类 O(1) 索引与 `GetAllProfessions` / `GetAllTitles` / `GetAllRankLadders`。
+- **职业 / 头衔模板**：`ProfessionTemplate` / `TitleTemplate`（`ConfigTemplateBase`：名称 / 色点 / 自定义字段 schema + 默认预设——职业「默认等级上限」、头衔「默认种类 / 可剥夺」）。`ProfessionDefinition` / `TitleDefinition` 升级为 `AttributeOwner`，获得 `templateRef` 与模板 schema 驱动的自定义字段 `values`（`RebuildAttributes` 依 schema 对账）；编辑器双页签左列首位加模板面板（复用 `ChronicleTemplateListPanel`），中列过滤维由分组改为**模板**、「从模板添加」复制预设并按 schema 建字段，检视器补只读来源模板与自定义字段区。分组标签降为检视器可编辑字段（与技能系统一致）。
+- **数据库**：`ChronicleDatabase` 增 `ProfessionTemplates` / `Professions` / `ProfessionTrees` / `TitleTemplates` / `Titles` / `RankLadders` 六列表（+ 访问器 + id/name 查询）；`Validate` 增职业 / 头衔悬空引用检查（含 `templateRef`）、模板 name 查重、**转职树成环 DFS 检测**、阶级序列须为阶级头衔校验；`CloneFrom` 覆盖新列表。运行时 `ChronicleDataManager` 增六类索引与 `GetAllProfessions` / `GetAllTitles` / `GetAllRankLadders`。
 - **编辑器**：新增 **职业**、**头衔** 两页签（`ChronicleEditorWindow` 现 **七页签**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 / 通用）。
-  - 职业页——中列职业列表（按分组过滤）+ 右列 **ExpCurve 三模式编辑器 + 每级所需经验预览折线**、每级成长表、等级解锁、内联从业条件；左列**转职树缩进结构编辑器**（折叠 / 加子带防环 / 移除）。
-  - 头衔页——中列头衔列表 + 右列按 `kind` 动态字段、修饰器（复用 `ModifierListDrawer`）+ 好感修饰器、内联获得条件；左列**阶级序列有序阶梯编辑器**（上下移 / 移除 / 加菜单仅列阶级头衔）。
+  - 职业页——左列子页签 **职业模板**（首位）/ 转职树；中列职业列表（按模板过滤 / 从模板添加）+ 右列**只读来源模板**、**ExpCurve 三模式编辑器 + 每级所需经验预览折线**、每级成长表、等级解锁、内联从业条件、**自定义字段区**；转职树子页签右列为**缩进结构编辑器**（折叠 / 加子带防环 / 移除）。
+  - 头衔页——左列子页签 **头衔模板**（首位）/ 阶级序列；中列头衔列表（按模板过滤 / 从模板添加）+ 右列**只读来源模板**、按 `kind` 动态字段、修饰器（复用 `ModifierListDrawer`）+ 好感修饰器、内联获得条件、**自定义字段区**；阶级序列子页签右列为**有序阶梯编辑器**（上下移 / 移除 / 加菜单仅列阶级头衔）。
   - 角色检视器补「职业」（等级 / 经验 / 主职业 + 该级成长预览）与「头衔」（按 kind 标注）分区；核心属性明细自动含 `prof:*` / `title:*` 来源行。
-- **测试**：`Assets/Tests/` 新增 6 个测试文件（现 18 个），覆盖 ExpCurve 三模式一致性 / 汇流端到端 / 序列化 v4 往返 + 旧 v3 兼容 / 数据库校验（含成环）/ 数据管理器索引 / 新条件判定器 / 运行时管理器（升级 / 解锁 / 一序列一持有 / 唯一头衔易主 / 存档）。
+- **测试**：`Assets/Tests/` 新增 6 个测试文件（现 18 个），覆盖 ExpCurve 三模式一致性 / 汇流端到端 / 序列化 v5 往返（含模板 + 自定义字段）+ 旧 v3 / v4 兼容 / 数据库校验（含成环）/ 数据管理器索引 / 新条件判定器 / 运行时管理器（升级 / 解锁 / 一序列一持有 / 唯一头衔易主 / 存档）。
 
 ### 变更
 
-- **序列化 `Version` 3 → 4**：尾部追加 职业 / 转职树 / 头衔 / 阶级序列 四块，角色块尾追加 职业 / 头衔 持有字段——**append-only 向后兼容**，旧 v3 二进制仍可导入（职业 / 头衔为空）。
+- **序列化 `Version` 3 → 5**：v4 尾部追加 职业 / 转职树 / 头衔 / 阶级序列 四块 + 角色块尾职业 / 头衔持有字段；**v5** 再追加 职业模板 / 头衔模板 两块，并在职业 / 头衔块尾追加 `templateRef` + 自定义字段 `values`——**append-only 向后兼容**，旧 v3 / v4 二进制仍可导入（缺失部分为空）。
 - `CharacterDefinition.CollectModifiers` 由「仅特质」扩展为「特质 + 职业 + 头衔」三来源汇流（既有特质路径不变）。
+- **职业 / 头衔中列过滤维由分组标签改为模板**（分组标签保留为检视器可编辑字段），与角色 / 技能一致。
 
 ### 说明
 
