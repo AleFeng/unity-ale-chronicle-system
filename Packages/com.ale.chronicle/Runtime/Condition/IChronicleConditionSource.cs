@@ -15,5 +15,17 @@ namespace Ale.Chronicle
 
         /// <summary>作用域角色的年龄（岁）。</summary>
         int GetAge(EConditionScope scope);
+
+        /// <summary>作用域角色是否从事指定职业。</summary>
+        bool HasProfession(EConditionScope scope, string professionId);
+
+        /// <summary>作用域角色某职业的当前等级；未从事返回 0。</summary>
+        int GetProfessionLevel(EConditionScope scope, string professionId);
+
+        /// <summary>作用域角色是否持有指定头衔。</summary>
+        bool HasTitle(EConditionScope scope, string titleId);
+
+        /// <summary>作用域角色在某阶级序列上的最高位阶（rankTier）；未持有该序列任何头衔返回 <see cref="int.MinValue"/>。</summary>
+        int GetHighestRankTier(EConditionScope scope, string ladderId);
     }
 }
