@@ -12,14 +12,15 @@ namespace Ale.Chronicle.Editor
     /// </summary>
     public sealed class ProfessionSystemTab : EditorThreeColumnTab<ProfessionDefinition>
     {
+        private readonly ProfessionTemplatePanel _templatePanel = new ProfessionTemplatePanel();
         private readonly ProfessionTreeListPanel _treePanel = new ProfessionTreeListPanel();
         private readonly ProfessionListPanel     _listPanel = new ProfessionListPanel();
         private IEditorMasterListPanel<ChronicleDatabase>[] _leftPanels;
 
-        protected override string[] LeftSubTabs => new[] { "转职树" };
+        protected override string[] LeftSubTabs => new[] { "职业模板", "转职树" };
 
         protected override IEditorMasterListPanel<ChronicleDatabase>[] LeftPanels
-            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _treePanel };
+            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _templatePanel, _treePanel };
 
         protected override string EntityNoun => "职业";
 
@@ -35,7 +36,7 @@ namespace Ale.Chronicle.Editor
     }
 
     /// <summary>职业列表面板（中列）：按分组标签过滤 + 搜索 + 添加，每行 id / 名称 / 上限 / 成长数。</summary>
-    public sealed class ProfessionListPanel : EditorEntityListPanel<ProfessionDefinition, ChronicleGroupTag>
+    public sealed class ProfessionListPanel : EditorEntityListPanel<ProfessionDefinition, ProfessionTemplate>
     {
         public ProfessionListPanel() : base("ChronicleProfessionListDrag") { }
 
@@ -43,15 +44,15 @@ namespace Ale.Chronicle.Editor
         protected override string Noun => "职业";
 
         protected override List<ProfessionDefinition> Entities(ChronicleDatabase db)  => db.Professions;
-        protected override List<ChronicleGroupTag>    Templates(ChronicleDatabase db) => db.GroupTags;   // 分组作过滤维
-        protected override string TemplateName(ChronicleGroupTag t) => t.id;                             // 过滤键 = 分组 id（与 groupTagRef 一致）
-        protected override string TemplateRefOf(ProfessionDefinition e) => e.groupTagRef;
+        protected override List<ProfessionTemplate>   Templates(ChronicleDatabase db) => db.ProfessionTemplates;   // 模板作过滤维
+        protected override string TemplateName(ProfessionTemplate t) => t.name;
+        protected override string TemplateRefOf(ProfessionDefinition e) => e.templateRef;
         protected override string IdOf(ProfessionDefinition e) => e.id;
 
         protected override Color RowDotColor(ChronicleDatabase db, ProfessionDefinition e)
         {
-            var g = db.GetGroupTag(e.groupTagRef);
-            return g != null ? g.color : Color.gray;
+            var t = db.GetProfessionTemplate(e.templateRef);
+            return t != null ? t.color : Color.gray;
         }
 
         protected override string SearchName(ChronicleDatabase db, ProfessionDefinition e)
@@ -60,11 +61,13 @@ namespace Ale.Chronicle.Editor
         protected override ProfessionDefinition AddFromTemplate(IChronicleEditorContext ctx, string templateName)
         {
             var db = ctx.Database;
-            ctx.RecordUndo("添加职业");
-            var prof = new ProfessionDefinition(GenerateId(db, "prof_", id => db.GetProfession(id) != null))
-            {
-                groupTagRef = templateName,   // templateName = 选中的分组 id（「全部」时为 null）
-            };
+            ctx.RecordUndo("从模板添加职业");
+            var prof = new ProfessionDefinition(GenerateId(db, "prof_", id => db.GetProfession(id) != null), templateName);
+
+            // 从模板复制默认预设（等级上限）；自定义属性值由 RebuildAttributes 依模板 schema 初始化。
+            var t = db.GetProfessionTemplate(templateName);
+            if (t != null) prof.maxLevel = t.maxLevel;
+            prof.RebuildAttributes(db);
             db.Professions.Add(prof);
             ctx.MarkDirty();
             return prof;
@@ -105,6 +108,28 @@ namespace Ale.Chronicle.Editor
             GUI.Label(new Rect(nameX, valY, nameW, valH), string.IsNullOrEmpty(name) ? "—" : name, SubStyle);
             GUI.Label(new Rect(lvX, valY, lvW, valH), e.maxLevel.ToString(), SubStyle);
             GUI.Label(new Rect(grX, valY, grW, valH), (e.growth?.Count ?? 0).ToString(), SubStyle);
+        }
+    }
+
+    /// <summary>职业模板主列表面板（职业页左列首个子页签）：绑定 <see cref="ChronicleDatabase.ProfessionTemplates"/>；专属字段=默认等级上限。</summary>
+    public sealed class ProfessionTemplatePanel : ChronicleTemplateListPanel<ProfessionTemplate>
+    {
+        protected override List<ProfessionTemplate> GetList(ChronicleDatabase db) => db.ProfessionTemplates;
+        protected override string Noun => "职业模板";
+        protected override string NewNamePrefix => "prof_template_";
+        protected override ProfessionTemplate NewTemplate(string name) => new ProfessionTemplate(name);
+        protected override string SchemaLabel => "自定义属性字段 schema";
+
+        protected override void DrawExtras(IChronicleEditorContext ctx, ProfessionTemplate tmpl)
+        {
+            EditorGUI.BeginChangeCheck();
+            int maxLevel = EditorGUILayout.IntField("默认等级上限", tmpl.maxLevel);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ctx.RecordUndo("修改职业模板");
+                tmpl.maxLevel = Mathf.Max(1, maxLevel);
+                ctx.MarkDirty();
+            }
         }
     }
 
@@ -166,6 +191,7 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
             ChronicleEntityHeader.DrawIdField(ctx, "职业", prof.id,
                 ctx.DuplicateIdsOf(EChronicleEntityKind.Profession), v => prof.id = v);
+            ChronicleEntityHeader.DrawTemplateRefReadonly(prof.templateRef);
             AttributeFieldDrawer.Draw(ctx, "显示名", prof.displayName, null);
             AttributeFieldDrawer.Draw(ctx, "说明",   prof.description, null);
             AttributeFieldDrawer.Draw(ctx, "图标",   prof.icon, null);
@@ -191,6 +217,11 @@ namespace Ale.Chronicle.Editor
 
             EditorGUILayout.Space(6);
             DrawRequirements(ctx, prof);
+
+            EditorGUILayout.Space(6);
+            var tmpl = ctx.Database.GetProfessionTemplate(prof.templateRef);
+            ChronicleEntityHeader.DrawCustomAttributes(ctx, prof.values, tmpl?.attributes,
+                "（该职业暂无自定义属性字段；可在左侧「职业模板」中添加）");
         }
 
         // ── 经验曲线 ──────────────────────────────────────────────────────────────
