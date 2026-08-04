@@ -52,6 +52,16 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.LabelField("特质", ToolkitEditorStyles.Header);
             DrawTraitChips(ctx, c, db);
 
+            // ── 职业（等级 / 经验 / 主职业 + 该级成长预览）────────────────────────────
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("职业", ToolkitEditorStyles.Header);
+            DrawProfessionSection(ctx, c, db);
+
+            // ── 头衔（按 kind 标注阶级 / 称号）────────────────────────────────────────
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("头衔", ToolkitEditorStyles.Header);
+            DrawTitleSection(ctx, c, db);
+
             // ── 身份自由字段（schema = 模板 ∪ 特质功能标签）──────────────────────────
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("身份字段", ToolkitEditorStyles.Header);
@@ -83,7 +93,7 @@ namespace Ale.Chronicle.Editor
                     ctx.MarkDirty();
                 }
 
-                // 实时汇流：从角色特质收集修饰器 → toolkit 求值 → clamp。
+                // 实时汇流：从角色特质 / 职业成长 / 头衔收集修饰器 → toolkit 求值 → clamp。
                 var e = CoreAttributeResolver.Evaluate(c, def, db);
                 EditorGUILayout.LabelField($"    基础 {e.BaseValue:0.##} → 当前 {e.Value:0.##}", EditorStyles.miniLabel);
                 if (e.Breakdown != null)
@@ -140,6 +150,116 @@ namespace Ale.Chronicle.Editor
                     float rem = def != null && def.IsTemporary ? def.defaultDurationDays : -1f;
                     ctx.RecordUndo("添加特质");
                     c.traits.Add(new CharacterTraitInstance(traitRef, rem, 1, "editor"));
+                    ctx.MarkDirty();
+                }
+            }
+        }
+
+        // ── 职业 ───────────────────────────────────────────────────────────────────
+
+        private static void DrawProfessionSection(IChronicleEditorContext ctx, CharacterDefinition c, ChronicleDatabase db)
+        {
+            var profIds = Names(db.Professions, p => p.id);
+            int removeAt = -1;
+            for (int i = 0; i < c.professions.Count; i++)
+            {
+                var cp = c.professions[i];
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUI.BeginChangeCheck();
+                string profRef = NamePopup("职业", cp.professionRef, profIds);
+                bool changedRef = EditorGUI.EndChangeCheck();
+                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = i;
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUI.BeginChangeCheck();
+                int  level   = EditorGUILayout.IntField("等级", cp.level);
+                int  exp     = EditorGUILayout.IntField("当前经验", cp.currentExp);
+                bool primary = EditorGUILayout.Toggle("主职业", cp.isPrimary);
+                bool changedFields = EditorGUI.EndChangeCheck();
+
+                if (changedRef || changedFields)
+                {
+                    ctx.RecordUndo("修改角色职业");
+                    c.professions[i] = new CharacterProfession(profRef, Mathf.Max(1, level), Mathf.Max(0, exp), primary);
+                    if (primary && !cp.isPrimary) ClearOtherPrimary(c, i);
+                    ctx.MarkDirty();
+                }
+
+                // 该级成长预览（与运行时同一 CollectGrowthModifiers）。
+                var prof = db.GetProfession(cp.professionRef);
+                if (prof != null)
+                {
+                    var mods = new List<ModifierDefinition>();
+                    prof.CollectGrowthModifiers(cp.level, null, mods);
+                    foreach (var m in mods)
+                        EditorGUILayout.LabelField($"    {m.targetAttributeId}  +{m.magnitude:0.##}", EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndVertical();
+            }
+            if (removeAt >= 0) { ctx.RecordUndo("移除职业"); c.professions.RemoveAt(removeAt); ctx.MarkDirty(); }
+
+            if (profIds.Count > 0)
+            {
+                var options = new List<string> { "＋添加职业…" };
+                options.AddRange(profIds);
+                int pick = EditorGUILayout.Popup(0, options.ToArray(), GUILayout.Width(160));
+                if (pick > 0)
+                {
+                    ctx.RecordUndo("添加职业");
+                    c.professions.Add(new CharacterProfession(options[pick], 1, 0, c.professions.Count == 0));
+                    ctx.MarkDirty();
+                }
+            }
+        }
+
+        private static void ClearOtherPrimary(CharacterDefinition c, int keepIndex)
+        {
+            for (int j = 0; j < c.professions.Count; j++)
+                if (j != keepIndex && c.professions[j].isPrimary)
+                {
+                    var p = c.professions[j];
+                    c.professions[j] = new CharacterProfession(p.professionRef, p.level, p.currentExp, false);
+                }
+        }
+
+        // ── 头衔 ───────────────────────────────────────────────────────────────────
+
+        private static void DrawTitleSection(IChronicleEditorContext ctx, CharacterDefinition c, ChronicleDatabase db)
+        {
+            int removeAt = -1;
+            for (int i = 0; i < c.titles.Count; i++)
+            {
+                var ct  = c.titles[i];
+                var def = db.GetTitle(ct.titleRef);
+                string kindTag = def != null ? (def.kind == ETitleKind.RankTitle ? "[阶级] " : "[称号] ") : "";
+
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                EditorGUILayout.LabelField(kindTag + (string.IsNullOrEmpty(ct.titleRef) ? "(空)" : ct.titleRef), GUILayout.MinWidth(120));
+                EditorGUI.BeginChangeCheck();
+                int day = EditorGUILayout.IntField("获得日", ct.acquiredWorldDay, GUILayout.Width(150));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    ctx.RecordUndo("修改头衔");
+                    c.titles[i] = new CharacterTitle(ct.titleRef, day);
+                    ctx.MarkDirty();
+                }
+                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = i;
+                EditorGUILayout.EndHorizontal();
+            }
+            if (removeAt >= 0) { ctx.RecordUndo("移除头衔"); c.titles.RemoveAt(removeAt); ctx.MarkDirty(); }
+
+            var titleIds = Names(db.Titles, t => t.id);
+            if (titleIds.Count > 0)
+            {
+                var options = new List<string> { "＋添加头衔…" };
+                options.AddRange(titleIds);
+                int pick = EditorGUILayout.Popup(0, options.ToArray(), GUILayout.Width(160));
+                if (pick > 0)
+                {
+                    ctx.RecordUndo("添加头衔");
+                    c.titles.Add(new CharacterTitle(options[pick], 0));
                     ctx.MarkDirty();
                 }
             }
