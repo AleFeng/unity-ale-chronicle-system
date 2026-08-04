@@ -21,6 +21,12 @@ namespace Ale.Chronicle
         /// <summary>按名取技能模板（承载自定义字段 schema 与默认值）；不存在返回 null。</summary>
         SkillTemplate GetSkillTemplate(string name);
 
+        /// <summary>按名取职业模板（承载自定义字段 schema 与默认值）；不存在返回 null。</summary>
+        ProfessionTemplate GetProfessionTemplate(string name);
+
+        /// <summary>按名取头衔模板（承载自定义字段 schema 与默认值）；不存在返回 null。</summary>
+        TitleTemplate GetTitleTemplate(string name);
+
         /// <summary>按 id 取特质定义（携带 modifiers 与 functionTagRef）；不存在返回 null。</summary>
         TraitDefinition GetTrait(string id);
 

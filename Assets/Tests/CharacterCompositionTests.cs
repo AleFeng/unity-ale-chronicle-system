@@ -28,6 +28,8 @@ namespace Ale.Chronicle.Tests
             public CoreAttributeTemplate GetCoreAttributeTemplate(string name) => null;
             public TraitTemplate         GetTraitTemplate(string name)         => null;
             public SkillTemplate         GetSkillTemplate(string name)         => null;
+            public ProfessionTemplate    GetProfessionTemplate(string name)    => null;
+            public TitleTemplate         GetTitleTemplate(string name)         => null;
         }
 
         private static AttributeDefinition Field(string id, EFieldType type) => new AttributeDefinition(id, type);

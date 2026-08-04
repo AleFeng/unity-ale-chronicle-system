@@ -13,10 +13,11 @@ namespace Ale.Chronicle
     /// <see cref="opinionModifiers"/> 面向社交 / 好感轴，暂只存储、<b>不</b>汇入核心属性。
     ///
     /// <para>面向玩家的文本 / 资源字段用 <see cref="AttributeValue"/>（Text 走本地化、Sprite 走 Addressable）；
-    /// <see cref="id"/> 与各 <c>*Ref</c> 是稳定键，保持裸 <see cref="string"/>。定长强类型字段，不走模板 schema。</para>
+    /// <see cref="id"/> 与各 <c>*Ref</c> 是稳定键，保持裸 <see cref="string"/>。定长强类型字段之外，
+    /// 另经 <see cref="templateRef"/> 承载模板 schema 驱动的自定义属性值 <see cref="values"/>（继承 <see cref="AttributeOwner"/>）。</para>
     /// </summary>
     [Serializable]
-    public class TitleDefinition
+    public class TitleDefinition : AttributeOwner
     {
         /// <summary>来源标记前缀（<c>title:</c>）。</summary>
         public const string SourceTagPrefix = "title:";
@@ -32,6 +33,9 @@ namespace Ale.Chronicle
 
         /// <summary>图标（Sprite：经 Addressable 统一收集）。</summary>
         public AttributeValue icon = new AttributeValue(EFieldType.Sprite);
+
+        /// <summary>来源头衔模板名称（可为空；决定中列过滤维与自定义字段 schema）。</summary>
+        public string templateRef;
 
         /// <summary>头衔种类（阶级头衔 / 称号）。</summary>
         public ETitleKind kind = ETitleKind.RankTitle;
@@ -69,12 +73,34 @@ namespace Ale.Chronicle
         /// <summary>对好感 / 观感的修饰器（社交轴；暂只存储、不汇入核心属性）。</summary>
         public List<ModifierDefinition> opinionModifiers = new List<ModifierDefinition>();
 
+        /// <summary>来自模板 schema 的自定义属性值。</summary>
+        public List<AttributeEntry> values = new List<AttributeEntry>();
+
+        // 实现基类 AttributeOwner 的抽象属性，将 values 列表暴露给基类的懒加载字典缓存。
+        protected override List<AttributeEntry> AttributeEntries => values;
+
         public TitleDefinition() { }
 
-        public TitleDefinition(string id) { this.id = id; }
+        public TitleDefinition(string id, string templateRef = null)
+        {
+            this.id          = id;
+            this.templateRef = templateRef;
+        }
 
         /// <summary>本头衔作为修饰器来源的标记（<c>title:{id}</c>）。</summary>
         public string SourceTag() => SourceTagPrefix + id;
+
+        /// <summary>
+        /// 根据当前模板 schema 协调自定义属性值集合：新增字段追加默认值、移除已删字段、保留已存在字段值
+        /// （类型 / 枚举引用变化时重置）。与其它域的 RebuildAttributes 同法。
+        /// </summary>
+        public void RebuildAttributes(IChronicleSchemaSource src)
+        {
+            if (src == null) return;
+            var template = src.GetTitleTemplate(templateRef);
+            AttributeSync.Sync(values, template != null ? template.attributes : null);
+            InvalidateEntryCache();
+        }
 
         /// <summary>显示名解析（本地化优先 → 纯文本，均空回退 <see cref="id"/>）。运行时 UI 用。</summary>
         public string ResolveDisplayName()
@@ -119,6 +145,7 @@ namespace Ale.Chronicle
             if (acquisitionConditions == null) acquisitionConditions = new ConditionExpression();
             if (modifiers == null)             modifiers             = new List<ModifierDefinition>();
             if (opinionModifiers == null)      opinionModifiers      = new List<ModifierDefinition>();
+            if (values == null)                values                = new List<AttributeEntry>();
         }
 
         private static AttributeValue EnsureType(AttributeValue v, EFieldType t)
@@ -130,9 +157,8 @@ namespace Ale.Chronicle
 
         public TitleDefinition Clone()
         {
-            var c = new TitleDefinition
+            var c = new TitleDefinition(id, templateRef)
             {
-                id                    = id,
                 kind                  = kind,
                 groupTagRef           = groupTagRef,
                 rankTier              = rankTier,
@@ -149,6 +175,8 @@ namespace Ale.Chronicle
                 foreach (var m in modifiers) c.modifiers.Add(m != null ? m.Clone() : null);
             if (opinionModifiers != null)
                 foreach (var m in opinionModifiers) c.opinionModifiers.Add(m != null ? m.Clone() : null);
+            if (values != null)
+                foreach (var e in values) c.values.Add(e.Clone());
             return c;
         }
     }

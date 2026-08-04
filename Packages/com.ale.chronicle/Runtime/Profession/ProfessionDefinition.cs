@@ -11,10 +11,11 @@ namespace Ale.Chronicle
     /// <see cref="ModifierDefinition"/>，汇入 <see cref="CoreAttributeResolver"/>，与特质同法。
     ///
     /// <para>面向玩家的文本 / 资源字段用 <see cref="AttributeValue"/>（Text 走本地化、Sprite 走 Addressable）；
-    /// <see cref="id"/> 与各 <c>*Ref</c> 是稳定键，保持裸 <see cref="string"/>。定长强类型字段，不走模板 schema。</para>
+    /// <see cref="id"/> 与各 <c>*Ref</c> 是稳定键，保持裸 <see cref="string"/>。定长强类型字段之外，
+    /// 另经 <see cref="templateRef"/> 承载模板 schema 驱动的自定义属性值 <see cref="values"/>（继承 <see cref="AttributeOwner"/>）。</para>
     /// </summary>
     [Serializable]
-    public class ProfessionDefinition
+    public class ProfessionDefinition : AttributeOwner
     {
         /// <summary>来源标记前缀（<c>prof:</c>）。</summary>
         public const string SourceTagPrefix = "prof:";
@@ -31,7 +32,10 @@ namespace Ale.Chronicle
         /// <summary>图标（Sprite：经 Addressable 统一收集）。</summary>
         public AttributeValue icon = new AttributeValue(EFieldType.Sprite);
 
-        /// <summary>职业分组 id（→ 统一分组标签池 <see cref="ChronicleDatabase.GroupTags"/> 的 id；中列按此过滤）。</summary>
+        /// <summary>来源职业模板名称（可为空；决定中列过滤维与自定义字段 schema）。</summary>
+        public string templateRef;
+
+        /// <summary>职业分组 id（→ 统一分组标签池 <see cref="ChronicleDatabase.GroupTags"/> 的 id）。</summary>
         public string groupTagRef;
 
         /// <summary>等级上限。</summary>
@@ -52,12 +56,34 @@ namespace Ale.Chronicle
         /// <summary>允许种族（空 = 全部）。种族系统未落地前存为不透明串、宽松校验。</summary>
         public List<string> allowedRaceRefs = new List<string>();
 
+        /// <summary>来自模板 schema 的自定义属性值。</summary>
+        public List<AttributeEntry> values = new List<AttributeEntry>();
+
+        // 实现基类 AttributeOwner 的抽象属性，将 values 列表暴露给基类的懒加载字典缓存。
+        protected override List<AttributeEntry> AttributeEntries => values;
+
         public ProfessionDefinition() { }
 
-        public ProfessionDefinition(string id) { this.id = id; }
+        public ProfessionDefinition(string id, string templateRef = null)
+        {
+            this.id          = id;
+            this.templateRef = templateRef;
+        }
 
         /// <summary>本职业成长的来源标记：<c>prof:{id}:growth</c>。</summary>
         public string GrowthSourceTag() => SourceTagPrefix + id + ":growth";
+
+        /// <summary>
+        /// 根据当前模板 schema 协调自定义属性值集合：新增字段追加默认值、移除已删字段、保留已存在字段值
+        /// （类型 / 枚举引用变化时重置）。与其它域的 RebuildAttributes 同法。
+        /// </summary>
+        public void RebuildAttributes(IChronicleSchemaSource src)
+        {
+            if (src == null) return;
+            var template = src.GetProfessionTemplate(templateRef);
+            AttributeSync.Sync(values, template != null ? template.attributes : null);
+            InvalidateEntryCache();
+        }
 
         /// <summary>显示名解析（本地化优先 → 纯文本，均空回退 <see cref="id"/>）。运行时 UI 用。</summary>
         public string ResolveDisplayName()
@@ -103,6 +129,7 @@ namespace Ale.Chronicle
             if (unlocks == null)         unlocks         = new List<LevelUnlock>();
             if (requirements == null)    requirements    = new ConditionExpression();
             if (allowedRaceRefs == null) allowedRaceRefs = new List<string>();
+            if (values == null)          values          = new List<AttributeEntry>();
             if (maxLevel < 1)            maxLevel        = 1;
             foreach (var g in growth) g?.Normalize();
         }
@@ -116,9 +143,8 @@ namespace Ale.Chronicle
 
         public ProfessionDefinition Clone()
         {
-            var c = new ProfessionDefinition
+            var c = new ProfessionDefinition(id, templateRef)
             {
-                id          = id,
                 groupTagRef = groupTagRef,
                 maxLevel    = maxLevel,
                 displayName = displayName != null ? displayName.Clone() : new AttributeValue(EFieldType.Text),
@@ -132,6 +158,8 @@ namespace Ale.Chronicle
                 foreach (var g in growth) c.growth.Add(g != null ? g.Clone() : new LevelGrowthEntry());
             if (unlocks != null)
                 foreach (var u in unlocks) c.unlocks.Add(u != null ? u.Clone() : new LevelUnlock());
+            if (values != null)
+                foreach (var e in values) c.values.Add(e.Clone());
             return c;
         }
     }

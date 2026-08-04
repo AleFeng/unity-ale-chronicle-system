@@ -32,8 +32,10 @@ namespace Ale.Chronicle
         [SerializeField] private List<NumberFormatConfig>     numberFormatConfigs    = new List<NumberFormatConfig>();
         [SerializeField] private List<SkillTemplate>          skillTemplates         = new List<SkillTemplate>();
         [SerializeField] private List<Skill>                  skills                 = new List<Skill>();
+        [SerializeField] private List<ProfessionTemplate>     professionTemplates    = new List<ProfessionTemplate>();
         [SerializeField] private List<ProfessionDefinition>   professions            = new List<ProfessionDefinition>();
         [SerializeField] private List<ProfessionTree>         professionTrees        = new List<ProfessionTree>();
+        [SerializeField] private List<TitleTemplate>          titleTemplates         = new List<TitleTemplate>();
         [SerializeField] private List<TitleDefinition>        titles                 = new List<TitleDefinition>();
         [SerializeField] private List<RankLadder>             rankLadders            = new List<RankLadder>();
 
@@ -78,11 +80,17 @@ namespace Ale.Chronicle
         /// <summary>技能 列表。</summary>
         public List<Skill> Skills => skills;
 
+        /// <summary>职业模板 列表。</summary>
+        public List<ProfessionTemplate> ProfessionTemplates => professionTemplates;
+
         /// <summary>职业 列表。</summary>
         public List<ProfessionDefinition> Professions => professions;
 
         /// <summary>转职树 列表。</summary>
         public List<ProfessionTree> ProfessionTrees => professionTrees;
+
+        /// <summary>头衔模板 列表。</summary>
+        public List<TitleTemplate> TitleTemplates => titleTemplates;
 
         /// <summary>头衔 列表。</summary>
         public List<TitleDefinition> Titles => titles;
@@ -128,6 +136,12 @@ namespace Ale.Chronicle
 
         /// <summary>按名称查找技能模板，未找到返回 null。</summary>
         public SkillTemplate GetSkillTemplate(string templateName) => Find(skillTemplates, templateName, t => t.name);
+
+        /// <summary>按名称查找职业模板，未找到返回 null。</summary>
+        public ProfessionTemplate GetProfessionTemplate(string templateName) => Find(professionTemplates, templateName, t => t.name);
+
+        /// <summary>按名称查找头衔模板，未找到返回 null。</summary>
+        public TitleTemplate GetTitleTemplate(string templateName) => Find(titleTemplates, templateName, t => t.name);
 
         // ── 按 ID ─────────────────────────────────────────────────────────────────
 
@@ -202,8 +216,10 @@ namespace Ale.Chronicle
             CheckDuplicates(numberFormatConfigs, c => c.name, "数字格式 name", errors);
             CheckDuplicates(skills,             s => s.id,   "技能 id",       errors);
             CheckDuplicates(skillTemplates,     t => t.name, "技能模板 name", errors);
+            CheckDuplicates(professionTemplates, t => t.name, "职业模板 name", errors);
             CheckDuplicates(professions,        p => p.id,   "职业 id",       errors);
             CheckDuplicates(professionTrees,    t => t.id,   "转职树 id",     errors);
+            CheckDuplicates(titleTemplates,     t => t.name, "头衔模板 name", errors);
             CheckDuplicates(titles,             t => t.id,   "头衔 id",       errors);
             CheckDuplicates(rankLadders,        l => l.id,   "阶级序列 id",   errors);
 
@@ -280,6 +296,8 @@ namespace Ale.Chronicle
             foreach (var p in professions)
             {
                 if (p == null) continue;
+                if (!string.IsNullOrEmpty(p.templateRef) && GetProfessionTemplate(p.templateRef) == null)
+                    dangling.Add($"职业[{p.id}].templateRef → 职业模板 '{p.templateRef}'");
                 if (!string.IsNullOrEmpty(p.groupTagRef) && GetGroupTag(p.groupTagRef) == null)
                     dangling.Add($"职业[{p.id}].groupTagRef → 分组标签 '{p.groupTagRef}'");
                 if (p.growth != null)
@@ -305,6 +323,8 @@ namespace Ale.Chronicle
             foreach (var t in titles)
             {
                 if (t == null) continue;
+                if (!string.IsNullOrEmpty(t.templateRef) && GetTitleTemplate(t.templateRef) == null)
+                    dangling.Add($"头衔[{t.id}].templateRef → 头衔模板 '{t.templateRef}'");
                 if (!string.IsNullOrEmpty(t.groupTagRef) && GetGroupTag(t.groupTagRef) == null)
                     dangling.Add($"头衔[{t.id}].groupTagRef → 分组标签 '{t.groupTagRef}'");
                 if (t.modifiers != null)
@@ -435,8 +455,10 @@ namespace Ale.Chronicle
             numberFormatConfigs    = source.numberFormatConfigs.Select(c => c.Clone()).ToList();
             skillTemplates         = source.skillTemplates.Select(t => t.Clone()).ToList();
             skills                 = source.skills.Select(s => s.Clone()).ToList();
+            professionTemplates    = source.professionTemplates.Select(t => t.Clone()).ToList();
             professions            = source.professions.Select(p => p.Clone()).ToList();
             professionTrees        = source.professionTrees.Select(t => t.Clone()).ToList();
+            titleTemplates         = source.titleTemplates.Select(t => t.Clone()).ToList();
             titles                 = source.titles.Select(t => t.Clone()).ToList();
             rankLadders            = source.rankLadders.Select(l => l.Clone()).ToList();
         }
