@@ -24,6 +24,12 @@ namespace Ale.Chronicle
         /// <summary>按 id 取特质定义（携带 modifiers 与 functionTagRef）；不存在返回 null。</summary>
         TraitDefinition GetTrait(string id);
 
+        /// <summary>按 id 取职业定义（携带每级成长，供角色属性汇流）；不存在返回 null。</summary>
+        ProfessionDefinition GetProfession(string id);
+
+        /// <summary>按 id 取头衔定义（携带 modifiers，供角色属性汇流）；不存在返回 null。</summary>
+        TitleDefinition GetTitle(string id);
+
         /// <summary>按名取功能标签（携带附加字段 schema）；不存在返回 null。</summary>
         Tag GetTag(string name);
     }

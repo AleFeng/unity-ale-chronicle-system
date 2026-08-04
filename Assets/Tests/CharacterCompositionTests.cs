@@ -17,10 +17,14 @@ namespace Ale.Chronicle.Tests
             public readonly Dictionary<string, CharacterTemplate> Templates = new Dictionary<string, CharacterTemplate>();
             public readonly Dictionary<string, TraitDefinition>   Traits    = new Dictionary<string, TraitDefinition>();
             public readonly Dictionary<string, Tag>               Tags      = new Dictionary<string, Tag>();
+            public readonly Dictionary<string, ProfessionDefinition> Professions = new Dictionary<string, ProfessionDefinition>();
+            public readonly Dictionary<string, TitleDefinition>      Titles      = new Dictionary<string, TitleDefinition>();
 
             public CharacterTemplate GetCharacterTemplate(string name) => name != null && Templates.TryGetValue(name, out var t) ? t : null;
             public TraitDefinition   GetTrait(string id)               => id   != null && Traits.TryGetValue(id, out var t)      ? t : null;
             public Tag               GetTag(string name)               => name != null && Tags.TryGetValue(name, out var t)      ? t : null;
+            public ProfessionDefinition GetProfession(string id)       => id   != null && Professions.TryGetValue(id, out var p) ? p : null;
+            public TitleDefinition      GetTitle(string id)            => id   != null && Titles.TryGetValue(id, out var t)      ? t : null;
             public CoreAttributeTemplate GetCoreAttributeTemplate(string name) => null;
             public TraitTemplate         GetTraitTemplate(string name)         => null;
             public SkillTemplate         GetSkillTemplate(string name)         => null;

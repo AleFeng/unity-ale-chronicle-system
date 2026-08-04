@@ -32,6 +32,10 @@ namespace Ale.Chronicle
         [SerializeField] private List<NumberFormatConfig>     numberFormatConfigs    = new List<NumberFormatConfig>();
         [SerializeField] private List<SkillTemplate>          skillTemplates         = new List<SkillTemplate>();
         [SerializeField] private List<Skill>                  skills                 = new List<Skill>();
+        [SerializeField] private List<ProfessionDefinition>   professions            = new List<ProfessionDefinition>();
+        [SerializeField] private List<ProfessionTree>         professionTrees        = new List<ProfessionTree>();
+        [SerializeField] private List<TitleDefinition>        titles                 = new List<TitleDefinition>();
+        [SerializeField] private List<RankLadder>             rankLadders            = new List<RankLadder>();
 
         #region 访问器
 
@@ -73,6 +77,18 @@ namespace Ale.Chronicle
 
         /// <summary>技能 列表。</summary>
         public List<Skill> Skills => skills;
+
+        /// <summary>职业 列表。</summary>
+        public List<ProfessionDefinition> Professions => professions;
+
+        /// <summary>转职树 列表。</summary>
+        public List<ProfessionTree> ProfessionTrees => professionTrees;
+
+        /// <summary>头衔 列表。</summary>
+        public List<TitleDefinition> Titles => titles;
+
+        /// <summary>阶级序列 列表。</summary>
+        public List<RankLadder> RankLadders => rankLadders;
 
         #endregion
 
@@ -130,6 +146,18 @@ namespace Ale.Chronicle
         /// <summary>按 id 查找技能，未找到返回 null。</summary>
         public Skill GetSkill(string skillId) => Find(skills, skillId, s => s.id);
 
+        /// <summary>按 id 查找职业，未找到返回 null。</summary>
+        public ProfessionDefinition GetProfession(string professionId) => Find(professions, professionId, p => p.id);
+
+        /// <summary>按 id 查找转职树，未找到返回 null。</summary>
+        public ProfessionTree GetProfessionTree(string treeId) => Find(professionTrees, treeId, t => t.id);
+
+        /// <summary>按 id 查找头衔，未找到返回 null。</summary>
+        public TitleDefinition GetTitle(string titleId) => Find(titles, titleId, t => t.id);
+
+        /// <summary>按 id 查找阶级序列，未找到返回 null。</summary>
+        public RankLadder GetRankLadder(string ladderId) => Find(rankLadders, ladderId, l => l.id);
+
         #endregion
 
         #region 数据填充
@@ -174,6 +202,10 @@ namespace Ale.Chronicle
             CheckDuplicates(numberFormatConfigs, c => c.name, "数字格式 name", errors);
             CheckDuplicates(skills,             s => s.id,   "技能 id",       errors);
             CheckDuplicates(skillTemplates,     t => t.name, "技能模板 name", errors);
+            CheckDuplicates(professions,        p => p.id,   "职业 id",       errors);
+            CheckDuplicates(professionTrees,    t => t.id,   "转职树 id",     errors);
+            CheckDuplicates(titles,             t => t.id,   "头衔 id",       errors);
+            CheckDuplicates(rankLadders,        l => l.id,   "阶级序列 id",   errors);
 
             var dangling = new HashSet<string>();
 
@@ -244,6 +276,87 @@ namespace Ale.Chronicle
                             dangling.Add($"技能[{s.id}].secondaryGroupTags → 分组标签 '{g}'");
             }
 
+            // 职业：分组标签 / 成长目标属性 / 解锁授予的特质·头衔
+            foreach (var p in professions)
+            {
+                if (p == null) continue;
+                if (!string.IsNullOrEmpty(p.groupTagRef) && GetGroupTag(p.groupTagRef) == null)
+                    dangling.Add($"职业[{p.id}].groupTagRef → 分组标签 '{p.groupTagRef}'");
+                if (p.growth != null)
+                    foreach (var g in p.growth)
+                        if (g != null && !string.IsNullOrEmpty(g.coreAttrId) && GetCoreAttribute(g.coreAttrId) == null)
+                            dangling.Add($"职业[{p.id}].growth.coreAttrId → 属性 '{g.coreAttrId}'");
+                if (p.unlocks != null)
+                    foreach (var u in p.unlocks)
+                    {
+                        if (u == null) continue;
+                        if (u.grantTraitRefs != null)
+                            foreach (var r in u.grantTraitRefs)
+                                if (!string.IsNullOrEmpty(r) && GetTrait(r) == null)
+                                    dangling.Add($"职业[{p.id}].unlocks.grantTraitRefs → 特质 '{r}'");
+                        if (u.grantTitleRefs != null)
+                            foreach (var r in u.grantTitleRefs)
+                                if (!string.IsNullOrEmpty(r) && GetTitle(r) == null)
+                                    dangling.Add($"职业[{p.id}].unlocks.grantTitleRefs → 头衔 '{r}'");
+                    }
+            }
+
+            // 头衔：分组标签 / modifier 目标属性（opinionModifiers 面向社交轴，不校验为核心属性）
+            foreach (var t in titles)
+            {
+                if (t == null) continue;
+                if (!string.IsNullOrEmpty(t.groupTagRef) && GetGroupTag(t.groupTagRef) == null)
+                    dangling.Add($"头衔[{t.id}].groupTagRef → 分组标签 '{t.groupTagRef}'");
+                if (t.modifiers != null)
+                    foreach (var m in t.modifiers)
+                        if (m != null && !string.IsNullOrEmpty(m.targetAttributeId) && GetCoreAttribute(m.targetAttributeId) == null)
+                            dangling.Add($"头衔[{t.id}].modifier.targetAttributeId → 属性 '{m.targetAttributeId}'");
+            }
+
+            // 转职树：节点 / 子边职业须存在且为同树节点；成环为错误
+            foreach (var tree in professionTrees)
+            {
+                if (tree == null || tree.nodes == null) continue;
+                var nodeSet = new HashSet<string>();
+                foreach (var n in tree.nodes)
+                    if (n != null && !string.IsNullOrEmpty(n.professionRef)) nodeSet.Add(n.professionRef);
+                foreach (var n in tree.nodes)
+                {
+                    if (n == null) continue;
+                    if (!string.IsNullOrEmpty(n.professionRef) && GetProfession(n.professionRef) == null)
+                        dangling.Add($"转职树[{tree.id}].nodes → 职业 '{n.professionRef}'");
+                    if (n.childProfessionRefs != null)
+                        foreach (var ch in n.childProfessionRefs)
+                        {
+                            if (string.IsNullOrEmpty(ch)) continue;
+                            if (GetProfession(ch) == null)
+                                dangling.Add($"转职树[{tree.id}].childProfessionRefs → 职业 '{ch}'");
+                            else if (!nodeSet.Contains(ch))
+                                errors.Add($"转职树[{tree.id}] 子职业 '{ch}' 未作为本树节点存在");
+                        }
+                }
+                if (ProfessionTreeHasCycle(tree))
+                    errors.Add($"转职树[{tree.id}] 存在环（转职路径不可成环）");
+            }
+
+            // 阶级序列：成员头衔须存在、须为阶级头衔(RankTitle)、无重复
+            foreach (var l in rankLadders)
+            {
+                if (l == null || l.orderedTitleRefs == null) continue;
+                var seen = new HashSet<string>();
+                foreach (var tr in l.orderedTitleRefs)
+                {
+                    if (string.IsNullOrEmpty(tr)) continue;
+                    var title = GetTitle(tr);
+                    if (title == null)
+                        dangling.Add($"阶级序列[{l.id}].orderedTitleRefs → 头衔 '{tr}'");
+                    else if (title.kind != ETitleKind.RankTitle)
+                        errors.Add($"阶级序列[{l.id}] 含非阶级头衔 '{tr}'（kind 应为 RankTitle）");
+                    if (!seen.Add(tr))
+                        errors.Add($"阶级序列[{l.id}] 重复头衔 '{tr}'");
+                }
+            }
+
             if (dangling.Count > 0)
                 errors.Add("存在悬空引用：" + string.Join("；", dangling));
 
@@ -272,6 +385,36 @@ namespace Ale.Chronicle
                 errors.Add($"存在重复的 {label}：" + string.Join(", ", dup));
         }
 
+        /// <summary>转职树是否存在环（沿 childProfessionRefs 有向边 DFS 检测回边）。</summary>
+        private static bool ProfessionTreeHasCycle(ProfessionTree tree)
+        {
+            if (tree == null || tree.nodes == null) return false;
+            var adj = new Dictionary<string, List<string>>();
+            foreach (var n in tree.nodes)
+            {
+                if (n == null || string.IsNullOrEmpty(n.professionRef)) continue;
+                if (!adj.TryGetValue(n.professionRef, out var list)) { list = new List<string>(); adj[n.professionRef] = list; }
+                if (n.childProfessionRefs != null) list.AddRange(n.childProfessionRefs);
+            }
+            var state = new Dictionary<string, int>(); // 缺省/0=未访问，1=在栈上，2=已完成
+            foreach (var key in adj.Keys)
+                if (HasCycleDfs(key, adj, state)) return true;
+            return false;
+        }
+
+        private static bool HasCycleDfs(string node, Dictionary<string, List<string>> adj, Dictionary<string, int> state)
+        {
+            state.TryGetValue(node, out int s);
+            if (s == 1) return true;   // 回边 → 成环
+            if (s == 2) return false;
+            state[node] = 1;
+            if (adj.TryGetValue(node, out var children))
+                foreach (var c in children)
+                    if (!string.IsNullOrEmpty(c) && HasCycleDfs(c, adj, state)) return true;
+            state[node] = 2;
+            return false;
+        }
+
         #endregion
 
         #region 深拷贝（模板支持）
@@ -292,6 +435,10 @@ namespace Ale.Chronicle
             numberFormatConfigs    = source.numberFormatConfigs.Select(c => c.Clone()).ToList();
             skillTemplates         = source.skillTemplates.Select(t => t.Clone()).ToList();
             skills                 = source.skills.Select(s => s.Clone()).ToList();
+            professions            = source.professions.Select(p => p.Clone()).ToList();
+            professionTrees        = source.professionTrees.Select(t => t.Clone()).ToList();
+            titles                 = source.titles.Select(t => t.Clone()).ToList();
+            rankLadders            = source.rankLadders.Select(l => l.Clone()).ToList();
         }
 
         #endregion
