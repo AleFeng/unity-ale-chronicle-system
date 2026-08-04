@@ -4,6 +4,37 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.0] - 2026-08-04
+
+新增**职业系统（Profession）**与**头衔系统（Title）**两大配置域，接续 0.1.0 中 `CharacterDefinition` 预留的「产出 Modifier 汇入同一主干」切片；序列化升级至 v4（append-only 向后兼容，旧 v3 存档可载）。
+
+### 新增
+
+- **职业系统**：`ProfessionDefinition`（显示信息 / 分组 / 等级上限 / `ExpCurve` 经验曲线 / 每级成长 / 等级解锁 / 从业条件 / 允许种族）+ `ExpCurve`（**三模式**：公式 / 表格 / 曲线，曲线经 `AttributeValue(AnimationCurve)` 承载）+ `LevelGrowthEntry`（线性 / 曲线成长）+ `LevelUnlock`（授予特质 / 头衔）。
+- **转职树 `ProfessionTree`**：一等配置对象——职业间「父 → 子 = 可转职为」的进阶 DAG（`ProfessionTreeNode.childProfessionRefs`）；`Roots()` 派生根、`FindNode` 查节点。
+- **头衔系统**：`TitleDefinition`，两类由 `ETitleKind` 区分——**阶级头衔（RankTitle）** 逐级晋升 / 可继承，**称号（Epithet）** 靠事迹获得 / 多为唯一；含位阶 / 唯一 / 可剥夺 / 修饰器 / 好感修饰器 / 获得条件。
+- **阶级序列 `RankLadder`**：承载阶级头衔的有序阶梯（低 → 高），运行时「同时只持其一」。
+- **角色侧汇流**：`CharacterDefinition` 新增 `professions`（`CharacterProfession`：等级 / 经验 / 主职业）与 `titles`（`CharacterTitle`）持有字段；`CollectModifiers` 扩展为**特质 / 职业每级成长（`prof:{id}:growth`，按等级折算）/ 头衔加成（`title:{id}`）三来源统一汇入核心属性**（头衔 `opinionModifiers` 面向社交轴、不汇入核心）。
+- **运行时管理器**（均 `ToolkitSingleton` + `ISaveable`，存 / 读档不触发事件）：
+  - `ProfessionRuntimeManager`——习得 / 放弃 / 单一主职业；**`AddExp`** 按 `ExpCurve` 跑升级循环、`maxLevel` 封顶，每升级触发 `OnLevelUp` 并施加 `LevelUnlock`（授头衔经 `TitleRuntimeManager`、授特质经 `OnUnlockTrait` 事件）；存档持每角色职业进度。
+  - `TitleRuntimeManager`——**`Grant`**：阶级头衔按阶梯「晋升替换」（同序列只持其一）、唯一头衔从他人剥夺并触发 `OnTitleTransferred`；`Revoke` 受 `isRevocable` 约束；`GetHighestRankTier` 查某序列最高位阶；存档持每角色持有头衔。
+- **条件系统**：新增 4 个 `[ConditionEvaluator]`——`Chronicle.HasProfession` / `Chronicle.ProfessionLevelAtLeast` / `Chronicle.HasTitle` / `Chronicle.HasRankAtLeast`；`IChronicleConditionSource` 相应新增 4 个查询方法。
+- **数据库**：`ChronicleDatabase` 增 `Professions` / `ProfessionTrees` / `Titles` / `RankLadders` 四列表（+ 访问器 + id 查询）；`Validate` 增职业 / 头衔悬空引用检查、**转职树成环 DFS 检测**、阶级序列须为阶级头衔校验；`CloneFrom` 覆盖新列表。运行时 `ChronicleDataManager` 增四类 O(1) 索引与 `GetAllProfessions` / `GetAllTitles` / `GetAllRankLadders`。
+- **编辑器**：新增 **职业**、**头衔** 两页签（`ChronicleEditorWindow` 现 **七页签**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 / 通用）。
+  - 职业页——中列职业列表（按分组过滤）+ 右列 **ExpCurve 三模式编辑器 + 每级所需经验预览折线**、每级成长表、等级解锁、内联从业条件；左列**转职树缩进结构编辑器**（折叠 / 加子带防环 / 移除）。
+  - 头衔页——中列头衔列表 + 右列按 `kind` 动态字段、修饰器（复用 `ModifierListDrawer`）+ 好感修饰器、内联获得条件；左列**阶级序列有序阶梯编辑器**（上下移 / 移除 / 加菜单仅列阶级头衔）。
+  - 角色检视器补「职业」（等级 / 经验 / 主职业 + 该级成长预览）与「头衔」（按 kind 标注）分区；核心属性明细自动含 `prof:*` / `title:*` 来源行。
+- **测试**：`Assets/Tests/` 新增 6 个测试文件（现 18 个），覆盖 ExpCurve 三模式一致性 / 汇流端到端 / 序列化 v4 往返 + 旧 v3 兼容 / 数据库校验（含成环）/ 数据管理器索引 / 新条件判定器 / 运行时管理器（升级 / 解锁 / 一序列一持有 / 唯一头衔易主 / 存档）。
+
+### 变更
+
+- **序列化 `Version` 3 → 4**：尾部追加 职业 / 转职树 / 头衔 / 阶级序列 四块，角色块尾追加 职业 / 头衔 持有字段——**append-only 向后兼容**，旧 v3 二进制仍可导入（职业 / 头衔为空）。
+- `CharacterDefinition.CollectModifiers` 由「仅特质」扩展为「特质 + 职业 + 头衔」三来源汇流（既有特质路径不变）。
+
+### 说明
+
+- **预留、暂未接入求值**：`ProfessionDefinition.allowedRaceRefs`（种族系统未落地）、`TitleDefinition.successionPolicyRef` / `heritable`（继承结算未落地）——存为不透明串、宽松校验。0.1.0 已列的其它预留项（`CharacterTemplate` 生成规则、`EModifierTargetKind` 扩展目标、`TraitAiWeight`）仍然预留。
+
 ## [0.1.0] - 2026-08-02
 
 初始基线版本：**角色 / 核心属性 / 特质 / 技能** 四大领域的配置与运行时数据基础，构建于 [`com.ale.toolkit`](../com.ale.toolkit)（Schema 属性引擎 / 编辑器三列框架 / 虚拟滚动列表 / 序列化 / `Ale.Condition` 条件系统）之上。
