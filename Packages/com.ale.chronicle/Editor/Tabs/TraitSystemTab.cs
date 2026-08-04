@@ -117,47 +117,18 @@ namespace Ale.Chronicle.Editor
         }
     }
 
-    /// <summary>特质模板主列表面板（特质页左列）：绑定 <see cref="ChronicleDatabase.TraitTemplates"/> + 模板检视器。</summary>
-    public sealed class TraitTemplatePanel : EditorMasterListPanel<TraitTemplate>
+    /// <summary>特质模板主列表面板（特质页左列）：绑定 <see cref="ChronicleDatabase.TraitTemplates"/>；专属字段=默认类别 / 时效。</summary>
+    public sealed class TraitTemplatePanel : ChronicleTemplateListPanel<TraitTemplate>
     {
-        private readonly AttributeDefinitionListDrawer _schemaDrawer = new AttributeDefinitionListDrawer();
-
         protected override List<TraitTemplate> GetList(ChronicleDatabase db) => db.TraitTemplates;
         protected override string Noun => "特质模板";
-        protected override bool   HasColorDot => true;
-        protected override Color  RowColor(TraitTemplate item) => item.color;
+        protected override string NewNamePrefix => "trait_template_";
+        protected override TraitTemplate NewTemplate(string name) => new TraitTemplate(name);
+        protected override string SchemaLabel => "自定义字段 schema";
 
-        protected override string RowLabel(TraitTemplate item)
-            => string.IsNullOrEmpty(item.name) ? "(未命名)" : item.name;
-
-        protected override TraitTemplate CreateNew(ChronicleDatabase db, List<TraitTemplate> list)
+        protected override void DrawExtras(IChronicleEditorContext ctx, TraitTemplate tmpl)
         {
-            int n = list.Count + 1;
-            string name;
-            do { name = "trait_template_" + n; n++; } while (Contains(list, name));
-            return new TraitTemplate(name);
-        }
-
-        private static bool Contains(List<TraitTemplate> list, string name)
-        {
-            foreach (var t in list) if (t != null && t.name == name) return true;
-            return false;
-        }
-
-        protected override void OnInvalidate() => _schemaDrawer.Invalidate();
-
-        public override void DrawInspector(IChronicleEditorContext ctx, TraitTemplate tmpl)
-        {
-            if (tmpl == null)
-            {
-                EditorGUILayout.LabelField("请选择或新建一个特质模板。", ToolkitEditorStyles.Placeholder);
-                return;
-            }
-
-            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
             EditorGUI.BeginChangeCheck();
-            string name     = EditorGUILayout.TextField("名称(引用键)", tmpl.name);
-            Color  color    = EditorGUILayout.ColorField("列表色点", tmpl.color);
             string category = EditorGUILayout.TextField("默认类别枚举(可空)", tmpl.categoryEnumRef);
             var    lifetime = (ETraitLifetime)EditorGUILayout.EnumPopup("默认时效", tmpl.lifetime);
             float  durDays  = tmpl.defaultDurationDays;
@@ -166,16 +137,11 @@ namespace Ale.Chronicle.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 ctx.RecordUndo("修改特质模板");
-                tmpl.name                = name;
-                tmpl.color               = color;
                 tmpl.categoryEnumRef     = category;
                 tmpl.lifetime            = lifetime;
                 tmpl.defaultDurationDays = durDays;
                 ctx.MarkDirty();
             }
-
-            EditorGUILayout.Space(4);
-            _schemaDrawer.Draw(ctx, ctx.Database, tmpl.attributes, "自定义字段 schema");
         }
     }
 

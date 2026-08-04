@@ -117,65 +117,31 @@ namespace Ale.Chronicle.Editor
         }
     }
 
-    /// <summary>属性模板主列表面板（属性页左列）：绑定 <see cref="ChronicleDatabase.CoreAttributeTemplates"/> + 模板检视器。</summary>
-    public sealed class CoreAttributeTemplatePanel : EditorMasterListPanel<CoreAttributeTemplate>
+    /// <summary>属性模板主列表面板（属性页左列）：绑定 <see cref="ChronicleDatabase.CoreAttributeTemplates"/>；专属字段=默认类别 / 区间 / 基础值。</summary>
+    public sealed class CoreAttributeTemplatePanel : ChronicleTemplateListPanel<CoreAttributeTemplate>
     {
-        private readonly AttributeDefinitionListDrawer _schemaDrawer = new AttributeDefinitionListDrawer();
-
         protected override List<CoreAttributeTemplate> GetList(ChronicleDatabase db) => db.CoreAttributeTemplates;
         protected override string Noun => "属性模板";
-        protected override bool   HasColorDot => true;
-        protected override Color  RowColor(CoreAttributeTemplate item) => item.color;
+        protected override string NewNamePrefix => "attr_template_";
+        protected override CoreAttributeTemplate NewTemplate(string name) => new CoreAttributeTemplate(name);
+        protected override string SchemaLabel => "自定义字段 schema";
 
-        protected override string RowLabel(CoreAttributeTemplate item)
-            => string.IsNullOrEmpty(item.name) ? "(未命名)" : item.name;
-
-        protected override CoreAttributeTemplate CreateNew(ChronicleDatabase db, List<CoreAttributeTemplate> list)
+        protected override void DrawExtras(IChronicleEditorContext ctx, CoreAttributeTemplate tmpl)
         {
-            int n = list.Count + 1;
-            string name;
-            do { name = "attr_template_" + n; n++; } while (Contains(list, name));
-            return new CoreAttributeTemplate(name);
-        }
-
-        private static bool Contains(List<CoreAttributeTemplate> list, string name)
-        {
-            foreach (var t in list) if (t != null && t.name == name) return true;
-            return false;
-        }
-
-        protected override void OnInvalidate() => _schemaDrawer.Invalidate();
-
-        public override void DrawInspector(IChronicleEditorContext ctx, CoreAttributeTemplate tmpl)
-        {
-            if (tmpl == null)
-            {
-                EditorGUILayout.LabelField("请选择或新建一个属性模板。", ToolkitEditorStyles.Placeholder);
-                return;
-            }
-
-            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
             EditorGUI.BeginChangeCheck();
-            string name  = EditorGUILayout.TextField("名称(引用键)", tmpl.name);
-            Color  color = EditorGUILayout.ColorField("列表色点", tmpl.color);
             string category = EditorGUILayout.TextField("默认类别枚举(可空)", tmpl.categoryEnumRef);
-            float  min   = EditorGUILayout.FloatField("默认下限", tmpl.minValue);
-            float  max   = EditorGUILayout.FloatField("默认上限", tmpl.maxValue);
-            float  def   = EditorGUILayout.FloatField("默认基础值", tmpl.defaultBase);
+            float  min = EditorGUILayout.FloatField("默认下限", tmpl.minValue);
+            float  max = EditorGUILayout.FloatField("默认上限", tmpl.maxValue);
+            float  def = EditorGUILayout.FloatField("默认基础值", tmpl.defaultBase);
             if (EditorGUI.EndChangeCheck())
             {
                 ctx.RecordUndo("修改属性模板");
-                tmpl.name            = name;
-                tmpl.color           = color;
                 tmpl.categoryEnumRef = category;
                 tmpl.minValue        = min;
                 tmpl.maxValue        = max;
                 tmpl.defaultBase     = def;
                 ctx.MarkDirty();
             }
-
-            EditorGUILayout.Space(4);
-            _schemaDrawer.Draw(ctx, ctx.Database, tmpl.attributes, "自定义字段 schema");
         }
     }
 

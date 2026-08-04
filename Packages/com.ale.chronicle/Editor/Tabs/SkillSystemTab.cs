@@ -129,64 +129,21 @@ namespace Ale.Chronicle.Editor
         }
     }
 
-    /// <summary>技能模板主列表面板（技能页左列）：绑定 <see cref="ChronicleDatabase.SkillTemplates"/> + 模板检视器。</summary>
-    public sealed class SkillTemplatePanel : EditorMasterListPanel<SkillTemplate>
+    /// <summary>技能模板主列表面板（技能页左列）：绑定 <see cref="ChronicleDatabase.SkillTemplates"/>；专属字段=技能默认信息 + 分组标签。</summary>
+    public sealed class SkillTemplatePanel : ChronicleTemplateListPanel<SkillTemplate>
     {
-        private readonly AttributeDefinitionListDrawer _schemaDrawer = new AttributeDefinitionListDrawer();
-
         protected override List<SkillTemplate> GetList(ChronicleDatabase db) => db.SkillTemplates;
         protected override string Noun => "技能模板";
-        protected override bool   HasColorDot => true;
-        protected override Color  RowColor(SkillTemplate item) => item.color;
+        protected override string NewNamePrefix => "skill_template_";
+        protected override SkillTemplate NewTemplate(string name) => new SkillTemplate(name);
+        protected override string SchemaLabel => "自定义属性字段 schema";
 
-        protected override string RowLabel(SkillTemplate item)
-            => string.IsNullOrEmpty(item.name) ? "(未命名)" : item.name;
-
-        protected override SkillTemplate CreateNew(ChronicleDatabase db, List<SkillTemplate> list)
+        protected override void DrawExtras(IChronicleEditorContext ctx, SkillTemplate tmpl)
         {
-            int n = list.Count + 1;
-            string name;
-            do { name = "skill_template_" + n; n++; } while (Contains(list, name));
-            return new SkillTemplate(name);
-        }
-
-        private static bool Contains(List<SkillTemplate> list, string name)
-        {
-            foreach (var t in list) if (t != null && t.name == name) return true;
-            return false;
-        }
-
-        protected override void OnInvalidate() => _schemaDrawer.Invalidate();
-
-        public override void DrawInspector(IChronicleEditorContext ctx, SkillTemplate tmpl)
-        {
-            if (tmpl == null)
-            {
-                EditorGUILayout.LabelField("请选择或新建一个技能模板。", ToolkitEditorStyles.Placeholder);
-                return;
-            }
-
-            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
-            EditorGUI.BeginChangeCheck();
-            string name  = EditorGUILayout.TextField("名称(引用键)", tmpl.name);
-            Color  color = EditorGUILayout.ColorField("列表色点", tmpl.color);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ctx.RecordUndo("修改技能模板");
-                tmpl.name  = name;
-                tmpl.color = color;
-                ctx.MarkDirty();
-            }
-
-            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("技能默认信息（从模板创建时复制）", ToolkitEditorStyles.Header);
             SkillConfigDrawer.DrawDisplayFields(ctx, tmpl);
-
             EditorGUILayout.Space(6);
             SkillConfigDrawer.DrawGroupTags(ctx, tmpl);
-
-            EditorGUILayout.Space(6);
-            _schemaDrawer.Draw(ctx, ctx.Database, tmpl.attributes, "自定义属性字段 schema");
         }
     }
 

@@ -102,59 +102,18 @@ namespace Ale.Chronicle.Editor
         }
     }
 
-    /// <summary>角色模板主列表面板（角色页左列）：绑定 <see cref="ChronicleDatabase.CharacterTemplates"/> + 模板检视器。</summary>
-    public sealed class CharacterTemplateListPanel : EditorMasterListPanel<CharacterTemplate>
+    /// <summary>角色模板主列表面板（角色页左列）：绑定 <see cref="ChronicleDatabase.CharacterTemplates"/>；专属字段=生成规则（画在 schema 之后）。</summary>
+    public sealed class CharacterTemplateListPanel : ChronicleTemplateListPanel<CharacterTemplate>
     {
-        private readonly AttributeDefinitionListDrawer _schemaDrawer = new AttributeDefinitionListDrawer();
-
         protected override List<CharacterTemplate> GetList(ChronicleDatabase db) => db.CharacterTemplates;
         protected override string Noun => "角色模板";
-        protected override bool   HasColorDot => true;
-        protected override Color  RowColor(CharacterTemplate item) => item.color;
+        protected override string NewNamePrefix => "template_";
+        protected override CharacterTemplate NewTemplate(string name) => new CharacterTemplate(name);
+        protected override string SchemaLabel => "身份字段 schema";
+        protected override bool ExtrasBeforeSchema => false;   // 生成规则画在 schema 之后
 
-        protected override string RowLabel(CharacterTemplate item)
-            => string.IsNullOrEmpty(item.name) ? "(未命名)" : item.name;
-
-        protected override CharacterTemplate CreateNew(ChronicleDatabase db, List<CharacterTemplate> list)
+        protected override void DrawExtras(IChronicleEditorContext ctx, CharacterTemplate tmpl)
         {
-            int n = list.Count + 1;
-            string name;
-            do { name = "template_" + n; n++; } while (Contains(list, name));
-            return new CharacterTemplate(name);
-        }
-
-        private static bool Contains(List<CharacterTemplate> list, string name)
-        {
-            foreach (var t in list) if (t != null && t.name == name) return true;
-            return false;
-        }
-
-        protected override void OnInvalidate() => _schemaDrawer.Invalidate();
-
-        public override void DrawInspector(IChronicleEditorContext ctx, CharacterTemplate tmpl)
-        {
-            if (tmpl == null)
-            {
-                EditorGUILayout.LabelField("请选择或新建一个角色模板。", ToolkitEditorStyles.Placeholder);
-                return;
-            }
-
-            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
-            EditorGUI.BeginChangeCheck();
-            string name = EditorGUILayout.TextField("名称(引用键)", tmpl.name);
-            Color  color = EditorGUILayout.ColorField("列表色点", tmpl.color);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ctx.RecordUndo("修改角色模板");
-                tmpl.name  = name;
-                tmpl.color = color;
-                ctx.MarkDirty();
-            }
-
-            EditorGUILayout.Space(4);
-            _schemaDrawer.Draw(ctx, ctx.Database, tmpl.attributes, "身份字段 schema");
-
-            EditorGUILayout.Space(6);
             EditorGUILayout.LabelField("生成规则（预留）", ToolkitEditorStyles.Header);
             EditorGUI.BeginChangeCheck();
             string race   = EditorGUILayout.TextField("默认种族(可空)", tmpl.raceRef);
