@@ -67,6 +67,10 @@ namespace Ale.Chronicle
         private readonly Dictionary<string, CharacterDefinition>    _characters = new Dictionary<string, CharacterDefinition>();
         private readonly Dictionary<string, Skill>                  _skills    = new Dictionary<string, Skill>();
         private readonly Dictionary<string, ChronicleGroupTag>      _groupTags = new Dictionary<string, ChronicleGroupTag>();
+        private readonly Dictionary<string, ProfessionDefinition>   _professions     = new Dictionary<string, ProfessionDefinition>();
+        private readonly Dictionary<string, ProfessionTree>         _professionTrees = new Dictionary<string, ProfessionTree>();
+        private readonly Dictionary<string, TitleDefinition>        _titles          = new Dictionary<string, TitleDefinition>();
+        private readonly Dictionary<string, RankLadder>             _rankLadders     = new Dictionary<string, RankLadder>();
 
         /// <summary>使查询索引失效，下次查询时重建。运行期直接改动已注册数据库内容后需手动调用。</summary>
         public void InvalidateIndex() => _indexDirty = true;
@@ -79,6 +83,7 @@ namespace Ale.Chronicle
             _enumTypes.Clear(); _tags.Clear(); _coreAttrs.Clear();
             _traits.Clear();    _templates.Clear(); _characters.Clear();
             _skills.Clear();    _groupTags.Clear();
+            _professions.Clear(); _professionTrees.Clear(); _titles.Clear(); _rankLadders.Clear();
 
             foreach (var db in _databases)
             {
@@ -91,6 +96,10 @@ namespace Ale.Chronicle
                 Index(_characters, db.Characters,        x => x.id);
                 Index(_skills,     db.Skills,            x => x.id);
                 Index(_groupTags,  db.GroupTags,         x => x.id);
+                Index(_professions,     db.Professions,     x => x.id);
+                Index(_professionTrees, db.ProfessionTrees, x => x.id);
+                Index(_titles,          db.Titles,          x => x.id);
+                Index(_rankLadders,     db.RankLadders,     x => x.id);
             }
         }
 
@@ -154,6 +163,39 @@ namespace Ale.Chronicle
         {
             EnsureIndex();
             return new List<ChronicleGroupTag>(_groupTags.Values);
+        }
+
+        /// <summary>按 id 跨库查找职业，未找到返回 null。</summary>
+        public ProfessionDefinition GetProfession(string professionId) => Lookup(_professions, professionId);
+
+        /// <summary>按 id 跨库查找转职树，未找到返回 null。</summary>
+        public ProfessionTree GetProfessionTree(string treeId) => Lookup(_professionTrees, treeId);
+
+        /// <summary>按 id 跨库查找头衔，未找到返回 null。</summary>
+        public TitleDefinition GetTitle(string titleId) => Lookup(_titles, titleId);
+
+        /// <summary>按 id 跨库查找阶级序列，未找到返回 null。</summary>
+        public RankLadder GetRankLadder(string ladderId) => Lookup(_rankLadders, ladderId);
+
+        /// <summary>跨库返回全部职业（id 去重、先注册先得）；未注册返回空列表。</summary>
+        public List<ProfessionDefinition> GetAllProfessions()
+        {
+            EnsureIndex();
+            return new List<ProfessionDefinition>(_professions.Values);
+        }
+
+        /// <summary>跨库返回全部头衔（id 去重、先注册先得）；未注册返回空列表。</summary>
+        public List<TitleDefinition> GetAllTitles()
+        {
+            EnsureIndex();
+            return new List<TitleDefinition>(_titles.Values);
+        }
+
+        /// <summary>跨库返回全部阶级序列（id 去重、先注册先得）；未注册返回空列表。运行时定位「某阶级头衔属于哪条序列」用。</summary>
+        public List<RankLadder> GetAllRankLadders()
+        {
+            EnsureIndex();
+            return new List<RankLadder>(_rankLadders.Values);
         }
 
         #endregion

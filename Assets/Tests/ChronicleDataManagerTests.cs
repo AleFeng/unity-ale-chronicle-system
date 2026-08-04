@@ -126,5 +126,59 @@ namespace Ale.Chronicle.Tests
             Assert.IsNotNull(mgr.GetAllGroupTags());
             Assert.AreEqual(0, mgr.GetAllGroupTags().Count);
         }
+
+        // ── 职业 / 头衔索引（S5）────────────────────────────────────────────────────
+
+        [Test]
+        public void GetProfessionAndTitle_ResolveById()
+        {
+            var db = NewDb();
+            db.Professions.Add(new ProfessionDefinition("warrior"));
+            db.Titles.Add(new TitleDefinition("duke"));
+            db.ProfessionTrees.Add(new ProfessionTree("warrior_line"));
+            db.RankLadders.Add(new RankLadder("peerage"));
+
+            var mgr = ChronicleDataManager.Instance;
+            mgr.Register(db);
+
+            Assert.AreSame(db.GetProfession("warrior"), mgr.GetProfession("warrior"));
+            Assert.AreSame(db.GetTitle("duke"), mgr.GetTitle("duke"));
+            Assert.AreSame(db.GetProfessionTree("warrior_line"), mgr.GetProfessionTree("warrior_line"));
+            Assert.AreSame(db.GetRankLadder("peerage"), mgr.GetRankLadder("peerage"));
+            Assert.IsNull(mgr.GetProfession("missing"));
+        }
+
+        [Test]
+        public void GetAllProfessions_AggregatesAcrossDatabases_DedupByIdFirstWins()
+        {
+            var db1 = NewDb();
+            db1.Professions.Add(new ProfessionDefinition("a"));
+            db1.Titles.Add(new TitleDefinition("t1"));
+            db1.RankLadders.Add(new RankLadder("l1"));
+            var db2 = NewDb();
+            db2.Professions.Add(new ProfessionDefinition("a"));   // 重复 id → 先注册先得
+            db2.Professions.Add(new ProfessionDefinition("b"));
+
+            var mgr = ChronicleDataManager.Instance;
+            mgr.Register(db1);
+            mgr.Register(db2);
+
+            var profs = mgr.GetAllProfessions();
+            Assert.AreEqual(2, profs.Count);
+            CollectionAssert.AreEqual(new[] { "a", "b" }, profs.ConvertAll(p => p.id));
+            Assert.AreSame(db1.GetProfession("a"), mgr.GetProfession("a"));
+            Assert.AreEqual(1, mgr.GetAllTitles().Count);
+            Assert.AreEqual(1, mgr.GetAllRankLadders().Count);
+        }
+
+        [Test]
+        public void GetAllProfessionsTitles_EmptyNotNull_WhenNoDatabases()
+        {
+            var mgr = ChronicleDataManager.Instance;
+            Assert.IsNotNull(mgr.GetAllProfessions());
+            Assert.AreEqual(0, mgr.GetAllProfessions().Count);
+            Assert.IsNotNull(mgr.GetAllTitles());
+            Assert.AreEqual(0, mgr.GetAllRankLadders().Count);
+        }
     }
 }
