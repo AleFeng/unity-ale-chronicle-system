@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Ale.Toolkit.Runtime;
 using Ale.Toolkit.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -178,8 +179,82 @@ namespace Ale.Chronicle.Editor
             AttributeFieldDrawer.Draw(ctx, "说明",   item.description, null);
 
             EditorGUILayout.Space(4);
+            DrawConditionalModifiers(ctx, item);
+
+            EditorGUILayout.Space(4);
             var tmpl = ctx.Database.GetCoreAttributeTemplate(item.templateRef);
             ChronicleEntityHeader.DrawCustomAttributes(ctx, item.values, tmpl?.attributes, "（无——模板未定义自定义属性字段）");
+        }
+
+        // 「根据条件修改属性值」区：逐条 修改值（目标恒为本属性、隐藏目标下拉）+ 内联门控条件；延迟应用增删。
+        private static void DrawConditionalModifiers(IChronicleEditorContext ctx, CoreAttributeDefinition item)
+        {
+            var list = item.conditionalModifiers;
+            EditorGUILayout.LabelField("根据条件修改属性值（运行时按条件汇流）", ToolkitEditorStyles.Header);
+            if (list == null) return;
+
+            int attrIdx  = ctx.Database.CoreAttributes.IndexOf(item);
+            int removeAt = -1;
+            for (int j = 0; j < list.Count; j++)
+            {
+                var cm = list[j];
+                if (cm == null) continue;
+                if (cm.modifier == null) cm.modifier = new ModifierDefinition();
+                var m = cm.modifier;
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"修改值 {j + 1}", EditorStyles.miniBoldLabel);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = j;
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUI.BeginChangeCheck();
+                var    op     = (EModifierOperation)EditorGUILayout.EnumPopup("运算", m.operation);
+                float  mag    = EditorGUILayout.FloatField("幅度", m.magnitude);
+                string srcTag = EditorGUILayout.TextField("来源标记(可空)", m.sourceTag);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    ctx.RecordUndo("修改条件修改值");
+                    m.operation         = op;
+                    m.magnitude         = mag;
+                    m.sourceTag         = srcTag;
+                    m.targetAttributeId = item.id;   // 靶子恒为本属性
+                    ctx.MarkDirty();
+                }
+
+                if (attrIdx >= 0)
+                {
+                    int jj = j;
+                    ChronicleEditorFields.InlineConditionAt(ctx, "生效条件", so =>
+                    {
+                        var arr = so.FindProperty("coreAttributes");
+                        if (arr == null || attrIdx >= arr.arraySize) return null;
+                        var cmArr = arr.GetArrayElementAtIndex(attrIdx).FindPropertyRelative("conditionalModifiers");
+                        if (cmArr == null || jj >= cmArr.arraySize) return null;
+                        return cmArr.GetArrayElementAtIndex(jj).FindPropertyRelative("condition");
+                    });
+                }
+
+                EditorGUILayout.EndVertical();
+            }
+
+            if (removeAt >= 0)
+            {
+                ctx.RecordUndo("删除条件修改值");
+                list.RemoveAt(removeAt);
+                ctx.MarkDirty();
+            }
+
+            if (GUILayout.Button("+ 添加条件修改值"))
+            {
+                ctx.RecordUndo("添加条件修改值");
+                var added = new ConditionalModifier();
+                added.modifier.targetAttributeId = item.id;
+                list.Add(added);
+                ctx.MarkDirty();
+            }
         }
     }
 }

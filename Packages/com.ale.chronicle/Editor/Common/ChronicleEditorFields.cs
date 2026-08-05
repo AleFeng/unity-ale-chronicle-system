@@ -109,5 +109,30 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.PropertyField(prop, new GUIContent("条件"), true);
             so.ApplyModifiedProperties();
         }
+
+        /// <summary>
+        /// 内联 <c>ConditionExpression</c> 属性（任意嵌套路径版）：调用方经 <paramref name="resolve"/>
+        /// 从数据库 <c>SerializedObject</c> 逐跳定位到目标条件属性（越界 / 缺失时返回 null 即降级为提示行），
+        /// 交由 Ale.Condition 的 <c>[CustomPropertyDrawer]</c> 渲染。适配技能树 / 属性条件修改等多层列表。
+        /// </summary>
+        public static void InlineConditionAt(IChronicleEditorContext ctx, string label,
+            System.Func<SerializedObject, SerializedProperty> resolve)
+        {
+            var so = ctx.Serialized;
+            if (so == null || ctx.Database == null)
+            {
+                EditorGUILayout.HelpBox("条件编辑暂不可用（无序列化对象）。", MessageType.None);
+                return;
+            }
+            so.Update();
+            var prop = resolve(so);
+            if (prop == null)
+            {
+                EditorGUILayout.HelpBox("条件编辑暂不可用。", MessageType.None);
+                return;
+            }
+            EditorGUILayout.PropertyField(prop, new GUIContent(label), true);
+            so.ApplyModifiedProperties();
+        }
     }
 }
