@@ -219,6 +219,9 @@ namespace Ale.Chronicle.Editor
             DrawRequirements(ctx, prof);
 
             EditorGUILayout.Space(6);
+            DrawSkillTreeRefs(ctx, prof);
+
+            EditorGUILayout.Space(6);
             var tmpl = ctx.Database.GetProfessionTemplate(prof.templateRef);
             ChronicleEntityHeader.DrawCustomAttributes(ctx, prof.values, tmpl?.attributes,
                 "（该职业暂无自定义属性字段；可在左侧「职业模板」中添加）");
@@ -402,6 +405,51 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.LabelField("从业 / 转职条件", ToolkitEditorStyles.Header);
             ChronicleEditorFields.InlineCondition(ctx, "professions",
                 () => ctx.Database.Professions.IndexOf(prof), "requirements");
+        }
+
+        // ── 关联技能树 ──────────────────────────────────────────────────────────────
+        private static void DrawSkillTreeRefs(IChronicleEditorContext ctx, ProfessionDefinition prof)
+        {
+            var db = ctx.Database;
+            EditorGUILayout.LabelField("关联技能树", ToolkitEditorStyles.Header);
+            var list = prof.skillTreeRefs;
+
+            int removeAt = -1;
+            for (int i = 0; i < list.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                var tree = db.GetSkillTree(list[i]);
+                string label = tree != null ? SkillTreeLabel(tree) : list[i] + "（缺失）";
+                EditorGUILayout.LabelField(label, tree != null ? EditorStyles.label : ToolkitEditorStyles.StatusError);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("✕", GUILayout.Width(24))) removeAt = i;
+                EditorGUILayout.EndHorizontal();
+            }
+            if (removeAt >= 0) { ctx.RecordUndo("移除关联技能树"); list.RemoveAt(removeAt); ctx.MarkDirty(); }
+
+            if (GUILayout.Button("+ 关联技能树", GUILayout.Width(120)))
+            {
+                var menu = new GenericMenu();
+                bool any = false;
+                foreach (var t in db.SkillTrees)
+                {
+                    if (t == null || string.IsNullOrEmpty(t.id) || list.Contains(t.id)) continue;
+                    any = true;
+                    string captured = t.id;
+                    menu.AddItem(new GUIContent(SkillTreeLabel(t)), false, () =>
+                    {
+                        ctx.RecordUndo("关联技能树"); list.Add(captured); ctx.MarkDirty(); ctx.Repaint();
+                    });
+                }
+                if (!any) menu.AddDisabledItem(new GUIContent("（无可关联的技能树）"));
+                menu.ShowAsContext();
+            }
+        }
+
+        private static string SkillTreeLabel(SkillTree tree)
+        {
+            string nm = tree.displayName != null ? tree.displayName.GetTextValue() : null;
+            return (string.IsNullOrEmpty(nm) ? tree.id : nm) + " (" + tree.id + ")";
         }
     }
 
