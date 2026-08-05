@@ -9,7 +9,7 @@ namespace Ale.Chronicle
     public static class ChronicleInfo
     {
         public const string PackageName = "com.ale.chronicle";
-        public const string Version     = "0.2.0";
+        public const string Version     = "0.3.0";
 
         /// <summary>脚手架自检：证明本程序集可引用 toolkit（Schema 引擎）与 condition（条件系统）核心。</summary>
         public static bool ProbeReferences()

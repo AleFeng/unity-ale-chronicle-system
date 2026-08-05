@@ -4,6 +4,31 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.0] - 2026-08-05
+
+新增**技能树（SkillTree）**一等配置对象与**属性按条件修改值**功能，并让**职业关联技能树**。技能树与属性条件修改的门控条件全部复用 Toolkit 条件框架，**Chronicle 端零新增判定器**（跨系统条件由上层系统实现、各系统共用）。序列化随之升级至 **v6**（append-only 向后兼容，旧 v3 / v4 / v5 存档均可载）。
+
+### 新增
+
+- **技能树 `SkillTree`**：一等配置对象（技能页左列新增「技能树」子页签），按 `ESkillTreeKind` 三种类型组织一组技能——**列表**（无层级）/ **层级**（`SkillTreeTier`：先分层、层内加技能，层级与技能均可配解锁条件）/ **树状**（`SkillTreeEntry.prerequisiteSkillRefs`：每技能以前置技能作解锁，AND 语义）。每技能 / 层级可内联配 `ConditionExpression` 解锁条件；条件承载体铺平为技能树下的一层数组（技能以 `tierKey` 关联层级，重排不失联）。
+- **技能点获取 `SkillPointGrant`**：技能树可配多个获取条目——点数 + 获取方式 `ESkillPointGrantMode`（**一次性达成即得 / 持续生效 / 每级可重复**）+ 获取条件（`Ale.Condition`，一般为某职业等级，复用现成 `Chronicle.ProfessionLevelAtLeast`）。
+- **职业关联技能树**：`ProfessionDefinition` 新增 `skillTreeRefs`（可关联一或多棵技能树）；检视器加「关联技能树」多选区，`Validate` 加悬空引用检查。
+- **属性按条件修改值**：`CoreAttributeDefinition` 新增 `conditionalModifiers`（`ConditionalModifier` = 一条 `ModifierDefinition` 修改值 + 一个内联 `ConditionExpression` 门控，payload + gate 范式，仿 toolkit `EffectItem`）。例：兴趣值随剧情章节完成而变。`CoreAttributeResolver` 新增带 `IConditionContext` 的重载，在合流**收集期按条件过滤**这些修改值（来源 `attr:{id}:cond`）；旧三参重载委托 `ctx=null`，既有汇流零回归。
+- **数据库 / 运行时**：`ChronicleDatabase` 增 `SkillTrees` 列表（+ 访问器 + `GetSkillTree` + `CloneFrom`）与 `Validate`（技能树 id 查重、`skillRef` / `tierKey` / 前置悬空、**树状前置成环 DFS 检测**、职业 `skillTreeRefs` 悬空）；`ChronicleDataManager` 增技能树索引与 `GetSkillTree` / `GetAllSkillTrees`。
+- **编辑器**：技能页左列扩为「技能模板 / 技能树」双子页签；`SkillTreeDrawer` 三分支（列表 / 层级复用阶级序列「延迟应用」/ 树状复用转职树「缩进 + 折叠 + 防环」，加后继带前置防环）；技能点获取条目编辑；`ChronicleEditorFields.InlineConditionAt` 新增（任意嵌套路径的内联条件助手，供技能树与属性条件修改共用）；属性检视器加「根据条件修改属性值」区（隐藏目标下拉的单条修改值 + 内联门控条件）。
+- **测试**：`Assets/Tests/` 新增 2 个测试文件（现 20 个）——`SkillTreeSerializerTests`（v6 往返：三类型 / 三种获取方式 / 各处条件 / 职业引用 / 属性条件修改，及旧 v5 兼容）、`AttributeConditionalModifierTests`（属性条件修改：空条件计入 / 非空条件无上下文排除 / 三参回归）。
+
+### 变更
+
+- **序列化 `Version` 5 → 6**：尾部追加 技能树 一块；职业块尾追加 `skillTreeRefs`；核心属性块尾追加 `conditionalModifiers`（条件修改值）——三处均 `if (version >= 6)` 门控，**append-only 向后兼容**，旧 v3 / v4 / v5 二进制仍可导入（新字段为空）。
+- **术语统一**：六大领域编辑器界面的「自定义字段」/「自定义属性」名称统一为**「自定义属性字段」**（纯 UI 文案，零功能影响）。
+- `CoreAttributeResolver.Evaluate` 新增带条件上下文的高层重载；既有三参入口委托到新重载（`ctx=null`），行为不变。
+
+### 说明
+
+- **条件实现**：技能树解锁 / 技能点获取 / 属性条件修改的门控中，「某职业等级」复用现成 `Chronicle.ProfessionLevelAtLeast`；「层级总技能点数」「章节完成 / 世界标志」等**跨系统条件**建模为 Toolkit 通用 `Condition.NumberCompare` / `Condition.HasFlag`，由上层系统（如剧情系统）实现判定器与条件源、各系统共用——**Chronicle 端不新增判定器、不改 `IChronicleConditionSource`**。
+- **运行时降级**：属性条件修改的门控在编辑器无真实条件源（`ctx=null`）时按「空条件计入、门控条件不计入」近似预览，运行时传入真实 `IConditionContext` 方生效。
+
 ## [0.2.0] - 2026-08-04
 
 新增**职业系统（Profession）**与**头衔系统（Title）**两大配置域，接续 0.1.0 中 `CharacterDefinition` 预留的「产出 Modifier 汇入同一主干」切片；并为职业 / 头衔补齐**模板层**（`ProfessionTemplate` / `TitleTemplate`，`templateRef` + schema 自定义字段），使六大领域模板模式统一。序列化随之升级至 **v5**（append-only 向后兼容，旧 v3 / v4 存档均可载）。

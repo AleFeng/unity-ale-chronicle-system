@@ -15,7 +15,7 @@
 - 核心属性走 **基础值 + 修正器合流**（来源含特质 / 职业成长 / 头衔），带逐来源拆解。
 - 文本本地化（Unity Localization）、TextMeshPro、Addressable 均通过编译宏可选启用（与 toolkit 统一）。
 
-> ⚠️ **当前版本 `0.2.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域的配置与运行时数据基础已可用；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
+> ⚠️ **当前版本 `0.3.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域的配置与运行时数据基础已可用（本版技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
 
 ---
 
@@ -24,14 +24,14 @@
 | 领域 | 配置内容 | 运行时 |
 |------|---------|--------|
 | **角色系统** | 角色模板、角色（身份字段 + 核心属性基础值 + 特质实例 + 父/母/子家族指针） | `CharacterDefinition` 组合 + 属性合流 + `GetAge(worldDay)` |
-| **属性系统** | 核心属性模板、核心属性（取值范围 / 分类枚举 / 默认基础值 / 图标） | `CoreAttributeResolver`（基础值 + 修正器合流，带来源拆解、min/max 钳制） |
+| **属性系统** | 核心属性模板、核心属性（取值范围 / 分类枚举 / 默认基础值 / 图标 / **按条件修改值**） | `CoreAttributeResolver`（基础值 + 修正器合流，带来源拆解、min/max 钳制；收集期按条件过滤修改值） |
 | **特质系统** | 特质模板、特质（生命周期 / 修正器 / 硬互斥 / 软兼容 / 遗传 / AI 权重 / 获得条件） | `TraitDefinition.CollectModifiers` → 属性合流；条件求值经 `Ale.Condition` |
-| **技能系统** | 技能模板、技能（显示名 / 描述 / 图标 / 主+副分组标签 / 自定义属性） | `SkillRuntimeManager`（永久学会 + 外部提供者 两层 + 一次性使用派发） |
+| **技能系统** | 技能模板、技能（显示名 / 描述 / 图标 / 主+副分组标签 / 自定义属性）、**技能树**（列表 / 层级 / 树状 + 技能点获取） | `SkillRuntimeManager`（永久学会 + 外部提供者 两层 + 一次性使用派发） |
 | **职业系统** | 职业模板、职业（等级上限 / 经验曲线 / 每级成长 / 解锁 / 从业条件）、转职树 | `ProfessionRuntimeManager`（`AddExp` 按曲线升级 + 等级解锁）；成长汇入核心属性 |
 | **头衔系统** | 头衔模板、头衔（阶级头衔 / 称号 · 位阶 / 修饰器 / 获得条件）、阶级序列 | `TitleRuntimeManager`（授予 / 晋升替换 / 唯一头衔易主）；加成汇入核心属性 |
 | **通用（General）** | 枚举类型、功能标签、分组标签、数字格式 | 被上述领域引用（枚举下拉、字段成组、技能/职业/头衔分组、数值格式化） |
 
-> **六大领域统一采用 模板（蓝图）+ 定义 / 实例 模式**：共享 toolkit 的 `AttributeOwner` Schema，`RebuildAttributes` 按 Schema 增补 / 移除自定义字段，深拷贝 `Clone` 支持「以此为模板」。定义各有其固定的强类型字段（职业的 `expCurve/growth/unlocks`、头衔的 `kind/rankTier/modifiers` 等），另经模板承载**可选的自定义字段与默认预设**；各页中列均以**模板**作过滤维（分组标签降为检视器可编辑字段）。**转职树 / 阶级序列** 是额外组织职业 / 头衔的结构对象。
+> **六大领域统一采用 模板（蓝图）+ 定义 / 实例 模式**：共享 toolkit 的 `AttributeOwner` Schema，`RebuildAttributes` 按 Schema 增补 / 移除自定义字段，深拷贝 `Clone` 支持「以此为模板」。定义各有其固定的强类型字段（职业的 `expCurve/growth/unlocks`、头衔的 `kind/rankTier/modifiers` 等），另经模板承载**可选的自定义字段与默认预设**；各页中列均以**模板**作过滤维（分组标签降为检视器可编辑字段）。**转职树 / 阶级序列 / 技能树** 是额外组织职业 / 头衔 / 技能的结构对象。
 
 ---
 
@@ -45,7 +45,8 @@
 
 ### 属性系统（Core Attribute）
 - **核心属性**（力量 / 敏捷 / …）由 `CoreAttributeDefinition` 承载：显示名 / 缩写 / 描述（Text）、图标、分类枚举、取值范围 `minValue` / `maxValue`、默认基础值，以及自定义属性字段。
-- **合流求值**：`CoreAttributeResolver.Evaluate(...)` 以 toolkit `ModifierStackEvaluator` 计算 `基础值 → 原始值 → 最终值`，返回 `ModifierEvaluation`（含逐来源 `Breakdown`），并按定义 min/max 钳制。高层重载直接从角色的**特质 / 职业成长 / 头衔**收集修正器（`CharacterDefinition.CollectModifiers`）。
+- **按条件修改值** `conditionalModifiers`：属性自身可挂一组「一条 `ModifierDefinition` 修改值 + 一个内联 `ConditionExpression` 门控」（payload + gate 范式）。例：兴趣值随剧情章节完成而变——门控条件由上层系统（如剧情系统）经通用 `Condition.HasFlag` / `Condition.NumberCompare` 提供，Chronicle 端只负责存储 / 编辑 / 求值。
+- **合流求值**：`CoreAttributeResolver.Evaluate(...)` 以 toolkit `ModifierStackEvaluator` 计算 `基础值 → 原始值 → 最终值`，返回 `ModifierEvaluation`（含逐来源 `Breakdown`），并按定义 min/max 钳制。高层重载直接从角色的**特质 / 职业成长 / 头衔**收集修正器（`CharacterDefinition.CollectModifiers`）；带 `IConditionContext` 的重载另在收集期把**属性自身条件通过的 `conditionalModifiers`** 也汇入（来源 `attr:{id}:cond`）——编辑器无真实条件源时按「空条件计入、门控条件不计入」近似预览。
 - **编辑器实时预览**：角色 Inspector 展示「基础 → 当前 + 逐来源拆解」的活预览。
 
 ### 特质系统（Trait）
@@ -57,6 +58,7 @@
 
 ### 技能系统（Skill）
 - **技能目录条目** `Skill`：显示名 / 描述（Text，带本地化 fallback）、`iconValue`（Sprite / Addressable）、模板引用、主分组标签 + 副分组标签、自定义属性；`SkillTemplate` 为其蓝图（默认显示信息 + 字段 Schema，用于筛选 / 创建）。`ISkillConfig` 让二者共用同一套编辑器绘制器。
+- **技能树** `SkillTree`（一等配置对象，技能页左列第二子页签）：把一组技能按 `ESkillTreeKind` 组织成 **列表**（无层级）/ **层级**（先分层、层内加技能，层级与技能均可配解锁条件）/ **树状**（每技能以前置技能作解锁，编辑器加后继带防环、`Validate` 亦做前置成环 DFS 检测）三种形态；每技能 / 层级可内联配 `ConditionExpression` 解锁条件。另配多个**技能点获取条目** `SkillPointGrant`（点数 + 获取方式 `ESkillPointGrantMode`：一次性达成即得 / 持续生效 / 每级可重复 + 获取条件，一般为某职业等级）。职业经 `skillTreeRefs` 关联一或多棵技能树。**层级总技能点数 / 章节完成等跨系统条件复用 Toolkit 通用条件框架**（`Condition.NumberCompare` / `Condition.HasFlag`），由上层系统实现判定器与条件源，Chronicle 端不新增判定器。
 - 运行时的**已学 / 提供 / 使用**语义见下文 [技能运行时](#技能运行时两层模型--一次性使用)。
 
 ### 职业系统（Profession）
@@ -118,12 +120,12 @@
 
 ## 运行时与序列化
 
-- **`ChronicleDataManager`**（`ToolkitSingleton`，非 Mono）：注册一个 / 多个 `ChronicleDatabase`，提供跨库 O(1) 惰性字典查询（`GetSkill` / `GetProfession` / `GetTitle` / `GetRankLadder` / `GetAllSkills` / `GetAllProfessions` / `GetAllTitles` / `GetAllRankLadders` / …）；id 冲突「先注册者优先」；`Register` / `Unregister` / `ClearDatabases` / `LoadFromBinary` / `InvalidateIndex`。
+- **`ChronicleDataManager`**（`ToolkitSingleton`，非 Mono）：注册一个 / 多个 `ChronicleDatabase`，提供跨库 O(1) 惰性字典查询（`GetSkill` / `GetSkillTree` / `GetProfession` / `GetTitle` / `GetRankLadder` / `GetAllSkills` / `GetAllSkillTrees` / `GetAllProfessions` / `GetAllTitles` / `GetAllRankLadders` / …）；id 冲突「先注册者优先」；`Register` / `Unregister` / `ClearDatabases` / `LoadFromBinary` / `InvalidateIndex`。
 - **`ChronicleRuntimeManager`**（`ToolkitMonoSingleton`，Mono）：唯一运行时 Mono 主机——覆盖式 UI 与技能 Tooltip 宿主。
 - **`SkillRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：见上。
 - **`ProfessionRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：每角色职业进度（等级 / 经验 / 主职业）；`AddExp` 按 `ExpCurve` 升级 + 施加 `LevelUnlock`；存档持进度。
 - **`TitleRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：每角色持有头衔；阶级头衔「一序列一持有」晋升替换、唯一头衔易主；存档持持有。
-- **二进制导出**：`ChronicleConfigSerializer` 把 `ChronicleDatabase` ↔ 紧凑二进制。魔数 `CHRO`、**当前格式 `Version = 5`**、`MinReadableVersion = 1`；按版本追加块（v2 加属性/特质模板 + 分组标签 + 数字格式 + 模板引用/属性值；v3 追加技能模板 + 技能；v4 追加 职业 / 转职树 / 头衔 / 阶级序列，及角色的职业 / 头衔 持有字段；**v5 追加 职业模板 / 头衔模板 两块，并在职业 / 头衔块尾追加 `templateRef` + 自定义字段 `values`**）——**append-only 向后兼容**，旧版本（含 v3 / v4）导出的二进制仍可导入。对象引用经 `IAssetRefResolver` 以 GUID 承载；特质 / 职业 / 头衔的条件表达式以条件系统 JSON 存储。
+- **二进制导出**：`ChronicleConfigSerializer` 把 `ChronicleDatabase` ↔ 紧凑二进制。魔数 `CHRO`、**当前格式 `Version = 6`**、`MinReadableVersion = 1`；按版本追加块（v2 加属性/特质模板 + 分组标签 + 数字格式 + 模板引用/属性值；v3 追加技能模板 + 技能；v4 追加 职业 / 转职树 / 头衔 / 阶级序列，及角色的职业 / 头衔 持有字段；v5 追加 职业模板 / 头衔模板 两块，并在职业 / 头衔块尾追加 `templateRef` + 自定义字段 `values`；**v6 追加 技能树 一块，并在职业块尾追加 `skillTreeRefs`、核心属性块尾追加 `conditionalModifiers`（条件修改值）**）——**append-only 向后兼容**，旧版本（含 v3 / v4 / v5）导出的二进制仍可导入。对象引用经 `IAssetRefResolver` 以 GUID 承载；特质 / 职业 / 头衔 / 技能树 / 属性条件修改的条件表达式以条件系统 JSON 存储。
 
 ---
 
@@ -226,7 +228,7 @@ Packages/com.ale.chronicle/          ← 包根
 │   ├── Modifier/      CoreAttributeResolver（属性合流）
 │   ├── Profession/    职业 定义 / ExpCurve / 转职树 / 角色职业状态 / 运行时状态
 │   ├── Serialization/ 二进制序列化 + DTO
-│   ├── Skill/         Skill / SkillTemplate / ISkillConfig / 已学状态 / SkillUseEvent
+│   ├── Skill/         Skill / SkillTemplate / 技能树 / ISkillConfig / 已学状态 / SkillUseEvent
 │   ├── Tagging/       ChronicleGroupTag（分组标签）
 │   ├── Title/         头衔 定义 / 阶级序列 / 角色头衔 / 运行时状态
 │   └── Trait/         特质 定义 / 模板 / 实例 / 生命周期 / AI 权重 / 兼容
@@ -240,7 +242,7 @@ Packages/com.ale.chronicle/          ← 包根
 
 ## 测试
 
-工程 `Assets/Tests/`（程序集 `Ale.Chronicle.Tests`，EditMode NUnit）含 18 个测试文件，覆盖数据库 / 数据管理器 / 二进制序列化（含 v5 往返、模板 + 自定义字段往返、旧 v3 / v4 兼容）/ 属性合流 / 条件求值 / 特质 / 模板层 / 角色组合 / 技能数据 / 技能运行时 / 技能 UI / **职业与头衔（ExpCurve 三模式 / 数据库校验含成环 / 汇流 / 新条件判定器 / 运行时管理器升级·解锁·一序列一持有·唯一头衔）**。
+工程 `Assets/Tests/`（程序集 `Ale.Chronicle.Tests`，EditMode NUnit）含 20 个测试文件，覆盖数据库 / 数据管理器 / 二进制序列化（含 v6 往返、模板 + 自定义字段往返、旧 v3 / v4 / v5 兼容）/ 属性合流（含**条件修改值按条件过滤**）/ 条件求值 / 特质 / 模板层 / 角色组合 / 技能数据 / 技能运行时 / 技能 UI / 职业与头衔（ExpCurve 三模式 / 数据库校验含成环 / 汇流 / 条件判定器 / 运行时管理器）/ **技能树（v6 序列化往返 / 三类型 / 技能点获取 · 前置成环校验）**。
 
 ---
 
