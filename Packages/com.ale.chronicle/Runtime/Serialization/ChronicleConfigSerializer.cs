@@ -26,8 +26,9 @@ namespace Ale.Chronicle.Serialization
         /// <summary>当前序列化格式版本。v2：属性/特质实例追加 templateRef+values，尾部追加 属性模板/特质模板/分组标签/数字格式 四块。
         /// v3：尾部追加 技能模板/技能 两块（技能分组标签复用统一 groupTags 池，不单列）。
         /// v4：尾部追加 职业/转职树/头衔/阶级序列 四块，角色块尾追加 职业/头衔 持有字段。
-        /// v5：尾部追加 职业模板/头衔模板 两块，职业/头衔块尾追加 templateRef+values（自定义字段）。</summary>
-        public const int Version = 5;
+        /// v5：尾部追加 职业模板/头衔模板 两块，职业/头衔块尾追加 templateRef+values（自定义字段）。
+        /// v6：尾部追加 技能树 一块；职业块尾追加 skillTreeRefs；核心属性块尾追加 conditionalModifiers（条件修改值）。</summary>
+        public const int Version = 6;
 
         /// <summary>可正确解析的最低格式版本。</summary>
         private const int MinReadableVersion = 1;
@@ -72,6 +73,9 @@ namespace Ale.Chronicle.Serialization
                 // v5 追加块（职业 / 头衔模板）
                 WriteArray(w, dto.professionTemplates, WriteProfessionTemplate);
                 WriteArray(w, dto.titleTemplates, WriteTitleTemplate);
+
+                // v6 追加块（技能树）
+                WriteArray(w, dto.skillTrees, WriteSkillTree);
             }
             return stream.ToArray();
         }
@@ -149,6 +153,12 @@ namespace Ale.Chronicle.Serialization
                 dto.titleTemplates      = ReadArray(r, ReadTitleTemplate);
             }
 
+            // v6 追加块（技能树）：旧 v5 文件到头衔模板即结束。
+            if (version >= 6)
+            {
+                dto.skillTrees = ReadArray(r, ReadSkillTree);
+            }
+
             FromDto(dto, target, resolver);
         }
 
@@ -185,6 +195,8 @@ namespace Ale.Chronicle.Serialization
                                             l => l != null && !string.IsNullOrWhiteSpace(l.id), l => ToDto(l, resolver)),
                 professionTemplates    = ToolkitDtoMapper.ToArray(db.ProfessionTemplates, t => ToDto(t, resolver)),
                 titleTemplates         = ToolkitDtoMapper.ToArray(db.TitleTemplates, t => ToDto(t, resolver)),
+                skillTrees             = ToolkitDtoMapper.ToArrayFiltered(db.SkillTrees,
+                                            t => t != null && !string.IsNullOrWhiteSpace(t.id), t => ToDto(t, resolver)),
             };
         }
 
@@ -208,6 +220,7 @@ namespace Ale.Chronicle.Serialization
             target.TitleTemplates.Clear();
             target.Titles.Clear();
             target.RankLadders.Clear();
+            target.SkillTrees.Clear();
             if (dto == null) return;
 
             if (dto.enumTypes != null)          foreach (var e in dto.enumTypes)          target.EnumTypesList.Add(FromDto(e, resolver));
@@ -228,6 +241,7 @@ namespace Ale.Chronicle.Serialization
             if (dto.titleTemplates != null)         foreach (var t in dto.titleTemplates)         target.TitleTemplates.Add(FromDto(t, resolver));
             if (dto.titles != null)                 foreach (var t in dto.titles)                 target.Titles.Add(FromDto(t, resolver));
             if (dto.rankLadders != null)            foreach (var l in dto.rankLadders)            target.RankLadders.Add(FromDto(l, resolver));
+            if (dto.skillTrees != null)             foreach (var t in dto.skillTrees)             target.SkillTrees.Add(FromDto(t, resolver));
         }
 
         // ── 枚举类型 ────────────────────────────────────────────────────────────────
@@ -311,6 +325,7 @@ namespace Ale.Chronicle.Serialization
                 maxValue        = d.maxValue,
                 defaultBase     = d.defaultBase,
                 values          = ToolkitDtoMapper.ToDto(d.values, resolver),
+                conditionalModifiers = ToolkitDtoMapper.ToArray(d.conditionalModifiers, cm => ToDto(cm)),
             };
         }
 
@@ -330,6 +345,8 @@ namespace Ale.Chronicle.Serialization
                 defaultBase     = dto.defaultBase,
             };
             ToolkitDtoMapper.FromDto(dto.values, d.values, resolver);
+            if (dto.conditionalModifiers != null)
+                foreach (var cm in dto.conditionalModifiers) d.conditionalModifiers.Add(FromDto(cm));
             d.InvalidateEntryCache();
             d.Normalize();
             return d;
@@ -743,6 +760,7 @@ namespace Ale.Chronicle.Serialization
                 requirementsJson = ConditionJson.ToJson(p.requirements ?? new ConditionExpression(), pretty: false),
                 allowedRaceRefs  = ToolkitDtoMapper.ToArray(p.allowedRaceRefs),
                 values           = ToolkitDtoMapper.ToDto(p.values, resolver),
+                skillTreeRefs    = ToolkitDtoMapper.ToArray(p.skillTreeRefs),
             };
         }
 
@@ -760,6 +778,7 @@ namespace Ale.Chronicle.Serialization
                 expCurve        = dto.expCurve != null ? FromDto(dto.expCurve, resolver) : new ExpCurve(),
                 requirements    = ConditionJson.FromJson(dto.requirementsJson),
                 allowedRaceRefs = ToolkitDtoMapper.FromDto(dto.allowedRaceRefs),
+                skillTreeRefs   = ToolkitDtoMapper.FromDto(dto.skillTreeRefs),
             };
             if (dto.growth != null)
                 foreach (var g in dto.growth) p.growth.Add(FromDto(g, resolver));
@@ -911,6 +930,92 @@ namespace Ale.Chronicle.Serialization
             return t;
         }
 
+        // ── v6：技能树 / 条件修改器 ─────────────────────────────────────────────────
+
+        private static SkillTreeDto ToDto(SkillTree t, IAssetRefResolver resolver)
+        {
+            return new SkillTreeDto
+            {
+                id          = t.id,
+                displayName = ToolkitDtoMapper.ToDto(t.displayName, resolver),
+                kind        = (int)t.kind,
+                skills      = ToolkitDtoMapper.ToArray(t.skills, e => new SkillTreeEntryDto
+                {
+                    skillRef              = e.skillRef,
+                    unlockConditionJson   = ConditionJson.ToJson(e.unlockCondition ?? new ConditionExpression(), pretty: false),
+                    tierKey               = e.tierKey,
+                    prerequisiteSkillRefs = ToolkitDtoMapper.ToArray(e.prerequisiteSkillRefs),
+                }),
+                tiers       = ToolkitDtoMapper.ToArray(t.tiers, ti => new SkillTreeTierDto
+                {
+                    key                 = ti.key,
+                    displayName         = ToolkitDtoMapper.ToDto(ti.displayName, resolver),
+                    unlockConditionJson = ConditionJson.ToJson(ti.unlockCondition ?? new ConditionExpression(), pretty: false),
+                }),
+                pointGrants = ToolkitDtoMapper.ToArray(t.pointGrants, g => new SkillPointGrantDto
+                {
+                    points        = g.points,
+                    conditionJson = ConditionJson.ToJson(g.condition ?? new ConditionExpression(), pretty: false),
+                    mode          = (int)g.mode,
+                }),
+            };
+        }
+
+        private static SkillTree FromDto(SkillTreeDto dto, IAssetRefResolver resolver)
+        {
+            var t = new SkillTree
+            {
+                id          = dto.id,
+                displayName = ToolkitDtoMapper.TextFromDto(dto.displayName, resolver),
+                kind        = (ESkillTreeKind)dto.kind,
+            };
+            if (dto.skills != null)
+                foreach (var e in dto.skills)
+                    t.skills.Add(new SkillTreeEntry
+                    {
+                        skillRef              = e.skillRef,
+                        unlockCondition       = ConditionJson.FromJson(e.unlockConditionJson),
+                        tierKey               = e.tierKey,
+                        prerequisiteSkillRefs = ToolkitDtoMapper.FromDto(e.prerequisiteSkillRefs),
+                    });
+            if (dto.tiers != null)
+                foreach (var ti in dto.tiers)
+                    t.tiers.Add(new SkillTreeTier
+                    {
+                        key             = ti.key,
+                        displayName     = ToolkitDtoMapper.TextFromDto(ti.displayName, resolver),
+                        unlockCondition = ConditionJson.FromJson(ti.unlockConditionJson),
+                    });
+            if (dto.pointGrants != null)
+                foreach (var g in dto.pointGrants)
+                    t.pointGrants.Add(new SkillPointGrant
+                    {
+                        points    = g.points,
+                        condition = ConditionJson.FromJson(g.conditionJson),
+                        mode      = (ESkillPointGrantMode)g.mode,
+                    });
+            t.Normalize();
+            return t;
+        }
+
+        private static ConditionalModifierDto ToDto(ConditionalModifier cm)
+        {
+            return new ConditionalModifierDto
+            {
+                modifier      = cm.modifier != null ? ToDto(cm.modifier) : new ModifierDefinitionDto(),
+                conditionJson = ConditionJson.ToJson(cm.condition ?? new ConditionExpression(), pretty: false),
+            };
+        }
+
+        private static ConditionalModifier FromDto(ConditionalModifierDto dto)
+        {
+            return new ConditionalModifier
+            {
+                modifier  = dto.modifier != null ? FromDto(dto.modifier) : new ModifierDefinition(),
+                condition = ConditionJson.FromJson(dto.conditionJson),
+            };
+        }
+
         #endregion
 
         #region 二进制读写（DTO ↔ 字节流）
@@ -953,6 +1058,7 @@ namespace Ale.Chronicle.Serialization
             w.Write(d.defaultBase);
             WriteStr(w, d.templateRef);   // v2
             WriteEntries(w, d.values);    // v2
+            WriteArray(w, d.conditionalModifiers, WriteConditionalModifier);   // v6
         }
 
         private static CoreAttributeDefinitionDto ReadCoreAttribute(BinaryReader r, int version)
@@ -973,6 +1079,10 @@ namespace Ale.Chronicle.Serialization
             {
                 dto.templateRef = ReadStr(r);
                 dto.values      = ReadEntries(r);
+            }
+            if (version >= 6)
+            {
+                dto.conditionalModifiers = ReadArray(r, ReadConditionalModifier);
             }
             return dto;
         }
@@ -1377,6 +1487,7 @@ namespace Ale.Chronicle.Serialization
             WriteStrArray(w, p.allowedRaceRefs);
             WriteStr(w, p.templateRef);   // v5
             WriteEntries(w, p.values);    // v5
+            WriteStrArray(w, p.skillTreeRefs);   // v6
         }
 
         private static ProfessionDefinitionDto ReadProfession(BinaryReader r, int version)
@@ -1399,6 +1510,10 @@ namespace Ale.Chronicle.Serialization
             {
                 dto.templateRef = ReadStr(r);
                 dto.values      = ReadEntries(r);
+            }
+            if (version >= 6)
+            {
+                dto.skillTreeRefs = ReadStrArray(r);
             }
             return dto;
         }
@@ -1531,6 +1646,78 @@ namespace Ale.Chronicle.Serialization
                 attributes  = ReadArray(r, ReadDefinition),
                 kind        = r.ReadInt32(),
                 isRevocable = r.ReadBoolean(),
+            };
+        }
+
+        // ── v6 追加块：技能树 / 条件修改器 ─────────────────────────────────────────────
+
+        private static void WriteSkillTree(BinaryWriter w, SkillTreeDto t)
+        {
+            WriteStr(w, t.id);
+            WriteValue(w, t.displayName);
+            w.Write(t.kind);
+            WriteArray(w, t.skills, (bw, e) =>
+            {
+                WriteStr(bw, e.skillRef);
+                WriteStr(bw, e.unlockConditionJson);
+                WriteStr(bw, e.tierKey);
+                WriteStrArray(bw, e.prerequisiteSkillRefs);
+            });
+            WriteArray(w, t.tiers, (bw, ti) =>
+            {
+                WriteStr(bw, ti.key);
+                WriteValue(bw, ti.displayName);
+                WriteStr(bw, ti.unlockConditionJson);
+            });
+            WriteArray(w, t.pointGrants, (bw, g) =>
+            {
+                bw.Write(g.points);
+                WriteStr(bw, g.conditionJson);
+                bw.Write(g.mode);
+            });
+        }
+
+        private static SkillTreeDto ReadSkillTree(BinaryReader r)
+        {
+            return new SkillTreeDto
+            {
+                id          = ReadStr(r),
+                displayName = ReadValue(r),
+                kind        = r.ReadInt32(),
+                skills      = ReadArray(r, br => new SkillTreeEntryDto
+                {
+                    skillRef              = ReadStr(br),
+                    unlockConditionJson   = ReadStr(br),
+                    tierKey               = ReadStr(br),
+                    prerequisiteSkillRefs = ReadStrArray(br),
+                }),
+                tiers       = ReadArray(r, br => new SkillTreeTierDto
+                {
+                    key                 = ReadStr(br),
+                    displayName         = ReadValue(br),
+                    unlockConditionJson = ReadStr(br),
+                }),
+                pointGrants = ReadArray(r, br => new SkillPointGrantDto
+                {
+                    points        = br.ReadInt32(),
+                    conditionJson = ReadStr(br),
+                    mode          = br.ReadInt32(),
+                }),
+            };
+        }
+
+        private static void WriteConditionalModifier(BinaryWriter w, ConditionalModifierDto cm)
+        {
+            WriteModifier(w, cm.modifier ?? new ModifierDefinitionDto());
+            WriteStr(w, cm.conditionJson);
+        }
+
+        private static ConditionalModifierDto ReadConditionalModifier(BinaryReader r)
+        {
+            return new ConditionalModifierDto
+            {
+                modifier      = ReadModifier(r),
+                conditionJson = ReadStr(r),
             };
         }
 

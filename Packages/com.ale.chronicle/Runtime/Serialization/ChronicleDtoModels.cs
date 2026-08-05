@@ -34,6 +34,8 @@ namespace Ale.Chronicle.Serialization
         // v5 追加（职业 / 头衔模板）
         public ProfessionTemplateDto[] professionTemplates;
         public TitleTemplateDto[] titleTemplates;
+        // v6 追加（技能树）
+        public SkillTreeDto[] skillTrees;
     }
 
     [Serializable]
@@ -62,6 +64,7 @@ namespace Ale.Chronicle.Serialization
         public float maxValue;
         public float defaultBase;
         public AttributeEntryDto[] values;         // v2：来自模板 schema 的自定义字段
+        public ConditionalModifierDto[] conditionalModifiers;   // v6：按条件修改属性值
     }
 
     /// <summary>属性模板 DTO：派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加默认区间/类别。</summary>
@@ -260,6 +263,7 @@ namespace Ale.Chronicle.Serialization
         public string requirementsJson;
         public string[] allowedRaceRefs;
         public AttributeEntryDto[] values;         // v5：来自模板 schema 的自定义字段
+        public string[] skillTreeRefs;             // v6：关联技能树
     }
 
     /// <summary>职业模板 DTO：派生自 <see cref="ConfigTemplateDto"/>（name/color/attributes），追加默认预设。</summary>
@@ -338,5 +342,54 @@ namespace Ale.Chronicle.Serialization
     {
         public string titleRef;
         public int acquiredWorldDay;
+    }
+
+    // ── v6：技能树 / 条件修改器 DTO ───────────────────────────────────────────────
+
+    [Serializable]
+    public class SkillTreeEntryDto
+    {
+        public string skillRef;
+        /// <summary>unlockCondition（ConditionExpression）的 Condition System JSON 串。</summary>
+        public string unlockConditionJson;
+        public string tierKey;
+        public string[] prerequisiteSkillRefs;
+    }
+
+    [Serializable]
+    public class SkillTreeTierDto
+    {
+        public string key;
+        public AttributeValueDto displayName;
+        /// <summary>unlockCondition（ConditionExpression）的 Condition System JSON 串。</summary>
+        public string unlockConditionJson;
+    }
+
+    [Serializable]
+    public class SkillPointGrantDto
+    {
+        public int points;
+        /// <summary>condition（ConditionExpression）的 Condition System JSON 串。</summary>
+        public string conditionJson;
+        public int mode;
+    }
+
+    [Serializable]
+    public class SkillTreeDto
+    {
+        public string id;
+        public AttributeValueDto displayName;
+        public int kind;
+        public SkillTreeEntryDto[] skills;
+        public SkillTreeTierDto[] tiers;
+        public SkillPointGrantDto[] pointGrants;
+    }
+
+    [Serializable]
+    public class ConditionalModifierDto
+    {
+        public ModifierDefinitionDto modifier;
+        /// <summary>condition（ConditionExpression）的 Condition System JSON 串。</summary>
+        public string conditionJson;
     }
 }
