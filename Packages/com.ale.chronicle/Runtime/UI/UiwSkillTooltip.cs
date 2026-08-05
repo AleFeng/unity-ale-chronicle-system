@@ -43,9 +43,9 @@ namespace Ale.Chronicle.Runtime.UI
         [Header("自定义属性字段")]
         [Tooltip("要显示的自定义属性字段 Key 列表（每个非空值生成一行）。")]
         public string[] customFieldKeys;
-        [Tooltip("自定义字段行父容器。")]
+        [Tooltip("自定义属性字段行父容器。")]
         public Transform customFieldContainer;
-        [Tooltip("自定义字段行预制体（单个 SkillText）。")]
+        [Tooltip("自定义属性字段行预制体（单个 SkillText）。")]
         public SkillText customFieldLinePrefab;
 
         // 图标的异步绑定槽（内建代次守卫，改选 / 清空时作废未完成的加载）。见 SpriteSlot。

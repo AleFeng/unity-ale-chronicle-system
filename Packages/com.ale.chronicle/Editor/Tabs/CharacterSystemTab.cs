@@ -103,7 +103,7 @@ namespace Ale.Chronicle.Editor
         protected override string Noun => "角色模板";
         protected override string NewNamePrefix => "template_";
         protected override CharacterTemplate NewTemplate(string name) => new CharacterTemplate(name);
-        protected override string SchemaLabel => "自定义字段 schema";
+        protected override string SchemaLabel => "自定义属性字段 schema";
         protected override bool ExtrasBeforeSchema => false;   // 生成规则画在 schema 之后
 
         protected override void DrawExtras(IChronicleEditorContext ctx, CharacterTemplate tmpl)

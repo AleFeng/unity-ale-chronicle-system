@@ -53,7 +53,7 @@ namespace Ale.Chronicle.Editor
         public static void DrawCustomAttributes(IChronicleEditorContext ctx,
             List<AttributeEntry> values, List<AttributeDefinition> templateAttrs, string emptyHint)
         {
-            EditorGUILayout.LabelField("自定义属性（来自模板 schema）", ToolkitEditorStyles.Header);
+            EditorGUILayout.LabelField("自定义属性字段（来自模板 schema）", ToolkitEditorStyles.Header);
 
             if (values == null || values.Count == 0)
             {

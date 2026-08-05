@@ -117,7 +117,7 @@ namespace Ale.Chronicle.Editor
         protected override string Noun => "属性模板";
         protected override string NewNamePrefix => "attr_template_";
         protected override CoreAttributeTemplate NewTemplate(string name) => new CoreAttributeTemplate(name);
-        protected override string SchemaLabel => "自定义字段 schema";
+        protected override string SchemaLabel => "自定义属性字段 schema";
 
         protected override void DrawExtras(IChronicleEditorContext ctx, CoreAttributeTemplate tmpl)
         {
@@ -179,7 +179,7 @@ namespace Ale.Chronicle.Editor
 
             EditorGUILayout.Space(4);
             var tmpl = ctx.Database.GetCoreAttributeTemplate(item.templateRef);
-            ChronicleEntityHeader.DrawCustomAttributes(ctx, item.values, tmpl?.attributes, "（无——模板未定义自定义字段）");
+            ChronicleEntityHeader.DrawCustomAttributes(ctx, item.values, tmpl?.attributes, "（无——模板未定义自定义属性字段）");
         }
     }
 }

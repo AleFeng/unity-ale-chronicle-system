@@ -64,7 +64,7 @@ namespace Ale.Chronicle.Editor
 
             // ── 身份自由字段（schema = 模板 ∪ 特质功能标签）──────────────────────────
             EditorGUILayout.Space(4);
-            EditorGUILayout.LabelField("自定义字段", ToolkitEditorStyles.Header);
+            EditorGUILayout.LabelField("自定义属性字段", ToolkitEditorStyles.Header);
             if (c.values.Count == 0)
                 EditorGUILayout.LabelField("（无——请先为模板配置属性字段）", ToolkitEditorStyles.Placeholder);
             foreach (var entry in c.values)

@@ -41,9 +41,9 @@ namespace Ale.Chronicle.Runtime.UI
         [Header("自定义属性字段（可选，详情行）")]
         [Tooltip("要显示的自定义属性字段 Key 列表（每个非空值生成一行）。")]
         public string[] customFieldKeys;
-        [Tooltip("自定义字段行父容器（与 customFieldLinePrefab 同时配置时逐行生成）。")]
+        [Tooltip("自定义属性字段行父容器（与 customFieldLinePrefab 同时配置时逐行生成）。")]
         public Transform customFieldContainer;
-        [Tooltip("自定义字段行预制体（单个 SkillText）。")]
+        [Tooltip("自定义属性字段行预制体（单个 SkillText）。")]
         public SkillText customFieldLinePrefab;
 
         [Header("悬停详情")]

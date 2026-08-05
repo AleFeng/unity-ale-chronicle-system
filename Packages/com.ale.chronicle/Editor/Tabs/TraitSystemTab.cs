@@ -117,7 +117,7 @@ namespace Ale.Chronicle.Editor
         protected override string Noun => "特质模板";
         protected override string NewNamePrefix => "trait_template_";
         protected override TraitTemplate NewTemplate(string name) => new TraitTemplate(name);
-        protected override string SchemaLabel => "自定义字段 schema";
+        protected override string SchemaLabel => "自定义属性字段 schema";
 
         protected override void DrawExtras(IChronicleEditorContext ctx, TraitTemplate tmpl)
         {
@@ -224,7 +224,7 @@ namespace Ale.Chronicle.Editor
             // ── 自定义字段（来自模板 schema）───────────────────────────────────────
             EditorGUILayout.Space(4);
             var tmpl = db.GetTraitTemplate(trait.templateRef);
-            ChronicleEntityHeader.DrawCustomAttributes(ctx, trait.values, tmpl?.attributes, "（无——模板未定义自定义字段）");
+            ChronicleEntityHeader.DrawCustomAttributes(ctx, trait.values, tmpl?.attributes, "（无——模板未定义自定义属性字段）");
 
             // ── 获得条件（Condition System 内联绘制器）──────────────────────────────
             EditorGUILayout.Space(4);
