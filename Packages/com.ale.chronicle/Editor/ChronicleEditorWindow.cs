@@ -101,6 +101,7 @@ namespace Ale.Chronicle.Editor
                 foreach (var t in db.ProfessionTrees) t?.Normalize();
                 foreach (var t in db.Titles)          { t?.Normalize(); t?.RebuildAttributes(db); }
                 foreach (var l in db.RankLadders)     l?.Normalize();
+                foreach (var st in db.SkillTrees)     st?.Normalize();
             }
         }
 
@@ -174,6 +175,7 @@ namespace Ale.Chronicle.Editor
             Collect(db.ProfessionTrees,    x => x?.id,   result[EChronicleEntityKind.ProfessionTree]);
             Collect(db.Titles,             x => x?.id,   result[EChronicleEntityKind.Title]);
             Collect(db.RankLadders,        x => x?.id,   result[EChronicleEntityKind.RankLadder]);
+            Collect(db.SkillTrees,         x => x?.id,   result[EChronicleEntityKind.SkillTree]);
             return result;
         }
 
@@ -202,6 +204,7 @@ namespace Ale.Chronicle.Editor
             EChronicleEntityKind.ProfessionTree    => "转职树 id",
             EChronicleEntityKind.Title             => "头衔 id",
             EChronicleEntityKind.RankLadder        => "阶级序列 id",
+            EChronicleEntityKind.SkillTree         => "技能树 id",
             _                                      => k.ToString(),
         };
     }

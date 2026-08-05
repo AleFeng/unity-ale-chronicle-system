@@ -14,11 +14,14 @@ namespace Ale.Chronicle.Editor
     public sealed class SkillSystemTab : EditorThreeColumnTab<Skill>
     {
         private readonly SkillTemplatePanel _templatePanel = new SkillTemplatePanel();
+        private readonly SkillTreeListPanel _treePanel     = new SkillTreeListPanel();
         private readonly SkillListPanel     _listPanel     = new SkillListPanel();
         private IEditorMasterListPanel<ChronicleDatabase>[] _leftPanels;
 
+        protected override string[] LeftSubTabs => new[] { "技能模板", "技能树" };
+
         protected override IEditorMasterListPanel<ChronicleDatabase>[] LeftPanels
-            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _templatePanel };
+            => _leftPanels ??= new IEditorMasterListPanel<ChronicleDatabase>[] { _templatePanel, _treePanel };
 
         protected override string EntityNoun => "技能";
 
@@ -167,6 +170,128 @@ namespace Ale.Chronicle.Editor
             var tmpl = ctx.Database.GetSkillTemplate(skill.templateRef);
             ChronicleEntityHeader.DrawCustomAttributes(ctx, skill.values, tmpl?.attributes,
                 "（该技能暂无自定义属性字段；可在左侧「技能模板」中添加）");
+        }
+    }
+
+    /// <summary>技能树主列表面板（技能页左列第二子页签）：绑定 <see cref="ChronicleDatabase.SkillTrees"/>；
+    /// 选中后右列渲染 基础信息 + 类型 + 技能点获取；三类型结构编辑（列表 / 层级 / 树状）在 <c>SkillTreeDrawer</c>（后续步骤）。</summary>
+    public sealed class SkillTreeListPanel : EditorMasterListPanel<SkillTree>
+    {
+        protected override List<SkillTree> GetList(ChronicleDatabase db) => db.SkillTrees;
+        protected override string Noun => "技能树";
+
+        protected override string RowLabel(SkillTree item)
+        {
+            string name = item.displayName != null ? item.displayName.GetTextValue() : null;
+            return !string.IsNullOrEmpty(name) ? name : (string.IsNullOrEmpty(item.id) ? "(未命名)" : item.id);
+        }
+
+        protected override SkillTree CreateNew(ChronicleDatabase db, List<SkillTree> list)
+        {
+            int n = list.Count + 1;
+            string id;
+            do { id = "skill_tree_" + n; n++; } while (Exists(list, id));
+            return new SkillTree(id);
+        }
+
+        private static bool Exists(List<SkillTree> list, string id)
+        {
+            foreach (var t in list) if (t != null && t.id == id) return true;
+            return false;
+        }
+
+        public override void DrawInspector(IChronicleEditorContext ctx, SkillTree tree)
+        {
+            if (tree == null)
+            {
+                EditorGUILayout.LabelField("请选择或新建一棵技能树。", ToolkitEditorStyles.Placeholder);
+                return;
+            }
+            tree.Normalize();
+
+            EditorGUILayout.LabelField("基础信息", ToolkitEditorStyles.Header);
+            ChronicleEntityHeader.DrawIdField(ctx, "技能树", tree.id,
+                ctx.DuplicateIdsOf(EChronicleEntityKind.SkillTree), v => tree.id = v);
+            AttributeFieldDrawer.Draw(ctx, "显示名", tree.displayName, null);
+
+            EditorGUI.BeginChangeCheck();
+            var kind = (ESkillTreeKind)EditorGUILayout.EnumPopup("类型", tree.kind);
+            if (EditorGUI.EndChangeCheck())
+            {
+                ctx.RecordUndo("修改技能树类型");
+                tree.kind = kind;
+                ctx.MarkDirty();
+            }
+
+            // 三类型结构（列表 / 层级 / 树状）绘制留待后续步骤：SkillTreeDrawer.Draw(ctx, tree);
+            EditorGUILayout.Space(6);
+            EditorGUILayout.HelpBox("技能结构编辑（列表 / 层级 / 树状）将在下一步接入。", MessageType.None);
+
+            EditorGUILayout.Space(6);
+            DrawPointGrants(ctx, tree);
+        }
+
+        // 技能点获取条目列表：点数 + 获取方式 + 内联获取条件；延迟应用增删。
+        private static void DrawPointGrants(IChronicleEditorContext ctx, SkillTree tree)
+        {
+            var list = tree.pointGrants;
+            EditorGUILayout.LabelField("技能点获取", ToolkitEditorStyles.Header);
+            if (list == null) return;
+
+            int treeIdx  = ctx.Database.SkillTrees.IndexOf(tree);
+            int removeAt = -1;
+            for (int j = 0; j < list.Count; j++)
+            {
+                var g = list[j];
+                if (g == null) continue;
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"获取 {j + 1}", EditorStyles.miniBoldLabel);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("✕", EditorStyles.miniButton, GUILayout.Width(22))) removeAt = j;
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUI.BeginChangeCheck();
+                int pts  = EditorGUILayout.IntField("点数", g.points);
+                var mode = (ESkillPointGrantMode)EditorGUILayout.EnumPopup("获取方式", g.mode);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    ctx.RecordUndo("修改技能点获取");
+                    g.points = pts;
+                    g.mode   = mode;
+                    ctx.MarkDirty();
+                }
+
+                if (treeIdx >= 0)
+                {
+                    int jj = j;
+                    ChronicleEditorFields.InlineConditionAt(ctx, "获取条件", so =>
+                    {
+                        var arr = so.FindProperty("skillTrees");
+                        if (arr == null || treeIdx >= arr.arraySize) return null;
+                        var gArr = arr.GetArrayElementAtIndex(treeIdx).FindPropertyRelative("pointGrants");
+                        if (gArr == null || jj >= gArr.arraySize) return null;
+                        return gArr.GetArrayElementAtIndex(jj).FindPropertyRelative("condition");
+                    });
+                }
+
+                EditorGUILayout.EndVertical();
+            }
+
+            if (removeAt >= 0)
+            {
+                ctx.RecordUndo("删除技能点获取");
+                list.RemoveAt(removeAt);
+                ctx.MarkDirty();
+            }
+
+            if (GUILayout.Button("+ 添加获取条目"))
+            {
+                ctx.RecordUndo("添加技能点获取");
+                list.Add(new SkillPointGrant());
+                ctx.MarkDirty();
+            }
         }
     }
 }
