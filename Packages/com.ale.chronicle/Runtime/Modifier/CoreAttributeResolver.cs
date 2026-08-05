@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Ale.Toolkit.Runtime;
+using Ale.Condition;
 
 namespace Ale.Chronicle
 {
@@ -43,14 +44,48 @@ namespace Ale.Chronicle
         /// </summary>
         public static ModifierEvaluation Evaluate(CharacterDefinition character, CoreAttributeDefinition def,
             IChronicleSchemaSource src)
+            => Evaluate(character, def, src, null);
+
+        /// <summary>
+        /// 同上，另接收条件上下文 <paramref name="ctx"/>：在收集期把 <paramref name="def"/> 自身携带、且条件通过的
+        /// <see cref="CoreAttributeDefinition.conditionalModifiers"/> 也汇入（来源标记 <c>attr:{id}:cond</c>）。
+        /// 空条件恒通过；非空条件在 <paramref name="ctx"/> 为 null（如编辑器预览、无真实条件源）时判定器取不到数据源 →
+        /// 不通过 → 该条修改值不计入（运行时传入真实上下文才生效）。既有三来源汇流不受影响。
+        /// </summary>
+        public static ModifierEvaluation Evaluate(CharacterDefinition character, CoreAttributeDefinition def,
+            IChronicleSchemaSource src, IConditionContext ctx)
         {
             string attrId = def != null ? def.id : null;
             var mods = new List<ModifierDefinition>();
             character?.CollectModifiers(attrId, src, mods);
+            CollectConditionalModifiers(def, ctx, mods);
             float baseValue = character != null
                 ? character.GetCoreBaseValue(attrId, def)
                 : (def != null ? def.defaultBase : 0f);
             return Evaluate(def, baseValue, mods);
+        }
+
+        /// <summary>
+        /// 把 <paramref name="def"/> 自身携带、且条件通过的条件修改值克隆汇入 <paramref name="into"/>
+        /// （靶子回填为本属性 id；无自带来源标记则打 <c>attr:{id}:cond</c>）。空条件恒通过；
+        /// 条件不通过（含 <paramref name="ctx"/> 为 null 时的非空条件）者不计入。
+        /// </summary>
+        public static void CollectConditionalModifiers(CoreAttributeDefinition def, IConditionContext ctx,
+            List<ModifierDefinition> into)
+        {
+            if (def == null || def.conditionalModifiers == null || into == null) return;
+            string attrId = def.id;
+            string srcTag = "attr:" + attrId + ":cond";
+            foreach (var cm in def.conditionalModifiers)
+            {
+                if (cm == null || cm.modifier == null) continue;
+                bool pass = cm.condition == null || cm.condition.IsEmpty || cm.condition.Evaluate(ctx).Passed;
+                if (!pass) continue;
+                var m = cm.modifier.Clone();
+                m.targetAttributeId = attrId;
+                if (string.IsNullOrEmpty(m.sourceTag)) m.sourceTag = srcTag;
+                into.Add(m);
+            }
         }
     }
 }
