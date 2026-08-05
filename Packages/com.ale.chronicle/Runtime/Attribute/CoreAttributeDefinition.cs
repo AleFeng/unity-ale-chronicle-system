@@ -44,6 +44,9 @@ namespace Ale.Chronicle
         /// <summary>说明（Text）。</summary>
         public AttributeValue description = new AttributeValue(EFieldType.Text);
 
+        /// <summary>按条件修改本属性值（payload + gate）：运行时经 <see cref="CoreAttributeResolver"/> 收集期按条件过滤后汇入。</summary>
+        public List<ConditionalModifier> conditionalModifiers = new List<ConditionalModifier>();
+
         /// <summary>来自模板 schema 的自定义字段值。</summary>
         public List<AttributeEntry> values = new List<AttributeEntry>();
 
@@ -84,6 +87,8 @@ namespace Ale.Chronicle
             abbreviation = EnsureType(abbreviation, EFieldType.Text);
             description  = EnsureType(description,   EFieldType.Text);
             icon         = EnsureType(icon,          EFieldType.Sprite);
+            if (conditionalModifiers == null) conditionalModifiers = new List<ConditionalModifier>();
+            foreach (var cm in conditionalModifiers) cm?.Normalize();
             if (values == null) values = new List<AttributeEntry>();
         }
 
@@ -109,6 +114,9 @@ namespace Ale.Chronicle
                 icon            = icon        != null ? icon.Clone()        : new AttributeValue(EFieldType.Sprite),
                 description     = description != null ? description.Clone() : new AttributeValue(EFieldType.Text),
             };
+            if (conditionalModifiers != null)
+                foreach (var cm in conditionalModifiers)
+                    clone.conditionalModifiers.Add(cm != null ? cm.Clone() : new ConditionalModifier());
             foreach (var e in values)
                 clone.values.Add(e != null ? e.Clone() : new AttributeEntry());
             return clone;

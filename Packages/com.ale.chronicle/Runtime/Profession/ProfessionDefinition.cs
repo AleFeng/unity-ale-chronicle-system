@@ -56,6 +56,9 @@ namespace Ale.Chronicle
         /// <summary>允许种族（空 = 全部）。种族系统未落地前存为不透明串、宽松校验。</summary>
         public List<string> allowedRaceRefs = new List<string>();
 
+        /// <summary>关联技能树（→ <see cref="SkillTree.id"/>；可关联一个或多个；空 = 无）。</summary>
+        public List<string> skillTreeRefs = new List<string>();
+
         /// <summary>来自模板 schema 的自定义属性值。</summary>
         public List<AttributeEntry> values = new List<AttributeEntry>();
 
@@ -129,6 +132,7 @@ namespace Ale.Chronicle
             if (unlocks == null)         unlocks         = new List<LevelUnlock>();
             if (requirements == null)    requirements    = new ConditionExpression();
             if (allowedRaceRefs == null) allowedRaceRefs = new List<string>();
+            if (skillTreeRefs == null)   skillTreeRefs   = new List<string>();
             if (values == null)          values          = new List<AttributeEntry>();
             if (maxLevel < 1)            maxLevel        = 1;
             foreach (var g in growth) g?.Normalize();
@@ -153,6 +157,7 @@ namespace Ale.Chronicle
                 expCurve    = expCurve    != null ? expCurve.Clone()    : new ExpCurve(),
                 requirements = requirements != null ? requirements.Clone() : new ConditionExpression(),
                 allowedRaceRefs = allowedRaceRefs != null ? new List<string>(allowedRaceRefs) : new List<string>(),
+                skillTreeRefs   = skillTreeRefs   != null ? new List<string>(skillTreeRefs)   : new List<string>(),
             };
             if (growth != null)
                 foreach (var g in growth) c.growth.Add(g != null ? g.Clone() : new LevelGrowthEntry());
