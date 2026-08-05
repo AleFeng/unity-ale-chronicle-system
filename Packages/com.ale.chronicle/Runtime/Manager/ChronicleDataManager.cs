@@ -66,6 +66,7 @@ namespace Ale.Chronicle
         private readonly Dictionary<string, CharacterTemplate>      _templates = new Dictionary<string, CharacterTemplate>();
         private readonly Dictionary<string, CharacterDefinition>    _characters = new Dictionary<string, CharacterDefinition>();
         private readonly Dictionary<string, Skill>                  _skills    = new Dictionary<string, Skill>();
+        private readonly Dictionary<string, SkillTree>              _skillTrees = new Dictionary<string, SkillTree>();
         private readonly Dictionary<string, ChronicleGroupTag>      _groupTags = new Dictionary<string, ChronicleGroupTag>();
         private readonly Dictionary<string, ProfessionTemplate>     _professionTemplates = new Dictionary<string, ProfessionTemplate>();
         private readonly Dictionary<string, ProfessionDefinition>   _professions     = new Dictionary<string, ProfessionDefinition>();
@@ -87,6 +88,7 @@ namespace Ale.Chronicle
             _skills.Clear();    _groupTags.Clear();
             _professionTemplates.Clear(); _titleTemplates.Clear();
             _professions.Clear(); _professionTrees.Clear(); _titles.Clear(); _rankLadders.Clear();
+            _skillTrees.Clear();
 
             foreach (var db in _databases)
             {
@@ -98,6 +100,7 @@ namespace Ale.Chronicle
                 Index(_templates,  db.CharacterTemplates, x => x.name);
                 Index(_characters, db.Characters,        x => x.id);
                 Index(_skills,     db.Skills,            x => x.id);
+                Index(_skillTrees, db.SkillTrees,        x => x.id);
                 Index(_groupTags,  db.GroupTags,         x => x.id);
                 Index(_professionTemplates, db.ProfessionTemplates, x => x.name);
                 Index(_professions,     db.Professions,     x => x.id);
@@ -153,6 +156,9 @@ namespace Ale.Chronicle
         /// <summary>按 id 跨库查找技能，未找到返回 null。</summary>
         public Skill GetSkill(string skillId) => Lookup(_skills, skillId);
 
+        /// <summary>按 id 跨库查找技能树，未找到返回 null。</summary>
+        public SkillTree GetSkillTree(string treeId) => Lookup(_skillTrees, treeId);
+
         /// <summary>按 id 跨库查找分组标签，未找到返回 null。</summary>
         public ChronicleGroupTag GetGroupTag(string tagId) => Lookup(_groupTags, tagId);
 
@@ -161,6 +167,13 @@ namespace Ale.Chronicle
         {
             EnsureIndex();
             return new List<Skill>(_skills.Values);
+        }
+
+        /// <summary>跨库返回全部技能树（id 去重、先注册先得）；未注册返回空列表。</summary>
+        public List<SkillTree> GetAllSkillTrees()
+        {
+            EnsureIndex();
+            return new List<SkillTree>(_skillTrees.Values);
         }
 
         /// <summary>跨库返回全部分组标签（按注册 / 列表顺序，id 去重、先注册先得）；未注册返回空列表。</summary>
