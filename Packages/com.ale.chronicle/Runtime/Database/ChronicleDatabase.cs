@@ -32,6 +32,7 @@ namespace Ale.Chronicle
         [SerializeField] private List<NumberFormatConfig>     numberFormatConfigs    = new List<NumberFormatConfig>();
         [SerializeField] private List<SkillTemplate>          skillTemplates         = new List<SkillTemplate>();
         [SerializeField] private List<Skill>                  skills                 = new List<Skill>();
+        [SerializeField] private List<SkillTree>              skillTrees             = new List<SkillTree>();
         [SerializeField] private List<ProfessionTemplate>     professionTemplates    = new List<ProfessionTemplate>();
         [SerializeField] private List<ProfessionDefinition>   professions            = new List<ProfessionDefinition>();
         [SerializeField] private List<ProfessionTree>         professionTrees        = new List<ProfessionTree>();
@@ -79,6 +80,9 @@ namespace Ale.Chronicle
 
         /// <summary>技能 列表。</summary>
         public List<Skill> Skills => skills;
+
+        /// <summary>技能树 列表。</summary>
+        public List<SkillTree> SkillTrees => skillTrees;
 
         /// <summary>职业模板 列表。</summary>
         public List<ProfessionTemplate> ProfessionTemplates => professionTemplates;
@@ -160,6 +164,9 @@ namespace Ale.Chronicle
         /// <summary>按 id 查找技能，未找到返回 null。</summary>
         public Skill GetSkill(string skillId) => Find(skills, skillId, s => s.id);
 
+        /// <summary>按 id 查找技能树，未找到返回 null。</summary>
+        public SkillTree GetSkillTree(string treeId) => Find(skillTrees, treeId, t => t.id);
+
         /// <summary>按 id 查找职业，未找到返回 null。</summary>
         public ProfessionDefinition GetProfession(string professionId) => Find(professions, professionId, p => p.id);
 
@@ -215,6 +222,7 @@ namespace Ale.Chronicle
             CheckDuplicates(groupTags,          t => t.id,   "分组标签 id",   errors);
             CheckDuplicates(numberFormatConfigs, c => c.name, "数字格式 name", errors);
             CheckDuplicates(skills,             s => s.id,   "技能 id",       errors);
+            CheckDuplicates(skillTrees,         t => t.id,   "技能树 id",     errors);
             CheckDuplicates(skillTemplates,     t => t.name, "技能模板 name", errors);
             CheckDuplicates(professionTemplates, t => t.name, "职业模板 name", errors);
             CheckDuplicates(professions,        p => p.id,   "职业 id",       errors);
@@ -300,6 +308,10 @@ namespace Ale.Chronicle
                     dangling.Add($"职业[{p.id}].templateRef → 职业模板 '{p.templateRef}'");
                 if (!string.IsNullOrEmpty(p.groupTagRef) && GetGroupTag(p.groupTagRef) == null)
                     dangling.Add($"职业[{p.id}].groupTagRef → 分组标签 '{p.groupTagRef}'");
+                if (p.skillTreeRefs != null)
+                    foreach (var r in p.skillTreeRefs)
+                        if (!string.IsNullOrEmpty(r) && GetSkillTree(r) == null)
+                            dangling.Add($"职业[{p.id}].skillTreeRefs → 技能树 '{r}'");
                 if (p.growth != null)
                     foreach (var g in p.growth)
                         if (g != null && !string.IsNullOrEmpty(g.coreAttrId) && GetCoreAttribute(g.coreAttrId) == null)
@@ -377,6 +389,38 @@ namespace Ale.Chronicle
                 }
             }
 
+            // 技能树：技能条目 / 层级 key / 前置技能须存在且为同树节点；树状前置成环为错误
+            foreach (var tree in skillTrees)
+            {
+                if (tree == null || tree.skills == null) continue;
+                var skillSet = new HashSet<string>();
+                foreach (var e in tree.skills)
+                    if (e != null && !string.IsNullOrEmpty(e.skillRef)) skillSet.Add(e.skillRef);
+                var tierSet = new HashSet<string>();
+                if (tree.tiers != null)
+                    foreach (var ti in tree.tiers)
+                        if (ti != null && !string.IsNullOrEmpty(ti.key)) tierSet.Add(ti.key);
+                foreach (var e in tree.skills)
+                {
+                    if (e == null) continue;
+                    if (!string.IsNullOrEmpty(e.skillRef) && GetSkill(e.skillRef) == null)
+                        dangling.Add($"技能树[{tree.id}].skills → 技能 '{e.skillRef}'");
+                    if (!string.IsNullOrEmpty(e.tierKey) && !tierSet.Contains(e.tierKey))
+                        errors.Add($"技能树[{tree.id}] 技能 '{e.skillRef}' 的层级 '{e.tierKey}' 不存在");
+                    if (e.prerequisiteSkillRefs != null)
+                        foreach (var pre in e.prerequisiteSkillRefs)
+                        {
+                            if (string.IsNullOrEmpty(pre)) continue;
+                            if (GetSkill(pre) == null)
+                                dangling.Add($"技能树[{tree.id}].prerequisiteSkillRefs → 技能 '{pre}'");
+                            else if (!skillSet.Contains(pre))
+                                errors.Add($"技能树[{tree.id}] 前置技能 '{pre}' 未作为本树节点存在");
+                        }
+                }
+                if (SkillTreeHasCycle(tree))
+                    errors.Add($"技能树[{tree.id}] 存在环（前置技能不可成环）");
+            }
+
             if (dangling.Count > 0)
                 errors.Add("存在悬空引用：" + string.Join("；", dangling));
 
@@ -435,6 +479,23 @@ namespace Ale.Chronicle
             return false;
         }
 
+        /// <summary>技能树是否存在环（沿 prerequisiteSkillRefs 有向边 DFS 检测回边）。</summary>
+        private static bool SkillTreeHasCycle(SkillTree tree)
+        {
+            if (tree == null || tree.skills == null) return false;
+            var adj = new Dictionary<string, List<string>>();
+            foreach (var e in tree.skills)
+            {
+                if (e == null || string.IsNullOrEmpty(e.skillRef)) continue;
+                if (!adj.TryGetValue(e.skillRef, out var list)) { list = new List<string>(); adj[e.skillRef] = list; }
+                if (e.prerequisiteSkillRefs != null) list.AddRange(e.prerequisiteSkillRefs);
+            }
+            var state = new Dictionary<string, int>();
+            foreach (var key in adj.Keys)
+                if (HasCycleDfs(key, adj, state)) return true;
+            return false;
+        }
+
         #endregion
 
         #region 深拷贝（模板支持）
@@ -455,6 +516,7 @@ namespace Ale.Chronicle
             numberFormatConfigs    = source.numberFormatConfigs.Select(c => c.Clone()).ToList();
             skillTemplates         = source.skillTemplates.Select(t => t.Clone()).ToList();
             skills                 = source.skills.Select(s => s.Clone()).ToList();
+            skillTrees             = source.skillTrees.Select(t => t.Clone()).ToList();
             professionTemplates    = source.professionTemplates.Select(t => t.Clone()).ToList();
             professions            = source.professions.Select(p => p.Clone()).ToList();
             professionTrees        = source.professionTrees.Select(t => t.Clone()).ToList();
