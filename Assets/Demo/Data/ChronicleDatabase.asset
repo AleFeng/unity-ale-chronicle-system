@@ -39,6 +39,368 @@ MonoBehaviour:
       attributeValues: []
     nextValue: 4
     attributes: []
+  - name: "\u9636\u7EA7"
+    items:
+    - name: "\u521D\u7EA7"
+      value: 0
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u521D\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '30f88aa7a52b64f45b8c567d63d62b01[T_Quality_Frame_Poor]'
+    - name: "\u4E2D\u7EA7"
+      value: 1
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u4E2D\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '0abd3a6ee336ae144a47b12b50e68d49[T_Quality_Frame_Common]'
+    - name: "\u9AD8\u7EA7"
+      value: 2
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u9AD8\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '3283108b306f3d84b90d36bc846f0675[T_Quality_Frame_Uncommon]'
+    - name: "\u738B\u7EA7"
+      value: 3
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u738B\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '3eab096c48c919943a0d5cacb00ca84f[T_Quality_Frame_Rare]'
+    - name: "\u5E1D\u7EA7"
+      value: 4
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u5E1D\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - 'b165232a97a4a64408c1d4dfa30b7d62[T_Quality_Frame_Epic]'
+    - name: "\u5723\u7EA7"
+      value: 5
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u5723\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - 'dec70115fa10a534b952aa5289a898d2[T_Quality_Frame_Legendary]'
+    - name: "\u795E\u7EA7"
+      value: 6
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u795E\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - 'ef9f4c9a445adef4b8f8b1537bab5dc7[T_Quality_Frame_Mythic]'
+    nextValue: 7
+    attributes:
+    - id: "\u540D\u79F0"
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - 
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: "\u63CF\u8FF0"
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - 
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: "\u80CC\u666F\u6846"
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 9
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs:
+        - {fileID: 0}
+        curves: []
+        objAddresses:
+        - 
   tags: []
   coreAttributes:
   - id: might
@@ -1225,14 +1587,31 @@ MonoBehaviour:
   skillTemplates:
   - name: "\u4E3B\u52A8\u6280\u80FD"
     color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    attributes: []
+    attributes:
+    - id: "\u9636\u7EA7"
+      type: 4
+      isArray: 0
+      enumTypeRef: "\u9636\u7EA7"
+      defaultValue:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
     displayText:
       type: 10
       isArray: 0
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -1242,7 +1621,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -1293,13 +1675,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 70a42b5f72e932d448a5fed68befdf07
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: fireball
     displayText:
       type: 10
@@ -1334,13 +1729,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - f47f7d68136610543b4207c7a0b87d1d
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: magic
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: erudition
     displayText:
       type: 10
@@ -1375,13 +1783,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - fe3d30e84e6817a488c88f946440832e
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: social
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: slash
     displayText:
       type: 10
@@ -1416,13 +1837,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 3e31b9fdb695d7248a67344e6613b1f8
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: heavy_strike
     displayText:
       type: 10
@@ -1457,13 +1891,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 3e31b9fdb695d7248a67344e6613b1f8
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: whirlwind
     displayText:
       type: 10
@@ -1498,13 +1945,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 4f38ed690f4d1324f87750dd24d2bd32
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: flame_burst
     displayText:
       type: 10
@@ -1539,13 +1999,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 0e341243841712e4ba9ef6428b9b0370
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: magic
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 01000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   - id: meteor
     displayText:
       type: 10
@@ -1580,13 +2053,26 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 10f5993454ccba14a99fa9ad5de7c8cb
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: magic
     secondaryGroupTags: []
-    values: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 02000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
   skillTrees:
   - id: knight_tree
     displayName:
@@ -2460,7 +2946,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2471,9 +2960,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: "\u4E16\u4FD7\u7235\u4F4D"
     kind: 0
     groupTagRef: noble
@@ -2516,7 +3007,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2527,9 +3021,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: "\u4E16\u4FD7\u7235\u4F4D"
     kind: 0
     groupTagRef: noble
@@ -2572,7 +3068,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2583,9 +3082,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: "\u4E16\u4FD7\u7235\u4F4D"
     kind: 0
     groupTagRef: noble
@@ -2628,7 +3129,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2639,9 +3143,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: "\u4E16\u4FD7\u7235\u4F4D"
     kind: 0
     groupTagRef: noble
@@ -2684,7 +3190,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2695,9 +3204,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: "\u4E16\u4FD7\u7235\u4F4D"
     kind: 0
     groupTagRef: noble
@@ -2740,7 +3251,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2751,9 +3265,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: combat
@@ -2788,7 +3304,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2799,9 +3318,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: combat
@@ -2836,7 +3357,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2847,9 +3371,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: combat
@@ -2884,7 +3410,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2895,9 +3424,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: combat
@@ -2932,7 +3463,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2943,9 +3477,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: magic
@@ -2980,7 +3516,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -2991,9 +3530,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: magic
@@ -3028,7 +3569,10 @@ MonoBehaviour:
       enumTypeRef: 
       ints: 
       floats: []
-      strings: []
+      strings:
+      - 
+      - 
+      - 
       objRefs: []
       curves: []
       objAddresses: []
@@ -3039,9 +3583,11 @@ MonoBehaviour:
       ints: 
       floats: []
       strings: []
-      objRefs: []
+      objRefs:
+      - {fileID: 0}
       curves: []
-      objAddresses: []
+      objAddresses:
+      - 
     templateRef: 
     kind: 1
     groupTagRef: magic

@@ -14,16 +14,26 @@ namespace Ale.Chronicle.Runtime.UI
 {
     /// <summary>
     /// 角色信息主界面（MonoBehaviour，继承 <see cref="UiwViewBase"/>，与 <see cref="UiwSkillView"/> 同规格）。
-    /// 从 <see cref="ChronicleDataManager"/> 取 <see cref="CharacterDefinition"/>，分区展示：
-    /// 个人档案（姓名/性别/年龄/身高/体重/三围/血型/兴趣）、6 项能力（基础 → 当前 + 逐来源明细，经
-    /// <see cref="CoreAttributeResolver"/> 汇流特质/职业成长/头衔）、特质、职业（等级/主职业）、头衔（含爵位阶级位次）、
-    /// 以及由职业技能树导出的可用技能。
+    /// 从 <see cref="ChronicleDataManager"/> 取 <see cref="CharacterDefinition"/>，分区展示：姓名 + 头衔/主职业副标题、
+    /// 个人档案（两列）、6 项能力（数值网格 + 逐来源明细，经 <see cref="CoreAttributeResolver"/> 汇流特质/职业成长/头衔）、
+    /// 特质、职业（等级/主职业）、头衔（含爵位阶级位次）、以及由职业技能树导出的可用技能。
     ///
-    /// <para>展示的是<b>静态配置</b>（角色的起始配装），无运行时进度订阅，故 <see cref="Unsubscribe"/> 为空、
-    /// <see cref="Reopen"/> 直接重开。各分区文本写入对应的序列化 <c>UiText</c>（ATK_TMP 下即 TMP_Text）。</para>
+    /// <para>排版参考桌游式角色面板：TMP 富文本做配色 / 分栏 / 层级（无需额外美术图标）。
+    /// 展示<b>静态配置</b>，无运行时进度订阅，故 <see cref="Unsubscribe"/> 为空、<see cref="Reopen"/> 直接重开。</para>
     /// </summary>
     public class UiwCharacterView : UiwViewBase
     {
+        // ── 配色（TMP 富文本 <color> 十六进制）─────────────────────────────────────
+        private const string ColHeader = "#E0C98F"; // 分区标题（暖金）
+        private const string ColValue  = "#F0CE73"; // 数值（亮金）
+        private const string ColLabel  = "#8B97A9"; // 字段名 / 次要（灰蓝）
+        private const string ColName   = "#E6EAF2"; // 主体名（近白）
+        private const string ColDim    = "#798394"; // 明细 / 弱化（暗灰）
+        private const string ColSub    = "#CBAE7A"; // 副标题（浅金）
+        private const string ColAccent = "#8FB4E0"; // 强调标签（浅蓝，如 主职业）
+        private const string ColPos    = "#8FCf9a"; // 正加成（绿）
+        private const string ColNeg    = "#E08A8A"; // 负加成（红）
+
         [Header("角色")]
         [Tooltip("要展示的角色 ID（→ ChronicleDataManager.GetCharacter）。")]
         public string characterId = "luna";
@@ -32,10 +42,18 @@ namespace Ale.Chronicle.Runtime.UI
         [Tooltip("把「世界日」换算为「岁」的每岁天数（仅用于显示；历法子系统落地前的近似）。")]
         public int daysPerYear = 365;
 
+        [Header("头部")]
+        [Tooltip("头像占位：姓名首字（无美术头像时的替身）。")]
+        [SerializeField] private UiText portraitInitialText;
+        [Tooltip("副标题：最高爵位 · 主职业 Lv.x。")]
+        [SerializeField] private UiText subtitleText;
+        [Tooltip("元信息：性别 · 年龄。")]
+        [SerializeField] private UiText metaText;
+
         [Header("展示文本（各分区，可按需留空）")]
-        [Tooltip("个人档案：性别/年龄/身高/体重/三围/血型/兴趣。")]
+        [Tooltip("个人档案：性别/年龄/身高/体重/三围/血型/兴趣（两列）。")]
         [SerializeField] private UiText profileLabel;
-        [Tooltip("能力：基础 → 当前 + 逐来源明细。")]
+        [Tooltip("能力：数值网格 + 逐来源明细。")]
         [SerializeField] private UiText attributesLabel;
         [Tooltip("特质（含携带的属性修饰器摘要）。")]
         [SerializeField] private UiText traitsLabel;
@@ -86,19 +104,24 @@ namespace Ale.Chronicle.Runtime.UI
 
             var src = FindSchemaSource(dm, characterId);
 
-            if (titleLabel) titleLabel.text = ResolveName(character);
-            // 分区标题烘焙进内容文本(视图每次覆盖写入,不依赖独立静态节点——后者会被 LocalizedTextEvent 清空)。
-            if (profileLabel)     profileLabel.text     = Section("个人档案",        BuildProfile(character, dm));
-            if (attributesLabel)  attributesLabel.text  = Section("能力（基础 → 当前）", BuildAttributes(character, dm, src));
-            if (traitsLabel)      traitsLabel.text      = Section("特质",            BuildTraits(character, dm));
-            if (professionsLabel) professionsLabel.text = Section("职业",            BuildProfessions(character, dm));
-            if (titlesLabel)      titlesLabel.text      = Section("头衔",            BuildTitles(character, dm));
-            if (skillsLabel)      skillsLabel.text      = Section("技能",            BuildSkills(character, dm));
+            // 头部：姓名 / 副标题（爵位·主职业）/ 元信息（性别·年龄）/ 头像占位（姓名首字）
+            if (titleLabel)          titleLabel.text          = ResolveName(character);
+            if (portraitInitialText) portraitInitialText.text = Initial(character);
+            if (subtitleText)        subtitleText.text        = BuildSubtitle(character, dm);
+            if (metaText)            metaText.text            = BuildMeta(character, dm);
+
+            if (profileLabel)     profileLabel.text     = Section("个人档案", BuildProfile(character, dm));
+            if (attributesLabel)  attributesLabel.text  = Section("能力",     BuildAttributes(character, dm, src));
+            if (traitsLabel)      traitsLabel.text      = Section("特质",     BuildTraits(character, dm));
+            if (professionsLabel) professionsLabel.text = Section("职业",     BuildProfessions(character, dm));
+            if (titlesLabel)      titlesLabel.text      = Section("头衔",     BuildTitles(character, dm));
+            if (skillsLabel)      skillsLabel.text      = Section("技能",     BuildSkills(character, dm));
         }
 
-        /// <summary>把分区标题(TMP 富文本加粗)拼到内容之前;内容为空时占位「—」。</summary>
+        /// <summary>分区标题（暖金加粗 + ◆ 前缀）；内容为空时占位「—」。</summary>
         private static string Section(string header, string body)
-            => "<b>◆ " + header + "</b>\n" + (string.IsNullOrEmpty(body) ? "—" : body);
+            => $"<size=112%><b><color={ColHeader}>◆ {header}</color></b></size>\n"
+               + (string.IsNullOrEmpty(body) ? "—" : body);
 
         private void SetSections(string text)
         {
@@ -110,146 +133,223 @@ namespace Ale.Chronicle.Runtime.UI
             if (skillsLabel)      skillsLabel.text      = text;
         }
 
-        /// <summary>个人档案：逐字段显示;枚举字段经 <see cref="ChronicleDataManager"/> 直解为枚举项名(与 SkillRankUtil 同范式,不依赖全局 EnumTypeResolver)。</summary>
-        private string BuildProfile(CharacterDefinition c, ChronicleDataManager dm)
+        /// <summary>头像占位文本：姓名首字。</summary>
+        private static string Initial(CharacterDefinition c)
         {
-            var sb = new StringBuilder();
-            AppendField(sb, "性别", c, dm, WellKnownAttr.Sex);
+            string n = ResolveName(c);
+            return string.IsNullOrEmpty(n) ? "?" : n.Substring(0, 1);
+        }
+
+        /// <summary>副标题：最高爵位 · 主职业 Lv.x（纯文本，配色由节点设定）。</summary>
+        private string BuildSubtitle(CharacterDefinition c, ChronicleDataManager dm)
+        {
+            TitleDefinition topRank = null;
+            foreach (var ct in c.titles)
+            {
+                var t = dm.GetTitle(ct.titleRef);
+                if (t != null && t.kind == ETitleKind.RankTitle && (topRank == null || t.rankTier > topRank.rankTier))
+                    topRank = t;
+            }
+            string primary = null;
+            foreach (var cp in c.professions)
+            {
+                if (!cp.isPrimary) continue;
+                var p = dm.GetProfession(cp.professionRef);
+                if (p != null) primary = p.ResolveDisplayName() + " Lv." + cp.level;
+                break;
+            }
+            var parts = new List<string>();
+            if (topRank != null) parts.Add(topRank.ResolveDisplayName());
+            if (primary != null) parts.Add(primary);
+            return string.Join("  ·  ", parts);
+        }
+
+        /// <summary>元信息：性别 · 年龄（纯文本，配色由节点设定）。</summary>
+        private string BuildMeta(CharacterDefinition c, ChronicleDataManager dm)
+        {
+            var parts = new List<string>();
+            string sex = FieldValue(c, dm, WellKnownAttr.Sex);
+            if (!string.IsNullOrEmpty(sex)) parts.Add(sex);
             int ageDays = c.GetAge(worldDay);
             int years = daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
-            sb.Append("年龄：").Append(years).Append(" 岁（").Append(ageDays).Append(" 日）\n");
-            AppendField(sb, "身高", c, dm, WellKnownAttr.Height, "cm");
-            AppendField(sb, "体重", c, dm, WellKnownAttr.Weight, "kg");
-            AppendField(sb, "三围", c, dm, "measurements");
-            AppendField(sb, "血型", c, dm, "bloodType");
-            AppendField(sb, "兴趣", c, dm, "interests");
+            parts.Add(years + " 岁");
+            return string.Join("  ·  ", parts);
+        }
+
+        /// <summary>个人档案：两列键值。性别/年龄/身高/体重/三围/血型两两成行，兴趣独占一行。</summary>
+        private string BuildProfile(CharacterDefinition c, ChronicleDataManager dm)
+        {
+            var cells = new List<string>();
+            cells.Add(Cell("性别", FieldValue(c, dm, WellKnownAttr.Sex)));
+            int ageDays = c.GetAge(worldDay);
+            int years = daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
+            cells.Add(Cell("年龄", years + " 岁"));
+            cells.Add(Cell("身高", FieldValue(c, dm, WellKnownAttr.Height) + " cm"));
+            cells.Add(Cell("体重", FieldValue(c, dm, WellKnownAttr.Weight) + " kg"));
+            cells.Add(Cell("三围", FieldValue(c, dm, "measurements")));
+            cells.Add(Cell("血型", FieldValue(c, dm, "bloodType")));
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < cells.Count; i += 2)
+            {
+                sb.Append("<pos=0%>").Append(cells[i]);
+                if (i + 1 < cells.Count) sb.Append("<pos=50%>").Append(cells[i + 1]);
+                sb.Append('\n');
+            }
+            string interests = FieldValue(c, dm, "interests");
+            if (!string.IsNullOrEmpty(interests)) sb.Append(Cell("兴趣", interests));
             return sb.ToString().TrimEnd('\n');
         }
 
-        private static void AppendField(StringBuilder sb, string label, CharacterDefinition c, ChronicleDataManager dm, string attrId, string suffix = null)
+        /// <summary>「标签 值」着色单元（标签灰蓝、值近白）。</summary>
+        private static string Cell(string label, string value)
+            => $"<color={ColLabel}>{label}</color> <color={ColName}>{value}</color>";
+
+        /// <summary>取字段显示值；枚举经 <see cref="ChronicleDataManager"/> 直解为枚举项名（与 SkillRankUtil 同范式）。</summary>
+        private static string FieldValue(CharacterDefinition c, ChronicleDataManager dm, string attrId)
         {
             var av = c.GetAttributeValue(attrId);
-            if (av == null) return;
-            string val;
+            if (av == null) return string.Empty;
             if (av.Type == EFieldType.Enum)
             {
-                // 运行时枚举值→枚举项名:经 ChronicleDataManager 直解(全局 EnumTypeResolver 运行时不保证已装)。
                 var et   = dm != null ? dm.GetEnumType(av.EnumTypeRef) : null;
                 var item = et != null ? et.GetItemByValue(av.AsEnumValue) : null;
-                val = item != null ? item.name : av.AsInt.ToString();
+                return item != null ? item.name : av.AsInt.ToString();
             }
-            else
-            {
-                val = av.ToDisplayString();
-            }
-            if (string.IsNullOrEmpty(val)) return;
-            sb.Append(label).Append('：').Append(val);
-            if (!string.IsNullOrEmpty(suffix)) sb.Append(' ').Append(suffix);
-            sb.Append('\n');
+            return av.ToDisplayString();
         }
 
-        /// <summary>能力：对角色配置了基础值的每个核心属性汇流求值，展示「基础 → 当前」与逐来源明细。</summary>
+        /// <summary>能力：上半三列「属性名 当前值（金）」网格；下半逐属性「基础→当前 · 各来源明细」（弱化小号）。</summary>
         private string BuildAttributes(CharacterDefinition c, ChronicleDataManager dm, IChronicleSchemaSource src)
         {
-            var sb = new StringBuilder();
+            var defs = new List<CoreAttributeDefinition>();
+            var evs  = new List<ModifierEvaluation>();
             foreach (var cv in c.coreAttributes)
             {
                 var def = dm.GetCoreAttribute(cv.attrId);
                 if (def == null) continue;
-                var ev = CoreAttributeResolver.Evaluate(c, def, src);
-                sb.Append(def.ResolveDisplayName()).Append('：')
-                  .Append(Num(ev.BaseValue)).Append(" → ").Append(Num(ev.Value));
+                defs.Add(def);
+                evs.Add(CoreAttributeResolver.Evaluate(c, def, src));
+            }
 
-                // 汇流值超出 [min,max] 被夹取时标注原值,使右值与下方明细(其 Δ 之和 = 未夹取值−基础)自洽。
+            var sb = new StringBuilder();
+            // 数值网格（3 列）
+            for (int i = 0; i < defs.Count; i++)
+            {
+                int col = i % 3;
+                if (col == 0 && i > 0) sb.Append('\n');
+                sb.Append("<pos=").Append(col * 34).Append("%>")
+                  .Append("<color=").Append(ColLabel).Append('>').Append(defs[i].ResolveDisplayName()).Append("</color> ")
+                  .Append("<color=").Append(ColValue).Append("><b>").Append(Num(evs[i].Value)).Append("</b></color>");
+            }
+            // 明细（弱化小号）
+            sb.Append("\n<size=76%><color=").Append(ColDim).Append('>');
+            for (int i = 0; i < defs.Count; i++)
+            {
+                var ev = evs[i];
+                sb.Append(defs[i].ResolveDisplayName()).Append(' ')
+                  .Append(Num(ev.BaseValue)).Append('→').Append(Num(ev.Value));
                 if (!Mathf.Approximately(ev.RawValue, ev.Value))
-                    sb.Append("（封顶，原值 ").Append(Num(ev.RawValue)).Append("）");
-
+                    sb.Append("(封顶").Append(Num(ev.RawValue)).Append(')');
                 if (ev.Breakdown != null && ev.Breakdown.Count > 0)
                 {
-                    sb.Append("  （");
-                    for (int i = 0; i < ev.Breakdown.Count; i++)
+                    sb.Append("　");
+                    for (int b = 0; b < ev.Breakdown.Count; b++)
                     {
-                        var b = ev.Breakdown[i];
-                        if (i > 0) sb.Append('，');
-                        sb.Append(PrettySource(b.SourceTag, dm)).Append(Signed(b.Delta));
+                        if (b > 0) sb.Append('、');
+                        var bd = ev.Breakdown[b];
+                        sb.Append(PrettySource(bd.SourceTag, dm)).Append(SignedColored(bd.Delta));
                     }
-                    sb.Append('）');
                 }
-                sb.Append('\n');
+                if (i < defs.Count - 1) sb.Append('\n');
             }
-            return sb.ToString().TrimEnd('\n');
+            sb.Append("</color></size>");
+            return sb.ToString();
         }
 
-        /// <summary>特质：显示名 + 携带的属性修饰器摘要。</summary>
+        /// <summary>特质：名（近白）+ 携带的属性修饰器摘要（弱化）。</summary>
         private string BuildTraits(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
+            bool firstLine = true;
             foreach (var ti in c.traits)
             {
                 var t = dm.GetTrait(ti.traitRef);
                 if (t == null) continue;
-                sb.Append("· ").Append(t.ResolveDisplayName());
+                if (!firstLine) sb.Append('\n');
+                firstLine = false;
+
+                sb.Append("<color=").Append(ColName).Append(">· ").Append(t.ResolveDisplayName()).Append("</color>");
                 if (t.modifiers != null && t.modifiers.Count > 0)
                 {
-                    // 先拼修饰器摘要(跳过 null、以 first 控分隔符),仅在非空时套括号——避免前导「，」或空「（）」。
                     var mods = new StringBuilder();
                     bool first = true;
                     foreach (var m in t.modifiers)
                     {
                         if (m == null) continue;
                         if (!first) mods.Append('，');
-                        mods.Append(AttrName(dm, m.targetAttributeId)).Append(Signed(m.magnitude));
+                        mods.Append(AttrName(dm, m.targetAttributeId)).Append(SignedColored(m.magnitude));
                         first = false;
                     }
-                    if (mods.Length > 0) sb.Append('（').Append(mods).Append('）');
+                    if (mods.Length > 0)
+                        sb.Append("  <size=88%><color=").Append(ColDim).Append(">（").Append(mods).Append("）</color></size>");
                 }
-                sb.Append('\n');
             }
-            return sb.ToString().TrimEnd('\n');
+            return sb.ToString();
         }
 
-        /// <summary>职业：显示名 + 等级（+ 主职业标记）。</summary>
+        /// <summary>职业：名（近白）+ 等级（金/弱化上限）+ 主职业标签（浅蓝）。</summary>
         private string BuildProfessions(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
+            bool firstLine = true;
             foreach (var cp in c.professions)
             {
                 var p = dm.GetProfession(cp.professionRef);
                 if (p == null) continue;
-                sb.Append("· ").Append(p.ResolveDisplayName())
-                  .Append("  Lv.").Append(cp.level).Append('/').Append(p.maxLevel);
-                if (cp.isPrimary) sb.Append("  [主职业]");
-                sb.Append('\n');
+                if (!firstLine) sb.Append('\n');
+                firstLine = false;
+
+                sb.Append("<color=").Append(ColName).Append(">· ").Append(p.ResolveDisplayName()).Append("</color>")
+                  .Append("  <color=").Append(ColValue).Append(">Lv.").Append(cp.level).Append("</color>")
+                  .Append("<color=").Append(ColDim).Append(">/").Append(p.maxLevel).Append("</color>");
+                if (cp.isPrimary)
+                    sb.Append("  <size=85%><color=").Append(ColAccent).Append(">[主职业]</color></size>");
             }
-            return sb.ToString().TrimEnd('\n');
+            return sb.ToString();
         }
 
-        /// <summary>头衔：称号直接显示；阶级头衔附带其在阶级序列中的位次（如「伯爵（爵位 3/5）」）。</summary>
+        /// <summary>头衔：名（近白）；阶级头衔附带其在阶级序列中的位次（弱化）。</summary>
         private string BuildTitles(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
+            bool firstLine = true;
             foreach (var ct in c.titles)
             {
                 var t = dm.GetTitle(ct.titleRef);
                 if (t == null) continue;
-                sb.Append("· ").Append(t.ResolveDisplayName());
+                if (!firstLine) sb.Append('\n');
+                firstLine = false;
+
+                sb.Append("<color=").Append(ColName).Append(">· ").Append(t.ResolveDisplayName()).Append("</color>");
                 if (t.kind == ETitleKind.RankTitle)
                 {
                     var (ladder, pos, total) = FindRankPosition(dm, t.id);
                     if (ladder != null)
-                        sb.Append('（').Append(ResolveLadderName(ladder)).Append(' ')
-                          .Append(pos).Append('/').Append(total).Append('）');
+                        sb.Append("  <size=85%><color=").Append(ColDim).Append('>')
+                          .Append(ResolveLadderName(ladder)).Append(' ').Append(pos).Append('/').Append(total)
+                          .Append("</color></size>");
                 }
-                sb.Append('\n');
             }
-            return sb.ToString().TrimEnd('\n');
+            return sb.ToString();
         }
 
-        /// <summary>技能：遍历角色各职业关联的技能树，列出其中技能（按技能树分组、去重）。</summary>
+        /// <summary>技能：按技能树分组（树名浅金），列出各技能（近白、去重）。</summary>
         private string BuildSkills(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
             var seenTrees = new HashSet<string>();
+            bool firstLine = true;
             foreach (var cp in c.professions)
             {
                 var p = dm.GetProfession(cp.professionRef);
@@ -259,21 +359,23 @@ namespace Ale.Chronicle.Runtime.UI
                     if (string.IsNullOrEmpty(treeId) || !seenTrees.Add(treeId)) continue;
                     var tree = dm.GetSkillTree(treeId);
                     if (tree == null || tree.skills == null) continue;
+                    if (!firstLine) sb.Append('\n');
+                    firstLine = false;
 
-                    sb.Append("「").Append(ResolveTreeName(tree)).Append("」");
+                    sb.Append("<color=").Append(ColSub).Append(">「").Append(ResolveTreeName(tree)).Append("」</color>");
                     bool first = true;
                     foreach (var e in tree.skills)
                     {
                         if (e == null || string.IsNullOrEmpty(e.skillRef)) continue;
                         var skill = dm.GetSkill(e.skillRef);
                         if (skill == null) continue;
-                        sb.Append(first ? "" : "、").Append(UiwSkillText.ResolveName(skill));
+                        sb.Append("<color=").Append(ColName).Append('>').Append(first ? "" : "、")
+                          .Append(UiwSkillText.ResolveName(skill)).Append("</color>");
                         first = false;
                     }
-                    sb.Append('\n');
                 }
             }
-            return sb.ToString().TrimEnd('\n');
+            return sb.ToString();
         }
 
         #endregion
@@ -356,8 +458,13 @@ namespace Ale.Chronicle.Runtime.UI
         /// <summary>数值格式：最多两位小数，去除多余零。</summary>
         private static string Num(float v) => v.ToString("0.##");
 
-        /// <summary>带符号数值（正数前缀 +）。</summary>
-        private static string Signed(float v) => (v >= 0f ? "+" : "") + v.ToString("0.##");
+        /// <summary>带符号且着色的加成数值（正绿负红）。</summary>
+        private static string SignedColored(float v)
+        {
+            string col = v >= 0f ? ColPos : ColNeg;
+            string s = (v >= 0f ? "+" : "") + v.ToString("0.##");
+            return $"<color={col}>{s}</color>";
+        }
 
         #endregion
     }

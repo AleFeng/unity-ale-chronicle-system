@@ -88,8 +88,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
-  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -118,7 +118,7 @@ MonoBehaviour:
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 6
-  m_fontSizeMax: 18
+  m_fontSizeMax: 14
   m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 4096
@@ -346,6 +346,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c90200ddf06a474382a2e5d0ce6d9b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Ale.Chronicle.Runtime.UI::Ale.Chronicle.Runtime.UI.UiwSkillEntry
+  rootFadeInDuration: 0.15
+  rootFadeOutDuration: 0.12
   iconImage: {fileID: 5122876908413567520}
   nameText: {fileID: 6769719973680905810}
   descText: {fileID: 6856109929625278537}
@@ -564,8 +566,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
-  m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
+  m_sharedMaterial: {fileID: 921754396160446366, guid: 45e3bdc9d4723454f9d4fa8fdc80fafa, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -589,12 +591,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 10
   m_fontSizeBase: 11
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 6
-  m_fontSizeMax: 18
+  m_fontSizeMax: 10
   m_fontStyle: 0
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
