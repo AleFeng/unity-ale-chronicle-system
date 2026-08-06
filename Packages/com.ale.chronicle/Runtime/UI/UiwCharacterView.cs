@@ -87,13 +87,18 @@ namespace Ale.Chronicle.Runtime.UI
             var src = FindSchemaSource(dm, characterId);
 
             if (titleLabel) titleLabel.text = ResolveName(character);
-            if (profileLabel)     profileLabel.text     = BuildProfile(character);
-            if (attributesLabel)  attributesLabel.text  = BuildAttributes(character, dm, src);
-            if (traitsLabel)      traitsLabel.text      = BuildTraits(character, dm);
-            if (professionsLabel) professionsLabel.text = BuildProfessions(character, dm);
-            if (titlesLabel)      titlesLabel.text      = BuildTitles(character, dm);
-            if (skillsLabel)      skillsLabel.text      = BuildSkills(character, dm);
+            // 分区标题烘焙进内容文本(视图每次覆盖写入,不依赖独立静态节点——后者会被 LocalizedTextEvent 清空)。
+            if (profileLabel)     profileLabel.text     = Section("个人档案",        BuildProfile(character, dm));
+            if (attributesLabel)  attributesLabel.text  = Section("能力（基础 → 当前）", BuildAttributes(character, dm, src));
+            if (traitsLabel)      traitsLabel.text      = Section("特质",            BuildTraits(character, dm));
+            if (professionsLabel) professionsLabel.text = Section("职业",            BuildProfessions(character, dm));
+            if (titlesLabel)      titlesLabel.text      = Section("头衔",            BuildTitles(character, dm));
+            if (skillsLabel)      skillsLabel.text      = Section("技能",            BuildSkills(character, dm));
         }
+
+        /// <summary>把分区标题(TMP 富文本加粗)拼到内容之前;内容为空时占位「—」。</summary>
+        private static string Section(string header, string body)
+            => "<b>◆ " + header + "</b>\n" + (string.IsNullOrEmpty(body) ? "—" : body);
 
         private void SetSections(string text)
         {
@@ -105,26 +110,38 @@ namespace Ale.Chronicle.Runtime.UI
             if (skillsLabel)      skillsLabel.text      = text;
         }
 
-        /// <summary>个人档案：逐字段用 <see cref="AttributeValue.ToDisplayString"/> 显示（枚举经 EnumTypeResolver 转名）。</summary>
-        private string BuildProfile(CharacterDefinition c)
+        /// <summary>个人档案：逐字段显示;枚举字段经 <see cref="ChronicleDataManager"/> 直解为枚举项名(与 SkillRankUtil 同范式,不依赖全局 EnumTypeResolver)。</summary>
+        private string BuildProfile(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
-            AppendField(sb, "性别", c, WellKnownAttr.Sex);
+            AppendField(sb, "性别", c, dm, WellKnownAttr.Sex);
             int ageDays = c.GetAge(worldDay);
             int years = daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
             sb.Append("年龄：").Append(years).Append(" 岁（").Append(ageDays).Append(" 日）\n");
-            AppendField(sb, "身高", c, WellKnownAttr.Height, "cm");
-            AppendField(sb, "体重", c, WellKnownAttr.Weight, "kg");
-            AppendField(sb, "三围", c, "measurements");
-            AppendField(sb, "血型", c, "bloodType");
-            AppendField(sb, "兴趣", c, "interests");
+            AppendField(sb, "身高", c, dm, WellKnownAttr.Height, "cm");
+            AppendField(sb, "体重", c, dm, WellKnownAttr.Weight, "kg");
+            AppendField(sb, "三围", c, dm, "measurements");
+            AppendField(sb, "血型", c, dm, "bloodType");
+            AppendField(sb, "兴趣", c, dm, "interests");
             return sb.ToString().TrimEnd('\n');
         }
 
-        private static void AppendField(StringBuilder sb, string label, CharacterDefinition c, string attrId, string suffix = null)
+        private static void AppendField(StringBuilder sb, string label, CharacterDefinition c, ChronicleDataManager dm, string attrId, string suffix = null)
         {
             var av = c.GetAttributeValue(attrId);
-            string val = av != null ? av.ToDisplayString() : string.Empty;
+            if (av == null) return;
+            string val;
+            if (av.Type == EFieldType.Enum)
+            {
+                // 运行时枚举值→枚举项名:经 ChronicleDataManager 直解(全局 EnumTypeResolver 运行时不保证已装)。
+                var et   = dm != null ? dm.GetEnumType(av.EnumTypeRef) : null;
+                var item = et != null ? et.GetItemByValue(av.AsEnumValue) : null;
+                val = item != null ? item.name : av.AsInt.ToString();
+            }
+            else
+            {
+                val = av.ToDisplayString();
+            }
             if (string.IsNullOrEmpty(val)) return;
             sb.Append(label).Append('：').Append(val);
             if (!string.IsNullOrEmpty(suffix)) sb.Append(' ').Append(suffix);
