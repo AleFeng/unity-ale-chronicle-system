@@ -943,7 +943,143 @@ MonoBehaviour:
     attributePointBudget: 0
     minAgeDays: 0
     maxAgeDays: 0
-  characters: []
+  characters:
+  - id: luna
+    templateRef: "\u4E3B\u89D2"
+    values:
+    - id: name
+      value:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u9732\u5A1C"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: birthday
+      value:
+        type: 0
+        isArray: 0
+        enumTypeRef: 
+        ints: eedaffff
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: sex
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u6027\u522B"
+        ints: 01000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: height
+      value:
+        type: 1
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats:
+        - 168
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: weight
+      value:
+        type: 1
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats:
+        - 54
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: measurements
+      value:
+        type: 20
+        isArray: 0
+        enumTypeRef: 
+        ints: 560000003c00000058000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: bloodType
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u8840\u578B"
+        ints: 02000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: interests
+      value:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u8BFB\u4E66"
+        - "\u5251\u672F"
+        - "\u5929\u6587"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    coreAttributes:
+    - attrId: might
+      baseValue: 14
+    - attrId: intellect
+      baseValue: 16
+    - attrId: stamina
+      baseValue: 12
+    - attrId: agility
+      baseValue: 11
+    - attrId: perception
+      baseValue: 13
+    - attrId: charisma
+      baseValue: 15
+    traits:
+    - traitRef: brave
+      remainingDays: -1
+      stacks: 1
+      sourceTag: 
+    - traitRef: genius
+      remainingDays: -1
+      stacks: 1
+      sourceTag: 
+    fatherRef: 
+    motherRef: 
+    childRefs: []
+    professions:
+    - professionRef: knight
+      level: 45
+      currentExp: 0
+      isPrimary: 1
+    - professionRef: scholar
+      level: 12
+      currentExp: 0
+      isPrimary: 0
+    titles:
+    - titleRef: count
+      acquiredWorldDay: 0
+    - titleRef: knight_t40
+      acquiredWorldDay: 0
   coreAttributeTemplates:
   - name: "\u80FD\u529B"
     color: {r: 0.5, g: 0.5, b: 0.5, a: 1}

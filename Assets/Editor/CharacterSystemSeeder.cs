@@ -501,6 +501,62 @@ namespace Ale.Chronicle.DemoEditor
         }
 
         // ════════════════════════════════════════════════════════════════════════
+        //  D6 · 示例角色
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// D6:生成 1 个示例角色「露娜」,挂载前序全部系统——个人字段(姓名/生日/性别/身高/体重/三围/血型/兴趣)、
+        /// 6 项能力基础值、2 特质(勇敢+天才)、2 职业(骑士 45 级为主 + 学者 12 级)、2 头衔(伯爵 + 里程碑「骑士」);
+        /// <see cref="CharacterDefinition.RebuildAttributes"/> 对账个人字段后逐一赋值,末尾 Validate。
+        /// 只清空并重建 <see cref="ChronicleDatabase.Characters"/>。
+        /// </summary>
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Character Seeder/D6 示例角色")]
+        public static string Build_D6()
+        {
+            var db = GetOrCreateDb();
+            db.Characters.Clear();
+
+            var luna = new CharacterDefinition("luna", TplCharacter);
+
+            // 特质(先加:RebuildAttributes 会纳入特质功能标签字段——本例无功能标签)
+            luna.traits.Add(new CharacterTraitInstance("brave"));
+            luna.traits.Add(new CharacterTraitInstance("genius"));
+
+            // 核心属性基础值(当前值由 CoreAttributeResolver 汇流特质/职业/头衔后求出)
+            luna.coreAttributes.Add(new CoreAttributeValue(AtMight,      14f));
+            luna.coreAttributes.Add(new CoreAttributeValue(AtIntellect,  16f));
+            luna.coreAttributes.Add(new CoreAttributeValue(AtStamina,    12f));
+            luna.coreAttributes.Add(new CoreAttributeValue(AtAgility,    11f));
+            luna.coreAttributes.Add(new CoreAttributeValue(AtPerception, 13f));
+            luna.coreAttributes.Add(new CoreAttributeValue(AtCharisma,   15f));
+
+            // 职业(骑士 45 级为主职业 + 学者 12 级)
+            luna.professions.Add(new CharacterProfession(ProfKnight,  45, 0, true));
+            luna.professions.Add(new CharacterProfession(ProfScholar, 12, 0, false));
+
+            // 头衔(伯爵 + 骑士里程碑「骑士」,均汇入属性)
+            luna.titles.Add(new CharacterTitle("count", 0));
+            luna.titles.Add(new CharacterTitle(MilestoneTitleId(ProfKnight, 40), 0));
+
+            db.Characters.Add(luna);
+
+            // schema 对账(建立个人字段条目)后逐一赋值
+            luna.RebuildAttributes(db);
+            luna.SetAttributeValue<string>(WellKnownAttr.Name, "露娜");
+            luna.SetAttributeValue<int>(WellKnownAttr.Birthday, -9490);     // worldDay=0 时 GetAge=9490 日(≈26 岁)
+            luna.SetAttributeValue<int>(WellKnownAttr.Sex, 1);             // 女(枚举「性别」1)
+            luna.SetAttributeValue<float>(WellKnownAttr.Height, 168f);
+            luna.SetAttributeValue<float>(WellKnownAttr.Weight, 54f);
+            luna.SetAttributeValue<Vector3Int>(PfMeasurements, new Vector3Int(86, 60, 88));
+            luna.SetAttributeValue<int>(PfBloodType, 2);                   // O(枚举「血型」A0/B1/O2/AB3)
+            var interests = luna.GetAttributeValue(PfInterests);
+            if (interests != null) { interests.SetString(0, "读书"); interests.SetString(1, "剑术"); interests.SetString(2, "天文"); }
+
+            SaveDb(db);
+            return ValidateReport(db, "D6", $"角色={db.Characters.Count}(露娜:2特质/2职业/2头衔/6项属性基础值+个人档案)");
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
         //  共享基础设施
         // ════════════════════════════════════════════════════════════════════════
 
