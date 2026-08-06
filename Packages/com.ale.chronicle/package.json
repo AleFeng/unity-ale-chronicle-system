@@ -1,6 +1,6 @@
 {
   "name": "com.ale.chronicle",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "displayName": "Ale Chronicle",
   "description": "编年史系统（Chronicle System）：角色配置与百万级人生模拟。基于 com.ale.toolkit 的 Schema 引擎 / 编辑器三列框架 / 序列化，与 Ale.Condition 条件系统。",
   "unity": "2022.3",
@@ -12,6 +12,13 @@
     "character",
     "life-simulation",
     "gameplay"
+  ],
+  "samples": [
+    {
+      "displayName": "Chronicle 演示（角色面板 + 技能 UI）",
+      "description": "CharacterSystemDemo 场景：由代码全量生成的 ChronicleDatabase（六大领域 + 示例角色露娜）驱动 UiwCharacterView 角色信息面板与 UiwSkillView 技能界面；含 PF_UiwCharacterView / PF_UiwSkillView 预制体、演示宿主、本地化串表与图集。",
+      "path": "Samples~/Demo"
+    }
   ],
   "author": {
     "name": "Able Games"

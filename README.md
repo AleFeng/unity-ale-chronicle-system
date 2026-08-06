@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.3.0-orange">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.3.1-orange">
   <img alt="Unity Version" src="https://img.shields.io/badge/Unity-2022.3%2B-black?logo=unity">
   <img alt="Unity Version" src="https://img.shields.io/badge/Unity-6000.3%2B-black?logo=unity">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blueviolet">
@@ -21,7 +21,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 它用一个 `ChronicleDatabase` 资产集中配置各领域的**静态定义数据**（角色 / 属性 / 特质 / 技能 / 职业 / 头衔，及配套的枚举 / 功能标签 / 分组标签 / 数字格式），配套**运行时管理器**维护动态状态（已学技能、外部来源提供的技能、职业等级 / 经验、持有头衔、核心属性合流结果等）。
 面向**设计师**：编辑器始终且仅在 ScriptableObject 上工作，全程支持 Undo / Redo；二进制仅作为**单向导出**格式。构建于通用底层包 [`com.ale.toolkit`](Packages/com.ale.chronicle/README.md#依赖)（Schema 属性引擎 / 编辑器三列框架 / 虚拟滚动列表 / 序列化 / `Ale.Condition` 条件系统）之上，本插件包自身零硬依赖（TMP / Localization / Addressable 均经编译宏可选启用）。
 
-> ⚠️ **当前版本 `0.3.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域的配置与运行时数据基础已可用（本版技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成、继承结算、派生属性等尚为**预留**、暂未接入。
+> ⚠️ **当前版本 `0.3.1`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域的配置与运行时数据基础已可用（`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成、继承结算、派生属性等尚为**预留**、暂未接入。
 
 ## 📜 目录
 - [简介](#简介)
@@ -57,6 +57,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 | 头衔系统 | 阶级头衔（逐级晋升、一序列一持有）与称号（多为唯一）两类；修饰器汇入核心属性 / 获得条件 / 阶级序列有序阶梯；运行时 `Grant` 晋升替换 + 唯一头衔易主。 |
 | 条件系统整合 | 内置 7 个 `Ale.Condition` 求值器（年龄 / 属性比较 / 拥有特质 / 拥有职业 / 职业等级 / 持有头衔 / 位阶达到），支持多作用域（本人 / 配偶 / 父 / 母 …）。 |
 | 运行时技能 UI | 虚拟滚动网格 / 顺序列表、主+副分组标签 AND 过滤、搜索、悬停 Tooltip、目录 / 角色双来源。 |
+| 运行时角色面板 | `UiwCharacterView`（`0.3.1`）：一屏展示角色个人档案 + 6 项能力「基础→当前」求值明细 + 特质 / 职业 / 头衔（阶级位次）/ 技能；TMP 富文本信息卡排版、随内容自适应，无额外美术依赖。 |
 | 单向导出 | `ChronicleConfigSerializer` → 紧凑二进制（魔数 `CHRO`，格式 v6），**append-only 向后兼容**旧版本（含 v3 / v4 / v5）；对象引用以 AssetGUID 承载。 |
 | 三个可选宏 | TextMeshPro（`ATK_TMP`）/ Unity Localization（`ATK_LOCALIZATION`）/ Unity Addressables（`ATK_ADDRESSABLE`），在 Ale Toolkit 欢迎窗口一键开关；插件包本身零硬依赖。 |
 | 跨包整合 | 与 `com.ale.inventory` 协同的「装备持有技能 / 消耗品触发技能」整合 Demo，两包互不依赖。 |
@@ -91,7 +92,7 @@ https://github.com/AleFeng/unity-ale-chronicle-system.git?path=/Packages/com.ale
 **要固定版本，把 `#<tag>` 加在整条 URL 的最末尾**（必须在 `?path=` 之后）：
 
 ```
-https://github.com/AleFeng/unity-ale-chronicle-system.git?path=/Packages/com.ale.chronicle#0.3.0
+https://github.com/AleFeng/unity-ale-chronicle-system.git?path=/Packages/com.ale.chronicle#0.3.1
 ```
 
 ### 其他方式
@@ -134,7 +135,7 @@ TitleRuntimeManager.Instance.Grant("hero", "duke", worldDay: 0);
 ```
 
 ### 4. 一键 Demo
-菜单 `Tools > Ale Toolkit > Chronicle System > Demo Wizard` 生成技能 UI 预制体；工程内 `Assets/Demo/` 为技能 UI 演示、`Assets/DemoInventory/` 为 Chronicle × Inventory 整合演示。
+**`CharacterSystemDemo` 演示场景**（同屏 `UiwCharacterView` 角色信息面板 + `UiwSkillView` 技能界面，由代码全量生成的示例数据库 + 示例角色露娜驱动）已作为 **Sample** 打包于 `Packages/com.ale.chronicle/Samples~/Demo`，在 Package Manager 本包详情页「Samples」区一键导入即可 Play；另有 `Assets/DemoInventory/` Chronicle × Inventory 整合演示，及菜单 `Tools > Ale Toolkit > Chronicle System > Demo Wizard` 一键生成技能 UI 预制体。
 
 ## 🧩 可选宏开关
 三个宏均在 **Ale Toolkit 欢迎窗口**（`Tools > Ale Toolkit > Welcome`）的「插件支持（编译宏）」区一键开关，并实时检测对应 Package 是否已安装：
@@ -169,12 +170,13 @@ Packages/com.ale.chronicle/          ← 包根
 │   ├── Tagging/       ChronicleGroupTag（分组标签）
 │   ├── Title/         头衔 / 阶级序列 / 角色头衔 / 运行时状态
 │   └── Trait/         特质 定义 / 模板 / 实例 / 兼容 / AI 权重
-├── Runtime/UI/                       Ale.Chronicle.Runtime.UI（技能 UI 组件）
+├── Runtime/UI/                       Ale.Chronicle.Runtime.UI（角色面板 UiwCharacterView + 技能 UI 组件）
 ├── Editor/                           Ale.Chronicle.Editor（三列编辑器 + 七页签）
-└── Docs~/                            （预留）
+├── Docs~/                            （预留）
+└── Samples~/Demo/                    「Chronicle 演示」Sample（CharacterSystemDemo 场景 + 角色/技能 UI 预制体 + 代码生成示例数据库 + 本地化）
 ```
 
-工程内演示与测试：`Assets/Demo/`（技能 UI）、`Assets/DemoInventory/`（Chronicle × Inventory 整合）、`Assets/Editor/DemoWizard/`（预制体生成）、`Assets/Tests/`（20 个 EditMode 测试，含职业 / 头衔 / 技能树）。
+工程内演示与测试：`Packages/com.ale.chronicle/Samples~/Demo/`（**角色面板 + 技能 UI** 演示场景 `CharacterSystemDemo`，Package Manager 可导入）、`Assets/DemoInventory/`（Chronicle × Inventory 整合）、`Assets/Editor/DemoWizard/`（技能预制体生成）、`Assets/Tests/`（20 个 EditMode 测试，含职业 / 头衔 / 技能树）。
 
 ## 📄 许可
 本项目基于 [MIT License](LICENSE) 开源，可自由用于商业与非商业项目。

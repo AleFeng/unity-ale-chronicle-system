@@ -4,6 +4,19 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.1] - 2026-08-06
+
+新增**运行时角色信息面板 `UiwCharacterView`** 与一个**「角色系统」演示 Sample**，把六大领域的配置串成一个「Play 即见」的角色档案界面。纯运行时 UI 组件 + 演示新增，**核心数据模型 / 编辑器 / 序列化（仍为 v6）零变化**。
+
+### 新增
+
+- **角色信息面板 `UiwCharacterView`**（`Ale.Chronicle.Runtime.UI`，继承 `UiwViewBase`，与 `UiwSkillView` 同规格）：从 `ChronicleDataManager` 取一个 `CharacterDefinition`，分区展示——**个人档案**（姓名 / 性别 / 年龄 / 身高 / 体重 / 三围 / 血型 / 兴趣，枚举经数据管理器直解）、**能力**（6 项核心属性经 `CoreAttributeResolver` 求「基础 → 当前」+ 逐来源明细，超上限标注封顶）、**特质 / 职业（等级 + 主职业 + 授头衔）/ 头衔（阶级头衔附阶级序列位次）/ 技能（由职业关联技能树导出）**。TMP 富文本做配色 / 分栏 / 层级的桌游式信息卡排版（头部卡 + 能力条 + 各分区卡），随内容自适应高度；无额外美术依赖。
+- **Sample「Chronicle 演示（角色面板 + 技能 UI）」**（`Samples~/Demo`，`package.json` 声明、可经 Package Manager 一键导入）：一个由代码**全量生成**的 `ChronicleDatabase`（6 能力属性 + 角色个人字段 schema + ~6 特质 + 爵位五连/阶级序列/职业里程碑/好感·疯狂头衔 + 8 技能/5 技能树 + 主职业 99 级·好感·疯狂 5 级职业 + 示例角色**露娜**）驱动 `CharacterSystemDemo` 场景，同屏展示 `UiwCharacterView` 与 `UiwSkillView`；含 `PF_UiwCharacterView` / `PF_UiwSkillView` 预制体、演示宿主 `ChronicleDemoManager`、7 语言本地化串表与 CJK 字体图集。
+
+### 说明
+
+- 本版仅新增 UI 组件与演示，**不改任何配置数据结构、编辑器或二进制格式**；`UiwCharacterView` 展示的是角色**静态配置**（起始配装），运行时进度（升级 / 授予）仍由各 `*RuntimeManager` 维护。
+
 ## [0.3.0] - 2026-08-05
 
 新增**技能树（SkillTree）**一等配置对象与**属性按条件修改值**功能，并让**职业关联技能树**。技能树与属性条件修改的门控条件全部复用 Toolkit 条件框架，**Chronicle 端零新增判定器**（跨系统条件由上层系统实现、各系统共用）。序列化随之升级至 **v6**（append-only 向后兼容，旧 v3 / v4 / v5 存档均可载）。

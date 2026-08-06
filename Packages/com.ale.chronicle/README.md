@@ -15,7 +15,7 @@
 - 核心属性走 **基础值 + 修正器合流**（来源含特质 / 职业成长 / 头衔），带逐来源拆解。
 - 文本本地化（Unity Localization）、TextMeshPro、Addressable 均通过编译宏可选启用（与 toolkit 统一）。
 
-> ⚠️ **当前版本 `0.3.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域的配置与运行时数据基础已可用（本版技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
+> ⚠️ **当前版本 `0.3.1`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域的配置与运行时数据基础已可用（`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
 
 ---
 
@@ -107,6 +107,7 @@
 
 位于 `Runtime/UI/`，独立程序集 `Ale.Chronicle.Runtime.UI`（命名空间 `Ale.Chronicle.Runtime.UI`），依赖 toolkit 的虚拟滚动引擎与通用控件：
 
+- **`UiwCharacterView`**（`UiwViewBase`，`0.3.1`）：**角色信息面板**——从 `ChronicleDataManager` 取一个 `CharacterDefinition`，分区展示 **个人档案**（姓名 / 性别 / 年龄 / 身高 / 体重 / 三围 / 血型 / 兴趣，枚举经数据管理器直解）、**能力**（6 项核心属性经 `CoreAttributeResolver` 求「基础 → 当前」+ 逐来源明细）、**特质 / 职业（等级 + 主职业 + 授头衔）/ 头衔（阶级头衔附阶级序列位次）/ 技能（由职业关联技能树导出）**；TMP 富文本做配色 / 分栏 / 层级的信息卡排版（头部卡 + 能力条 + 各分区卡），随内容自适应高度，无额外美术依赖。展示的是角色**静态配置**（起始配装）。
 - **`UiwSkillView`**（`UiwViewBase`）：技能主界面——标题 + 搜索 + 主/副分组标签 AND 过滤页签 + 网格/顺序双视图；来源可在 `Database`（目录）与 `Character`（已学，含提供者）之间切换，订阅 `OnLearnedChanged` 自动刷新。
 - **`UiwSkillGridList` / `UiwSkillOrderList`**：技能虚拟网格 / 单列列表（继承 toolkit `UiwVirtualGridList` / `UiwVirtualOrderList`）。
 - **`UiwSkillEntry`**（`UiwHoverTooltipSource`）：技能格（图标 / 名称 / 阶级背景 + 可选描述与自定义字段行），悬停触发全局 Tooltip。
@@ -204,13 +205,15 @@ TitleRuntimeManager.Instance.Grant("hero", "duke", worldDay: 0);
 ```
 
 ### 5. 一键 Demo
-菜单 `Tools > Ale Toolkit > Chronicle System > Demo Wizard` 一键生成技能 UI 预制体；工程内另有 `Assets/Demo/`（技能 UI 演示场景）与 `Assets/DemoInventory/`（Chronicle × Inventory 整合演示）。
+- **Sample 场景**：`CharacterSystemDemo` 演示场景（同屏 `UiwCharacterView` 角色信息面板 + `UiwSkillView` 技能界面，由代码全量生成的示例 `ChronicleDatabase` 驱动、含示例角色露娜）已作为 Sample 打包于 **`Samples~/Demo`**——在 Package Manager 本包详情页 **`Samples`** 区一键 `Import` 后打开场景 Play 即见。
+- **Demo Wizard**：菜单 `Tools > Ale Toolkit > Chronicle System > Demo Wizard` 一键生成技能 UI 预制体。
+- **整合演示**：`Assets/DemoInventory/`（Chronicle × Inventory 整合，需 `com.ale.inventory`）。
 
 ---
 
 ## 本地化
 
-包内 UI 文本经 toolkit `AttributeValue.ResolveText()` 解析，启用 `ATK_LOCALIZATION` 时接 Unity Localization（本地化优先、取不到回退纯文本）。演示的字符串表 `Assets/Demo/Localization/ChronicleSystem` 覆盖 **7 种 Locale**（en / fr / ja / ko / ru / zh-Hans / zh-Hant），并配套 CJK 字体。`LocalizedTextEvent` / `LocalizedFontEvent` 仅由 Demo Wizard 在生成预制体时挂载（`ATK_TMP && ATK_LOCALIZATION` 门控）。
+包内 UI 文本经 toolkit `AttributeValue.ResolveText()` 解析，启用 `ATK_LOCALIZATION` 时接 Unity Localization（本地化优先、取不到回退纯文本）。演示的字符串表 `Samples~/Demo/Localization/ChronicleSystem` 覆盖 **7 种 Locale**（en / fr / ja / ko / ru / zh-Hans / zh-Hant），并配套 CJK 字体。技能 UI 预制体由 Demo Wizard 生成时挂 `LocalizedTextEvent` / `LocalizedFontEvent`（`ATK_TMP && ATK_LOCALIZATION` 门控）；角色面板 `UiwCharacterView` 为全视图驱动文本，直接绑定 CJK 字体、不走本地化字体事件。
 
 ---
 
@@ -232,10 +235,11 @@ Packages/com.ale.chronicle/          ← 包根
 │   ├── Tagging/       ChronicleGroupTag（分组标签）
 │   ├── Title/         头衔 定义 / 阶级序列 / 角色头衔 / 运行时状态
 │   └── Trait/         特质 定义 / 模板 / 实例 / 生命周期 / AI 权重 / 兼容
-├── Runtime/UI/                       程序集 Ale.Chronicle.Runtime.UI（技能 UI 组件）
+├── Runtime/UI/                       程序集 Ale.Chronicle.Runtime.UI（角色面板 UiwCharacterView + 技能 UI 组件）
 ├── Editor/                           程序集 Ale.Chronicle.Editor（三列编辑器 + 七页签）
 │   ├── Common/  Drawers/  Inspectors/  Tabs/
-└── Docs~/                            （预留）
+├── Docs~/                            （预留）
+└── Samples~/Demo/                    「Chronicle 演示」Sample：CharacterSystemDemo 场景 + 角色/技能 UI 预制体 + 代码生成的示例数据库 + 本地化（经 package.json samples 声明，Package Manager 可导入）
 ```
 
 ---
