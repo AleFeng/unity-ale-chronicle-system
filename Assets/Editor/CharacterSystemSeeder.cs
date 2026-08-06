@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Ale.Toolkit.Runtime;
+using Ale.Condition;
 
 namespace Ale.Chronicle.DemoEditor
 {
@@ -127,6 +128,92 @@ namespace Ale.Chronicle.DemoEditor
             a.displayName.SetTextValue(0, displayName);
             a.abbreviation.SetTextValue(0, abbr);
             db.CoreAttributes.Add(a);
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        //  D2 · 特质
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// D2:生成 6 个特质(均挂「性格」模板、携带对能力属性的修饰器),含 1 组互斥(懦弱↔勇敢)
+        /// 与 1 个获得门槛内联条件(睿智:智力≥30)。只清空并重建 <see cref="ChronicleDatabase.Traits"/>。
+        /// </summary>
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Character Seeder/D2 特质")]
+        public static string Build_D2()
+        {
+            var db = GetOrCreateDb();
+            db.Traits.Clear();
+
+            var brave = AddTrait(db, "brave", "勇敢", "无惧危险,战力与耐力提升。");
+            Mod(brave, AtMight, 8f); Mod(brave, AtStamina, 4f);
+
+            var coward = AddTrait(db, "coward", "懦弱", "临阵退缩,战力下降但身法更灵活。");
+            Mod(coward, AtMight, -6f); Mod(coward, AtAgility, 3f);
+            coward.incompatibleTraitRefs.Add("brave");                 // 显式互斥:与「勇敢」不可并存(双向生效)
+
+            var genius = AddTrait(db, "genius", "天才", "智力超群,兼具敏锐洞察。");
+            Mod(genius, AtIntellect, 12f); Mod(genius, AtPerception, 5f);
+
+            var strong = AddTrait(db, "strong", "强壮", "体魄强健,耐力与战力提升。");
+            Mod(strong, AtStamina, 10f); Mod(strong, AtMight, 5f);
+
+            var beautiful = AddTrait(db, "beautiful", "美貌", "容颜出众,魅力大增。");
+            Mod(beautiful, AtCharisma, 12f);
+
+            var sage = AddTrait(db, "sage", "睿智", "博学通达;需智力达到 30 方可获得。");
+            Mod(sage, AtIntellect, 8f); Mod(sage, AtPerception, 4f);
+            sage.eligibility = AttrAtLeast(AtIntellect, 30f);          // 获得门槛:主体智力≥30
+
+            foreach (var t in db.Traits) t.RebuildAttributes(db);
+
+            SaveDb(db);
+            return ValidateReport(db, "D2", $"特质={db.Traits.Count}(互斥:懦弱↔勇敢;门槛:睿智 智力≥30)");
+        }
+
+        /// <summary>新增一个特质(挂「性格」模板、永久),返回以便追加修饰器 / 条件。</summary>
+        private static TraitDefinition AddTrait(ChronicleDatabase db, string id, string displayName, string description)
+        {
+            var t = new TraitDefinition(id) { templateRef = TplTrait, lifetime = ETraitLifetime.Permanent };
+            t.displayName.SetTextValue(0, displayName);
+            t.description.SetTextValue(0, description);
+            db.Traits.Add(t);
+            return t;
+        }
+
+        /// <summary>给特质追加一条对某能力属性的加法修饰器(汇入 CoreAttributeResolver)。</summary>
+        private static void Mod(TraitDefinition t, string attrId, float magnitude)
+            => t.modifiers.Add(new ModifierDefinition(attrId, EModifierOperation.Add, magnitude));
+
+        /// <summary>构造「主体某属性 ≥ value」的单项条件表达式(Chronicle.AttributeCompare)。</summary>
+        private static ConditionExpression AttrAtLeast(string attrId, float value)
+        {
+            var item = new ConditionItem("Chronicle.AttributeCompare");
+            item.parameters.Add(IntParam("scope",  (int)EConditionScope.Actor));
+            item.parameters.Add(StrParam("attrId", attrId));
+            item.parameters.Add(IntParam("op",     ChronicleCompareOp.GreaterOrEqual));
+            item.parameters.Add(FloatParam("value", value));
+
+            var group = new ConditionGroup { itemOperator = ConditionLogicOp.And };
+            group.items.Add(item);
+
+            var expr = new ConditionExpression { groupOperator = ConditionLogicOp.And };
+            expr.groups.Add(group);
+            return expr;
+        }
+
+        private static ConditionParam IntParam(string id, long v)
+        {
+            var p = new ConditionParam(id, ConditionParamType.Int); p.SetInt(v); return p;
+        }
+
+        private static ConditionParam StrParam(string id, string v)
+        {
+            var p = new ConditionParam(id, ConditionParamType.String); p.SetString(v); return p;
+        }
+
+        private static ConditionParam FloatParam(string id, double v)
+        {
+            var p = new ConditionParam(id, ConditionParamType.Float); p.SetFloat(v); return p;
         }
 
         // ════════════════════════════════════════════════════════════════════════

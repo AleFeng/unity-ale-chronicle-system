@@ -365,7 +365,462 @@ MonoBehaviour:
       objAddresses: []
     conditionalModifiers: []
     values: []
-  traits: []
+  traits:
+  - id: brave
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u52C7\u6562"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65E0\u60E7\u5371\u9669,\u6218\u529B\u4E0E\u8010\u529B\u63D0\u5347\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: might
+      operation: 0
+      magnitude: 8
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: stamina
+      operation: 0
+      magnitude: 4
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: coward
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u61E6\u5F31"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4E34\u9635\u9000\u7F29,\u6218\u529B\u4E0B\u964D\u4F46\u8EAB\u6CD5\u66F4\u7075\u6D3B\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs:
+    - brave
+    modifiers:
+    - targetAttributeId: might
+      operation: 0
+      magnitude: -6
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: agility
+      operation: 0
+      magnitude: 3
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: genius
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5929\u624D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u667A\u529B\u8D85\u7FA4,\u517C\u5177\u654F\u9510\u6D1E\u5BDF\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: intellect
+      operation: 0
+      magnitude: 12
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: perception
+      operation: 0
+      magnitude: 5
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: strong
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5F3A\u58EE"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4F53\u9B44\u5F3A\u5065,\u8010\u529B\u4E0E\u6218\u529B\u63D0\u5347\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: stamina
+      operation: 0
+      magnitude: 10
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: might
+      operation: 0
+      magnitude: 5
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: beautiful
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7F8E\u8C8C"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5BB9\u989C\u51FA\u4F17,\u9B45\u529B\u5927\u589E\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 12
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: sage
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u777F\u667A"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u535A\u5B66\u901A\u8FBE;\u9700\u667A\u529B\u8FBE\u5230 30 \u65B9\u53EF\u83B7\u5F97\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: intellect
+      operation: 0
+      magnitude: 8
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: perception
+      operation: 0
+      magnitude: 4
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups:
+      - negate: 0
+        itemOperator: 0
+        items:
+        - negate: 0
+          key: Chronicle.AttributeCompare
+          parameters:
+          - id: scope
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0000000000000000
+            floats: []
+            strings: []
+          - id: attrId
+            type: 0
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats: []
+            strings:
+            - intellect
+          - id: op
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0100000000000000
+            floats: []
+            strings: []
+          - id: value
+            type: 2
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats:
+            - 30
+            strings: []
+    values: []
   characterTemplates:
   - name: "\u4E3B\u89D2"
     color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
