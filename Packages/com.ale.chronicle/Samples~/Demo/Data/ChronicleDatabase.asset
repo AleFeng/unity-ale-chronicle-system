@@ -1,0 +1,4345 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d293087d365ae408feaeb87076c0ef, type: 3}
+  m_Name: ChronicleDatabase
+  m_EditorClassIdentifier: Ale.Chronicle.Runtime::Ale.Chronicle.ChronicleDatabase
+  enumTypes:
+  - name: "\u6027\u522B"
+    items:
+    - name: "\u7537"
+      value: 0
+      attributeValues: []
+    - name: "\u5973"
+      value: 1
+      attributeValues: []
+    nextValue: 2
+    attributes: []
+  - name: "\u8840\u578B"
+    items:
+    - name: A
+      value: 0
+      attributeValues: []
+    - name: B
+      value: 1
+      attributeValues: []
+    - name: O
+      value: 2
+      attributeValues: []
+    - name: AB
+      value: 3
+      attributeValues: []
+    nextValue: 4
+    attributes: []
+  - name: "\u9636\u7EA7"
+    items:
+    - name: "\u521D\u7EA7"
+      value: 0
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u521D\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '30f88aa7a52b64f45b8c567d63d62b01[T_Quality_Frame_Poor]'
+    - name: "\u4E2D\u7EA7"
+      value: 1
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u4E2D\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '0abd3a6ee336ae144a47b12b50e68d49[T_Quality_Frame_Common]'
+    - name: "\u9AD8\u7EA7"
+      value: 2
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u9AD8\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '3283108b306f3d84b90d36bc846f0675[T_Quality_Frame_Uncommon]'
+    - name: "\u738B\u7EA7"
+      value: 3
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u738B\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - '3eab096c48c919943a0d5cacb00ca84f[T_Quality_Frame_Rare]'
+    - name: "\u5E1D\u7EA7"
+      value: 4
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u5E1D\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - 'b165232a97a4a64408c1d4dfa30b7d62[T_Quality_Frame_Epic]'
+    - name: "\u5723\u7EA7"
+      value: 5
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u5723\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - 'dec70115fa10a534b952aa5289a898d2[T_Quality_Frame_Legendary]'
+    - name: "\u795E\u7EA7"
+      value: 6
+      attributeValues:
+      - id: "\u540D\u79F0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - "\u795E\u7EA7"
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u63CF\u8FF0"
+        value:
+          type: 10
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings:
+          - 
+          - 
+          - 
+          objRefs: []
+          curves: []
+          objAddresses: []
+      - id: "\u80CC\u666F\u6846"
+        value:
+          type: 9
+          isArray: 0
+          enumTypeRef: 
+          ints: 
+          floats: []
+          strings: []
+          objRefs:
+          - {fileID: 0}
+          curves: []
+          objAddresses:
+          - 'ef9f4c9a445adef4b8f8b1537bab5dc7[T_Quality_Frame_Mythic]'
+    nextValue: 7
+    attributes:
+    - id: "\u540D\u79F0"
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - 
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: "\u63CF\u8FF0"
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - 
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: "\u80CC\u666F\u6846"
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 9
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs:
+        - {fileID: 0}
+        curves: []
+        objAddresses:
+        - 
+  tags: []
+  coreAttributes:
+  - id: might
+    templateRef: "\u80FD\u529B"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6218\u529B"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6218"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    conditionalModifiers: []
+    values: []
+  - id: intellect
+    templateRef: "\u80FD\u529B"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u667A\u529B"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u667A"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    conditionalModifiers: []
+    values: []
+  - id: stamina
+    templateRef: "\u80FD\u529B"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8010\u529B"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8010"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    conditionalModifiers: []
+    values: []
+  - id: agility
+    templateRef: "\u80FD\u529B"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u654F\u6377"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u654F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    conditionalModifiers: []
+    values: []
+  - id: perception
+    templateRef: "\u80FD\u529B"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u611F\u77E5"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u611F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    conditionalModifiers: []
+    values: []
+  - id: charisma
+    templateRef: "\u80FD\u529B"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9B45\u529B"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    abbreviation:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9B45"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    conditionalModifiers: []
+    values: []
+  traits:
+  - id: brave
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u52C7\u6562"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65E0\u60E7\u5371\u9669,\u6218\u529B\u4E0E\u8010\u529B\u63D0\u5347\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: might
+      operation: 0
+      magnitude: 8
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: stamina
+      operation: 0
+      magnitude: 4
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: coward
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u61E6\u5F31"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4E34\u9635\u9000\u7F29,\u6218\u529B\u4E0B\u964D\u4F46\u8EAB\u6CD5\u66F4\u7075\u6D3B\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs:
+    - brave
+    modifiers:
+    - targetAttributeId: might
+      operation: 0
+      magnitude: -6
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: agility
+      operation: 0
+      magnitude: 3
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: genius
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5929\u624D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u667A\u529B\u8D85\u7FA4,\u517C\u5177\u654F\u9510\u6D1E\u5BDF\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: intellect
+      operation: 0
+      magnitude: 12
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: perception
+      operation: 0
+      magnitude: 5
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: strong
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5F3A\u58EE"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4F53\u9B44\u5F3A\u5065,\u8010\u529B\u4E0E\u6218\u529B\u63D0\u5347\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: stamina
+      operation: 0
+      magnitude: 10
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: might
+      operation: 0
+      magnitude: 5
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: beautiful
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7F8E\u8C8C"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5BB9\u989C\u51FA\u4F17,\u9B45\u529B\u5927\u589E\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 12
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
+  - id: sage
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u777F\u667A"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u535A\u5B66\u901A\u8FBE;\u9700\u667A\u529B\u8FBE\u5230 30 \u65B9\u53EF\u83B7\u5F97\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 0
+    defaultDurationDays: 0
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: intellect
+      operation: 0
+      magnitude: 8
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: perception
+      operation: 0
+      magnitude: 4
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups:
+      - negate: 0
+        itemOperator: 0
+        items:
+        - negate: 0
+          key: Chronicle.AttributeCompare
+          parameters:
+          - id: scope
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0000000000000000
+            floats: []
+            strings: []
+          - id: attrId
+            type: 0
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats: []
+            strings:
+            - intellect
+          - id: op
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0100000000000000
+            floats: []
+            strings: []
+          - id: value
+            type: 2
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats:
+            - 30
+            strings: []
+    values: []
+  characterTemplates:
+  - name: "\u4E3B\u89D2"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes:
+    - id: name
+      type: 2
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: birthday
+      type: 0
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 0
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: sex
+      type: 4
+      isArray: 0
+      enumTypeRef: "\u6027\u522B"
+      defaultValue:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u6027\u522B"
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: height
+      type: 1
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 1
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: weight
+      type: 1
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 1
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: measurements
+      type: 20
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 20
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: bloodType
+      type: 4
+      isArray: 0
+      enumTypeRef: "\u8840\u578B"
+      defaultValue:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u8840\u578B"
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: interests
+      type: 2
+      isArray: 1
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    raceRef: 
+    guaranteedTraitRefs: []
+    randomTraitPoolRefs: []
+    attributePointBudget: 0
+    minAgeDays: 0
+    maxAgeDays: 0
+  characters:
+  - id: luna
+    templateRef: "\u4E3B\u89D2"
+    values:
+    - id: name
+      value:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u9732\u5A1C"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: birthday
+      value:
+        type: 0
+        isArray: 0
+        enumTypeRef: 
+        ints: eedaffff
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: sex
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u6027\u522B"
+        ints: 01000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: height
+      value:
+        type: 1
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats:
+        - 168
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: weight
+      value:
+        type: 1
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats:
+        - 54
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: measurements
+      value:
+        type: 20
+        isArray: 0
+        enumTypeRef: 
+        ints: 560000003c00000058000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: bloodType
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u8840\u578B"
+        ints: 02000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: interests
+      value:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u8BFB\u4E66"
+        - "\u5251\u672F"
+        - "\u5929\u6587"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    coreAttributes:
+    - attrId: might
+      baseValue: 14
+    - attrId: intellect
+      baseValue: 16
+    - attrId: stamina
+      baseValue: 12
+    - attrId: agility
+      baseValue: 11
+    - attrId: perception
+      baseValue: 13
+    - attrId: charisma
+      baseValue: 15
+    traits:
+    - traitRef: brave
+      remainingDays: -1
+      stacks: 1
+      sourceTag: 
+    - traitRef: genius
+      remainingDays: -1
+      stacks: 1
+      sourceTag: 
+    fatherRef: 
+    motherRef: 
+    childRefs: []
+    professions:
+    - professionRef: knight
+      level: 45
+      currentExp: 0
+      isPrimary: 1
+    - professionRef: scholar
+      level: 12
+      currentExp: 0
+      isPrimary: 0
+    titles:
+    - titleRef: count
+      acquiredWorldDay: 0
+    - titleRef: knight_t40
+      acquiredWorldDay: 0
+  coreAttributeTemplates:
+  - name: "\u80FD\u529B"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    categoryEnumRef: 
+    minValue: 0
+    maxValue: 100
+    defaultBase: 10
+  traitTemplates:
+  - name: "\u6027\u683C"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    categoryEnumRef: 
+    lifetime: 0
+    defaultDurationDays: 0
+  groupTags:
+  - id: combat
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6218\u6597"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - id: magic
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9B54\u6CD5"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - id: noble
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8D35\u65CF"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - id: social
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u793E\u4EA4"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - id: state
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u72B6\u6001"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  numberFormatConfigs: []
+  skillTemplates:
+  - name: "\u4E3B\u52A8\u6280\u80FD"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes:
+    - id: "\u9636\u7EA7"
+      type: 4
+      isArray: 0
+      enumTypeRef: "\u9636\u7EA7"
+      defaultValue:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    primaryGroupTag: 
+    secondaryGroupTags: []
+  skills:
+  - id: charge
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u51B2\u950B"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5411\u524D\u7A81\u8FDB\u5E76\u5BF9\u76EE\u6807\u9020\u6210\u51B2\u51FB\u4F24\u5BB3\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 70a42b5f72e932d448a5fed68befdf07
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: combat
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: fireball
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u706B\u7403\u672F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6295\u63B7\u706B\u7403,\u9020\u6210\u8303\u56F4\u706B\u7130\u4F24\u5BB3\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - f47f7d68136610543b4207c7a0b87d1d
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: magic
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: erudition
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u535A\u8BC6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6E0A\u535A\u7684\u5B66\u8BC6,\u63D0\u5347\u7814\u7A76\u4E0E\u4EA4\u6D89\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - fe3d30e84e6817a488c88f946440832e
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: social
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: slash
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65A9\u51FB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u57FA\u7840\u5251\u672F:\u4E00\u6B21\u5229\u843D\u7684\u6325\u65A9\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 3e31b9fdb695d7248a67344e6613b1f8
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: combat
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: heavy_strike
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u91CD\u65A9"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u84C4\u529B\u91CD\u51FB,\u4F24\u5BB3\u66F4\u9AD8\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 3e31b9fdb695d7248a67344e6613b1f8
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: combat
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: whirlwind
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65CB\u98CE\u65A9"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65CB\u8EAB\u6A2A\u626B\u5468\u56F4\u6240\u6709\u654C\u4EBA\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 4f38ed690f4d1324f87750dd24d2bd32
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: combat
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: flame_burst
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u70C8\u7130\u7206"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u706B\u7403\u5347\u7EA7:\u5F15\u7206\u66F4\u5927\u8303\u56F4\u7684\u70C8\u7130\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 0e341243841712e4ba9ef6428b9b0370
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: magic
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 01000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: meteor
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9668\u661F\u672F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u53EC\u5524\u9668\u661F,\u6BC1\u706D\u6027\u8303\u56F4\u4F24\u5BB3\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 10f5993454ccba14a99fa9ad5de7c8cb
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: magic
+    secondaryGroupTags: []
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 02000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  skillTrees:
+  - id: knight_tree
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB\u6280\u80FD"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    kind: 0
+    skills:
+    - skillRef: charge
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: 
+      prerequisiteSkillRefs: []
+    tiers: []
+    pointGrants: []
+  - id: mage_tree
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6CD5\u5E08\u6280\u80FD"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    kind: 0
+    skills:
+    - skillRef: fireball
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: 
+      prerequisiteSkillRefs: []
+    tiers: []
+    pointGrants: []
+  - id: scholar_tree
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B66\u8005\u6280\u80FD"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    kind: 0
+    skills:
+    - skillRef: erudition
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: 
+      prerequisiteSkillRefs: []
+    tiers: []
+    pointGrants: []
+  - id: sword_tree
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5251\u672F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    kind: 1
+    skills:
+    - skillRef: slash
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: t1
+      prerequisiteSkillRefs: []
+    - skillRef: heavy_strike
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: t2
+      prerequisiteSkillRefs: []
+    - skillRef: whirlwind
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: t3
+      prerequisiteSkillRefs: []
+    tiers:
+    - key: t1
+      displayName:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u521D\u7EA7"
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+    - key: t2
+      displayName:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u4E2D\u7EA7"
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+      unlockCondition:
+        groupOperator: 0
+        groups:
+        - negate: 0
+          itemOperator: 0
+          items:
+          - negate: 0
+            key: Chronicle.AttributeCompare
+            parameters:
+            - id: scope
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0000000000000000
+              floats: []
+              strings: []
+            - id: attrId
+              type: 0
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats: []
+              strings:
+              - might
+            - id: op
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0100000000000000
+              floats: []
+              strings: []
+            - id: value
+              type: 2
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats:
+              - 30
+              strings: []
+    - key: t3
+      displayName:
+        type: 10
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u9AD8\u7EA7"
+        - 
+        - 
+        objRefs: []
+        curves: []
+        objAddresses: []
+      unlockCondition:
+        groupOperator: 0
+        groups:
+        - negate: 0
+          itemOperator: 0
+          items:
+          - negate: 0
+            key: Chronicle.AttributeCompare
+            parameters:
+            - id: scope
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0000000000000000
+              floats: []
+              strings: []
+            - id: attrId
+              type: 0
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats: []
+              strings:
+              - might
+            - id: op
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0100000000000000
+              floats: []
+              strings: []
+            - id: value
+              type: 2
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats:
+              - 60
+              strings: []
+    pointGrants: []
+  - id: fire_tree
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u706B\u7CFB\u8FDB\u9636"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    kind: 2
+    skills:
+    - skillRef: fireball
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: 
+      prerequisiteSkillRefs: []
+    - skillRef: flame_burst
+      unlockCondition:
+        groupOperator: 0
+        groups: []
+      tierKey: 
+      prerequisiteSkillRefs:
+      - fireball
+    - skillRef: meteor
+      unlockCondition:
+        groupOperator: 0
+        groups:
+        - negate: 0
+          itemOperator: 0
+          items:
+          - negate: 0
+            key: Chronicle.AttributeCompare
+            parameters:
+            - id: scope
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0000000000000000
+              floats: []
+              strings: []
+            - id: attrId
+              type: 0
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats: []
+              strings:
+              - intellect
+            - id: op
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0100000000000000
+              floats: []
+              strings: []
+            - id: value
+              type: 2
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats:
+              - 50
+              strings: []
+      tierKey: 
+      prerequisiteSkillRefs:
+      - flame_burst
+    tiers: []
+    pointGrants: []
+  professionTemplates:
+  - name: "\u6218\u6597\u804C\u4E1A"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    maxLevel: 99
+  professions:
+  - id: knight
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8FD1\u6218\u5B88\u62A4\u8005,\u6218\u529B\u4E0E\u8010\u529B\u968F\u7B49\u7EA7\u6210\u957F\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u6218\u6597\u804C\u4E1A"
+    groupTagRef: combat
+    maxLevel: 99
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth:
+    - coreAttrId: might
+      perLevel: 1.5
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - coreAttrId: stamina
+      perLevel: 1
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    unlocks:
+    - level: 20
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t20
+    - level: 40
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t40
+    - level: 60
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t60
+    - level: 80
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t80
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs:
+    - knight_tree
+    - sword_tree
+    values: []
+  - id: mage
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6CD5\u5E08"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A7E\u9A6D\u5143\u7D20,\u667A\u529B\u4E0E\u611F\u77E5\u968F\u7B49\u7EA7\u6210\u957F;\u9700\u667A\u529B\u226515
+        \u65B9\u53EF\u4ECE\u4E1A\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u6218\u6597\u804C\u4E1A"
+    groupTagRef: magic
+    maxLevel: 99
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth:
+    - coreAttrId: intellect
+      perLevel: 1.8
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - coreAttrId: perception
+      perLevel: 0.8
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    unlocks:
+    - level: 20
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t20
+    - level: 40
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t40
+    - level: 60
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t60
+    - level: 80
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t80
+    requirements:
+      groupOperator: 0
+      groups:
+      - negate: 0
+        itemOperator: 0
+        items:
+        - negate: 0
+          key: Chronicle.AttributeCompare
+          parameters:
+          - id: scope
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0000000000000000
+            floats: []
+            strings: []
+          - id: attrId
+            type: 0
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats: []
+            strings:
+            - intellect
+          - id: op
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0100000000000000
+            floats: []
+            strings: []
+          - id: value
+            type: 2
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats:
+            - 15
+            strings: []
+    allowedRaceRefs: []
+    skillTreeRefs:
+    - mage_tree
+    - fire_tree
+    values: []
+  - id: scholar
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B66\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u94BB\u7814\u5B66\u95EE,\u667A\u529B\u4E0E\u9B45\u529B\u968F\u7B49\u7EA7\u6210\u957F\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u6218\u6597\u804C\u4E1A"
+    groupTagRef: social
+    maxLevel: 99
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth:
+    - coreAttrId: intellect
+      perLevel: 1.2
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - coreAttrId: charisma
+      perLevel: 0.6
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    unlocks:
+    - level: 20
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t20
+    - level: 40
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t40
+    - level: 60
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t60
+    - level: 80
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t80
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs:
+    - scholar_tree
+    values: []
+  - id: favorability
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u597D\u611F\u5EA6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4EE5\u70B9\u6570\u79EF\u7D2F\u7684\u5173\u7CFB\u4EB2\u5BC6\u5EA6,\u6BCF\u7EA7\u6388\u4E88\u4E00\u4E2A\u79F0\u53F7\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    groupTagRef: state
+    maxLevel: 5
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth: []
+    unlocks:
+    - level: 1
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_1
+    - level: 2
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_2
+    - level: 3
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_3
+    - level: 4
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_4
+    - level: 5
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_5
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs: []
+    values: []
+  - id: madness
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u75AF\u72C2\u5EA6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4EE5\u70B9\u6570\u79EF\u7D2F\u7684\u7CBE\u795E\u5931\u5E38\u5EA6,\u6BCF\u7EA7\u6388\u4E88\u4E00\u4E2A\u79F0\u53F7\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    groupTagRef: state
+    maxLevel: 5
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth: []
+    unlocks:
+    - level: 1
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_1
+    - level: 2
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_2
+    - level: 3
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_3
+    - level: 4
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_4
+    - level: 5
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_5
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs: []
+    values: []
+  professionTrees: []
+  titleTemplates:
+  - name: "\u4E16\u4FD7\u7235\u4F4D"
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    kind: 0
+    isRevocable: 1
+  titles:
+  - id: baron
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7537\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 1
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 2
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: viscount
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B50\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 2
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 4
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: count
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4F2F\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 3
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 6
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: marquis
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4FAF\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 4
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 8
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: duke
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u516C\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 5
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 10
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: knight_t20
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u89C1\u4E60\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: knight_t40
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: knight_t60
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB\u961F\u957F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: knight_t80
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5723\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t20
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6CD5\u672F\u5B66\u5F92"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t40
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u672F\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t60
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5927\u6CD5\u5E08"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t80
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8D24\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t20
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4E66\u8BB0\u5458"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t40
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B66\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t60
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6559\u6388"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t80
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u667A\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_1
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u76F8\u8BC6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_2
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u53CB\u597D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_3
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4FE1\u8D56"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_4
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u631A\u53CB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_5
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7075\u9B42\u4F34\u4FA3"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_1
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7126\u8E81"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_2
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u504F\u6267"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_3
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u766B\u72C2"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_4
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5931\u63A7"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_5
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6E6E\u706D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  rankLadders:
+  - id: nobility
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7235\u4F4D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    orderedTitleRefs:
+    - baron
+    - viscount
+    - count
+    - marquis
+    - duke
