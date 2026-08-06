@@ -52,6 +52,13 @@ namespace Ale.Chronicle.DemoEditor
         public const string PfBloodType    = "bloodType";    // 血型(Enum→EnumBlood)
         public const string PfInterests    = "interests";    // 兴趣(String 数组)
 
+        // ── 职业 id(D5 建立;D3 里程碑/等级头衔按此命名,D5 经 LevelUnlock 引用) ─────
+        public const string ProfKnight  = "knight";       // 骑士(主职业,0~99)
+        public const string ProfMage    = "mage";         // 法师(主职业,0~99)
+        public const string ProfScholar = "scholar";      // 学者(主职业,0~99)
+        public const string ProfFavor   = "favorability"; // 好感度(0~5)
+        public const string ProfMadness = "madness";      // 疯狂度(0~5)
+
         // ════════════════════════════════════════════════════════════════════════
         //  D1 · 基础层
         // ════════════════════════════════════════════════════════════════════════
@@ -214,6 +221,99 @@ namespace Ale.Chronicle.DemoEditor
         private static ConditionParam FloatParam(string id, double v)
         {
             var p = new ConditionParam(id, ConditionParamType.Float); p.SetFloat(v); return p;
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        //  D3 · 头衔 + 阶级序列
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// D3:生成头衔与阶级序列。① 爵位五连(RankTitle,rankTier 递增,带魅力修饰器)+ RankLadder「爵位」(低→高);
+        /// ② 三个主职业的里程碑称号(Epithet,每 20 级一个);③ 好感/疯狂每级称号(Epithet,1~5 级)。
+        /// 只清空并重建 <see cref="ChronicleDatabase.Titles"/> 与 <see cref="ChronicleDatabase.RankLadders"/>。
+        /// </summary>
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Character Seeder/D3 头衔+阶级序列")]
+        public static string Build_D3()
+        {
+            var db = GetOrCreateDb();
+            db.Titles.Clear();
+            db.RankLadders.Clear();
+
+            // ── ① 爵位五连(阶级头衔;越大越高,带魅力加成) ────────────────────────
+            AddRank(db, "baron",    "男爵", 1, 2f);
+            AddRank(db, "viscount", "子爵", 2, 4f);
+            AddRank(db, "count",    "伯爵", 3, 6f);
+            AddRank(db, "marquis",  "侯爵", 4, 8f);
+            AddRank(db, "duke",     "公爵", 5, 10f);
+
+            var ladder = new RankLadder("nobility");
+            ladder.displayName.SetTextValue(0, "爵位");
+            ladder.orderedTitleRefs.AddRange(new[] { "baron", "viscount", "count", "marquis", "duke" }); // 低→高
+            db.RankLadders.Add(ladder);
+
+            // ── ② 主职业里程碑称号(每 20 级一个;D5 经 LevelUnlock 授予) ────────────
+            AddMilestone(db, ProfKnight,  GtCombat, 20, "见习骑士");
+            AddMilestone(db, ProfKnight,  GtCombat, 40, "骑士");
+            AddMilestone(db, ProfKnight,  GtCombat, 60, "骑士队长");
+            AddMilestone(db, ProfKnight,  GtCombat, 80, "圣骑士");
+            AddMilestone(db, ProfMage,    GtMagic,  20, "法术学徒");
+            AddMilestone(db, ProfMage,    GtMagic,  40, "术士");
+            AddMilestone(db, ProfMage,    GtMagic,  60, "大法师");
+            AddMilestone(db, ProfMage,    GtMagic,  80, "贤者");
+            AddMilestone(db, ProfScholar, GtSocial, 20, "书记员");
+            AddMilestone(db, ProfScholar, GtSocial, 40, "学者");
+            AddMilestone(db, ProfScholar, GtSocial, 60, "教授");
+            AddMilestone(db, ProfScholar, GtSocial, 80, "智者");
+
+            // ── ③ 好感度 / 疯狂度 每级称号(1~5;D5 经 LevelUnlock 授予) ─────────────
+            AddLevelTitle(db, FavorTitleId(1), "相识");
+            AddLevelTitle(db, FavorTitleId(2), "友好");
+            AddLevelTitle(db, FavorTitleId(3), "信赖");
+            AddLevelTitle(db, FavorTitleId(4), "挚友");
+            AddLevelTitle(db, FavorTitleId(5), "灵魂伴侣");
+            AddLevelTitle(db, MadnessTitleId(1), "焦躁");
+            AddLevelTitle(db, MadnessTitleId(2), "偏执");
+            AddLevelTitle(db, MadnessTitleId(3), "癫狂");
+            AddLevelTitle(db, MadnessTitleId(4), "失控");
+            AddLevelTitle(db, MadnessTitleId(5), "湮灭");
+
+            foreach (var t in db.Titles) t.RebuildAttributes(db);
+
+            SaveDb(db);
+            int ranks = 0, epithets = 0;
+            foreach (var t in db.Titles) { if (t.kind == ETitleKind.RankTitle) ranks++; else epithets++; }
+            return ValidateReport(db, "D3",
+                $"头衔={db.Titles.Count}(阶级{ranks}/称号{epithets}), 阶级序列={db.RankLadders.Count}(爵位:男→公)");
+        }
+
+        /// <summary>头衔 id 命名:主职业里程碑 = <c>{profId}_t{level}</c>;好感/疯狂等级 = <c>{profId}_{level}</c>。</summary>
+        public static string MilestoneTitleId(string profId, int level) => profId + "_t" + level;
+        public static string FavorTitleId(int level)   => ProfFavor + "_" + level;
+        public static string MadnessTitleId(int level) => ProfMadness + "_" + level;
+
+        /// <summary>新增一个阶级头衔(爵位,归「世俗爵位」模板、贵族分组、可继承、带魅力加成)。</summary>
+        private static void AddRank(ChronicleDatabase db, string id, string name, int tier, float charismaBonus)
+        {
+            var t = new TitleDefinition(id, TplTitle) { kind = ETitleKind.RankTitle, groupTagRef = GtNoble, rankTier = tier, heritable = true };
+            t.displayName.SetTextValue(0, name);
+            t.modifiers.Add(new ModifierDefinition(AtCharisma, EModifierOperation.Add, charismaBonus));
+            db.Titles.Add(t);
+        }
+
+        /// <summary>新增一个职业里程碑称号(Epithet)。</summary>
+        private static void AddMilestone(ChronicleDatabase db, string profId, string groupTag, int level, string name)
+            => AddEpithet(db, MilestoneTitleId(profId, level), name, groupTag);
+
+        /// <summary>新增一个好感/疯狂等级称号(Epithet,状态分组)。</summary>
+        private static void AddLevelTitle(ChronicleDatabase db, string id, string name)
+            => AddEpithet(db, id, name, GtState);
+
+        /// <summary>新增一个称号型头衔(Epithet)。</summary>
+        private static void AddEpithet(ChronicleDatabase db, string id, string name, string groupTag)
+        {
+            var t = new TitleDefinition(id) { kind = ETitleKind.Epithet, groupTagRef = groupTag };
+            t.displayName.SetTextValue(0, name);
+            db.Titles.Add(t);
         }
 
         // ════════════════════════════════════════════════════════════════════════

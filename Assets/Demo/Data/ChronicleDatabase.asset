@@ -1137,5 +1137,1361 @@ MonoBehaviour:
     attributes: []
     kind: 0
     isRevocable: 1
-  titles: []
-  rankLadders: []
+  titles:
+  - id: baron
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7537\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 1
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 2
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: viscount
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B50\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 2
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 4
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: count
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4F2F\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 3
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 6
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: marquis
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4FAF\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 4
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 8
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: duke
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u516C\u7235"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E16\u4FD7\u7235\u4F4D"
+    kind: 0
+    groupTagRef: noble
+    rankTier: 5
+    heritable: 1
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers:
+    - targetAttributeId: charisma
+      operation: 0
+      magnitude: 10
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    opinionModifiers: []
+    values: []
+  - id: knight_t20
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u89C1\u4E60\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: knight_t40
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: knight_t60
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB\u961F\u957F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: knight_t80
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5723\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: combat
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t20
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6CD5\u672F\u5B66\u5F92"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t40
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u672F\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t60
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5927\u6CD5\u5E08"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: mage_t80
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8D24\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: magic
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t20
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4E66\u8BB0\u5458"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t40
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B66\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t60
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6559\u6388"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: scholar_t80
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u667A\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: social
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_1
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u76F8\u8BC6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_2
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u53CB\u597D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_3
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4FE1\u8D56"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_4
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u631A\u53CB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: favorability_5
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7075\u9B42\u4F34\u4FA3"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_1
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7126\u8E81"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_2
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u504F\u6267"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_3
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u766B\u72C2"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_4
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5931\u63A7"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  - id: madness_5
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6E6E\u706D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    kind: 1
+    groupTagRef: state
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  rankLadders:
+  - id: nobility
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7235\u4F4D"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    orderedTitleRefs:
+    - baron
+    - viscount
+    - count
+    - marquis
+    - duke
