@@ -1762,7 +1762,540 @@ MonoBehaviour:
     color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     attributes: []
     maxLevel: 99
-  professions: []
+  professions:
+  - id: knight
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A91\u58EB"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u8FD1\u6218\u5B88\u62A4\u8005,\u6218\u529B\u4E0E\u8010\u529B\u968F\u7B49\u7EA7\u6210\u957F\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u6218\u6597\u804C\u4E1A"
+    groupTagRef: combat
+    maxLevel: 99
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth:
+    - coreAttrId: might
+      perLevel: 1.5
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - coreAttrId: stamina
+      perLevel: 1
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    unlocks:
+    - level: 20
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t20
+    - level: 40
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t40
+    - level: 60
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t60
+    - level: 80
+      grantTraitRefs: []
+      grantTitleRefs:
+      - knight_t80
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs:
+    - knight_tree
+    - sword_tree
+    values: []
+  - id: mage
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6CD5\u5E08"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u9A7E\u9A6D\u5143\u7D20,\u667A\u529B\u4E0E\u611F\u77E5\u968F\u7B49\u7EA7\u6210\u957F;\u9700\u667A\u529B\u226515
+        \u65B9\u53EF\u4ECE\u4E1A\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u6218\u6597\u804C\u4E1A"
+    groupTagRef: magic
+    maxLevel: 99
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth:
+    - coreAttrId: intellect
+      perLevel: 1.8
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - coreAttrId: perception
+      perLevel: 0.8
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    unlocks:
+    - level: 20
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t20
+    - level: 40
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t40
+    - level: 60
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t60
+    - level: 80
+      grantTraitRefs: []
+      grantTitleRefs:
+      - mage_t80
+    requirements:
+      groupOperator: 0
+      groups:
+      - negate: 0
+        itemOperator: 0
+        items:
+        - negate: 0
+          key: Chronicle.AttributeCompare
+          parameters:
+          - id: scope
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0000000000000000
+            floats: []
+            strings: []
+          - id: attrId
+            type: 0
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats: []
+            strings:
+            - intellect
+          - id: op
+            type: 1
+            isArray: 0
+            enumTypeRef: 
+            ints: 0100000000000000
+            floats: []
+            strings: []
+          - id: value
+            type: 2
+            isArray: 0
+            enumTypeRef: 
+            ints: 
+            floats:
+            - 15
+            strings: []
+    allowedRaceRefs: []
+    skillTreeRefs:
+    - mage_tree
+    - fire_tree
+    values: []
+  - id: scholar
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5B66\u8005"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u94BB\u7814\u5B66\u95EE,\u667A\u529B\u4E0E\u9B45\u529B\u968F\u7B49\u7EA7\u6210\u957F\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u6218\u6597\u804C\u4E1A"
+    groupTagRef: social
+    maxLevel: 99
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth:
+    - coreAttrId: intellect
+      perLevel: 1.2
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - coreAttrId: charisma
+      perLevel: 0.6
+      useCurve: 0
+      levelCurve:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    unlocks:
+    - level: 20
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t20
+    - level: 40
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t40
+    - level: 60
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t60
+    - level: 80
+      grantTraitRefs: []
+      grantTitleRefs:
+      - scholar_t80
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs:
+    - scholar_tree
+    values: []
+  - id: favorability
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u597D\u611F\u5EA6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4EE5\u70B9\u6570\u79EF\u7D2F\u7684\u5173\u7CFB\u4EB2\u5BC6\u5EA6,\u6BCF\u7EA7\u6388\u4E88\u4E00\u4E2A\u79F0\u53F7\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    groupTagRef: state
+    maxLevel: 5
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth: []
+    unlocks:
+    - level: 1
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_1
+    - level: 2
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_2
+    - level: 3
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_3
+    - level: 4
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_4
+    - level: 5
+      grantTraitRefs: []
+      grantTitleRefs:
+      - favorability_5
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs: []
+    values: []
+  - id: madness
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u75AF\u72C2\u5EA6"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u4EE5\u70B9\u6570\u79EF\u7D2F\u7684\u7CBE\u795E\u5931\u5E38\u5EA6,\u6BCF\u7EA7\u6388\u4E88\u4E00\u4E2A\u79F0\u53F7\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: 
+    groupTagRef: state
+    maxLevel: 5
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth: []
+    unlocks:
+    - level: 1
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_1
+    - level: 2
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_2
+    - level: 3
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_3
+    - level: 4
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_4
+    - level: 5
+      grantTraitRefs: []
+      grantTitleRefs:
+      - madness_5
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs: []
+    values: []
   professionTrees: []
   titleTemplates:
   - name: "\u4E16\u4FD7\u7235\u4F4D"

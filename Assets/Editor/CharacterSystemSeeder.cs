@@ -420,6 +420,87 @@ namespace Ale.Chronicle.DemoEditor
         }
 
         // ════════════════════════════════════════════════════════════════════════
+        //  D5 · 职业
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// D5:生成 5 个职业。主职业 骑士/法师/学者(maxLevel=99,每级成长汇入属性、每 20 级 LevelUnlock 授里程碑头衔、
+        /// 挂 D4 职业技能树;法师另配从业门槛 智力≥15);好感度/疯狂度(maxLevel=5,每级 LevelUnlock 授对应称号)。
+        /// 只清空并重建 <see cref="ChronicleDatabase.Professions"/>。
+        /// </summary>
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Character Seeder/D5 职业")]
+        public static string Build_D5()
+        {
+            var db = GetOrCreateDb();
+            db.Professions.Clear();
+
+            // ── 主职业 骑士(战力/耐力成长;技能树 骑士技能 + 剑术) ─────────────────
+            var knight = AddProfession(db, ProfKnight, "骑士", "近战守护者,战力与耐力随等级成长。", GtCombat, 99, TplProfession);
+            knight.growth.Add(Growth(AtMight, 1.5f));
+            knight.growth.Add(Growth(AtStamina, 1.0f));
+            knight.skillTreeRefs.Add(KnightTreeId);
+            knight.skillTreeRefs.Add("sword_tree");
+            AddMilestoneUnlocks(knight, ProfKnight);
+
+            // ── 主职业 法师(智力/感知成长;技能树 法师技能 + 火系进阶;从业门槛 智力≥15) ──
+            var mage = AddProfession(db, ProfMage, "法师", "驾驭元素,智力与感知随等级成长;需智力≥15 方可从业。", GtMagic, 99, TplProfession);
+            mage.growth.Add(Growth(AtIntellect, 1.8f));
+            mage.growth.Add(Growth(AtPerception, 0.8f));
+            mage.skillTreeRefs.Add(MageTreeId);
+            mage.skillTreeRefs.Add("fire_tree");
+            mage.requirements = AttrAtLeast(AtIntellect, 15f);
+            AddMilestoneUnlocks(mage, ProfMage);
+
+            // ── 主职业 学者(智力/魅力成长;技能树 学者技能) ─────────────────────────
+            var scholar = AddProfession(db, ProfScholar, "学者", "钻研学问,智力与魅力随等级成长。", GtSocial, 99, TplProfession);
+            scholar.growth.Add(Growth(AtIntellect, 1.2f));
+            scholar.growth.Add(Growth(AtCharisma, 0.6f));
+            scholar.skillTreeRefs.Add(ScholarTreeId);
+            AddMilestoneUnlocks(scholar, ProfScholar);
+
+            // ── 好感度 / 疯狂度(点数积累型,maxLevel=5,每级授称号) ───────────────────
+            var favor = AddProfession(db, ProfFavor, "好感度", "以点数积累的关系亲密度,每级授予一个称号。", GtState, 5, null);
+            for (int lv = 1; lv <= 5; lv++) favor.unlocks.Add(UnlockTitle(lv, FavorTitleId(lv)));
+
+            var madness = AddProfession(db, ProfMadness, "疯狂度", "以点数积累的精神失常度,每级授予一个称号。", GtState, 5, null);
+            for (int lv = 1; lv <= 5; lv++) madness.unlocks.Add(UnlockTitle(lv, MadnessTitleId(lv)));
+
+            foreach (var p in db.Professions) p.RebuildAttributes(db);
+
+            SaveDb(db);
+            return ValidateReport(db, "D5", $"职业={db.Professions.Count}(主职业3·99级/好感·疯狂2·5级)");
+        }
+
+        /// <summary>新增一个职业(挂模板 / 分组 / 等级上限;返回以便追加成长 / 解锁 / 技能树)。</summary>
+        private static ProfessionDefinition AddProfession(ChronicleDatabase db, string id, string name, string desc, string groupTag, int maxLevel, string templateRef)
+        {
+            var p = new ProfessionDefinition(id, templateRef) { groupTagRef = groupTag, maxLevel = maxLevel };
+            p.displayName.SetTextValue(0, name);
+            p.description.SetTextValue(0, desc);
+            db.Professions.Add(p);
+            return p;
+        }
+
+        /// <summary>一条线性每级成长(perLevel × (level-1))。</summary>
+        private static LevelGrowthEntry Growth(string attrId, float perLevel)
+            => new LevelGrowthEntry { coreAttrId = attrId, perLevel = perLevel };
+
+        /// <summary>一条「达到 level 级授予 titleId」的解锁。</summary>
+        private static LevelUnlock UnlockTitle(int level, string titleId)
+        {
+            var u = new LevelUnlock { level = level };
+            u.grantTitleRefs.Add(titleId);
+            return u;
+        }
+
+        /// <summary>主职业每 20 级(20/40/60/80)授予对应里程碑称号。</summary>
+        private static void AddMilestoneUnlocks(ProfessionDefinition prof, string profId)
+        {
+            for (int lv = 20; lv <= 80; lv += 20)
+                prof.unlocks.Add(UnlockTitle(lv, MilestoneTitleId(profId, lv)));
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
         //  共享基础设施
         // ════════════════════════════════════════════════════════════════════════
 
