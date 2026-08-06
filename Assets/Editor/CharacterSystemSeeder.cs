@@ -59,6 +59,11 @@ namespace Ale.Chronicle.DemoEditor
         public const string ProfFavor   = "favorability"; // 好感度(0~5)
         public const string ProfMadness = "madness";      // 疯狂度(0~5)
 
+        // ── 职业技能树 id(D4 建立;D5 经 ProfessionDefinition.skillTreeRefs 引用) ────
+        public const string KnightTreeId  = "knight_tree";
+        public const string MageTreeId    = "mage_tree";
+        public const string ScholarTreeId = "scholar_tree";
+
         // ════════════════════════════════════════════════════════════════════════
         //  D1 · 基础层
         // ════════════════════════════════════════════════════════════════════════
@@ -314,6 +319,104 @@ namespace Ale.Chronicle.DemoEditor
             var t = new TitleDefinition(id) { kind = ETitleKind.Epithet, groupTagRef = groupTag };
             t.displayName.SetTextValue(0, name);
             db.Titles.Add(t);
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        //  D4 · 技能 + 技能树
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// D4:生成 8 个技能 + 5 棵技能树,演示三种类型:
+        /// ① 三个主职业的职业技能树(List;D5 经 skillTreeRefs 关联);
+        /// ② 剑术(Tiered,三层,层级带战力门槛);③ 火系进阶(Tree,前置链 火球术→烈焰爆→陨星术,末端另加智力门槛)。
+        /// 只清空并重建 <see cref="ChronicleDatabase.Skills"/> 与 <see cref="ChronicleDatabase.SkillTrees"/>。
+        /// </summary>
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Character Seeder/D4 技能+技能树")]
+        public static string Build_D4()
+        {
+            var db = GetOrCreateDb();
+            db.Skills.Clear();
+            db.SkillTrees.Clear();
+
+            // ── 技能(均挂「主动技能」模板,主分组标签引用 D1 分组池) ────────────────
+            AddSkill(db, "charge",       "冲锋",   "向前突进并对目标造成冲击伤害。", GtCombat); // 骑士职业技能
+            AddSkill(db, "fireball",     "火球术", "投掷火球,造成范围火焰伤害。",   GtMagic);  // 法师职业技能 + 火系树根
+            AddSkill(db, "erudition",    "博识",   "渊博的学识,提升研究与交涉。",   GtSocial); // 学者职业技能
+            AddSkill(db, "slash",        "斩击",   "基础剑术:一次利落的挥斩。",     GtCombat); // 剑术树·初级
+            AddSkill(db, "heavy_strike", "重斩",   "蓄力重击,伤害更高。",           GtCombat); // 剑术树·中级
+            AddSkill(db, "whirlwind",    "旋风斩", "旋身横扫周围所有敌人。",         GtCombat); // 剑术树·高级
+            AddSkill(db, "flame_burst",  "烈焰爆", "火球升级:引爆更大范围的烈焰。", GtMagic);  // 火系树·需火球术
+            AddSkill(db, "meteor",       "陨星术", "召唤陨星,毁灭性范围伤害。",     GtMagic);  // 火系树·需烈焰爆
+
+            foreach (var s in db.Skills) s.RebuildAttributes(db);
+
+            // ── ① 职业技能树(List) ───────────────────────────────────────────────
+            AddListTree(db, KnightTreeId,  "骑士技能", "charge");
+            AddListTree(db, MageTreeId,    "法师技能", "fireball");
+            AddListTree(db, ScholarTreeId, "学者技能", "erudition");
+
+            // ── ② 剑术(Tiered):三层,中/高级层带战力门槛 ─────────────────────────
+            var sword = new SkillTree("sword_tree") { kind = ESkillTreeKind.Tiered };
+            sword.displayName.SetTextValue(0, "剑术");
+            sword.tiers.Add(Tier("t1", "初级"));
+            sword.tiers.Add(Tier("t2", "中级", AttrAtLeast(AtMight, 30f)));
+            sword.tiers.Add(Tier("t3", "高级", AttrAtLeast(AtMight, 60f)));
+            sword.skills.Add(TierEntry("slash",        "t1"));
+            sword.skills.Add(TierEntry("heavy_strike", "t2"));
+            sword.skills.Add(TierEntry("whirlwind",    "t3"));
+            db.SkillTrees.Add(sword);
+
+            // ── ③ 火系进阶(Tree):前置链 + 末端额外条件 ───────────────────────────
+            var fire = new SkillTree("fire_tree") { kind = ESkillTreeKind.Tree };
+            fire.displayName.SetTextValue(0, "火系进阶");
+            fire.skills.Add(new SkillTreeEntry { skillRef = "fireball" });        // 根(无前置)
+            fire.skills.Add(Prereq("flame_burst", "fireball"));                   // 需:火球术
+            var meteorEntry = Prereq("meteor", "flame_burst");                    // 需:烈焰爆
+            meteorEntry.unlockCondition = AttrAtLeast(AtIntellect, 50f);          // + 额外门槛:智力≥50
+            fire.skills.Add(meteorEntry);
+            db.SkillTrees.Add(fire);
+
+            SaveDb(db);
+            return ValidateReport(db, "D4", $"技能={db.Skills.Count}, 技能树={db.SkillTrees.Count}(List3/Tiered1/Tree1)");
+        }
+
+        /// <summary>新增一个技能(挂「主动技能」模板 + 主分组标签)。</summary>
+        private static void AddSkill(ChronicleDatabase db, string id, string name, string desc, string groupTag)
+        {
+            var s = new Skill(id, TplSkill) { primaryGroupTag = groupTag };
+            s.displayText.SetTextValue(0, name);
+            s.descriptionText.SetTextValue(0, desc);
+            db.Skills.Add(s);
+        }
+
+        /// <summary>新增一棵 List 型技能树(一组技能打包,无层级/前置)。</summary>
+        private static void AddListTree(ChronicleDatabase db, string id, string name, params string[] skillRefs)
+        {
+            var tree = new SkillTree(id) { kind = ESkillTreeKind.List };
+            tree.displayName.SetTextValue(0, name);
+            foreach (var sr in skillRefs) tree.skills.Add(new SkillTreeEntry { skillRef = sr });
+            db.SkillTrees.Add(tree);
+        }
+
+        /// <summary>构造一个层级(可选解锁条件)。</summary>
+        private static SkillTreeTier Tier(string key, string name, ConditionExpression unlock = null)
+        {
+            var t = new SkillTreeTier { key = key };
+            t.displayName.SetTextValue(0, name);
+            if (unlock != null) t.unlockCondition = unlock;
+            return t;
+        }
+
+        /// <summary>层级成员条目(带 tierKey)。</summary>
+        private static SkillTreeEntry TierEntry(string skillRef, string tierKey)
+            => new SkillTreeEntry { skillRef = skillRef, tierKey = tierKey };
+
+        /// <summary>树状节点条目(带前置技能,AND 语义)。</summary>
+        private static SkillTreeEntry Prereq(string skillRef, params string[] prerequisiteSkillRefs)
+        {
+            var e = new SkillTreeEntry { skillRef = skillRef };
+            e.prerequisiteSkillRefs.AddRange(prerequisiteSkillRefs);
+            return e;
         }
 
         // ════════════════════════════════════════════════════════════════════════
