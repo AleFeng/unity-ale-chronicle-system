@@ -796,12 +796,27 @@ MonoBehaviour:
       objRefs: []
       curves: []
       objAddresses: []
+    conditionalModifiers: []
     values: []
   traits: []
   characterTemplates:
   - name: "\u4EBA\u7C7B"
     color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    attributes: []
+    attributes:
+    - id: field_0
+      type: 0
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 0
+        isArray: 0
+        enumTypeRef: 
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
     raceRef: 
     guaranteedTraitRefs: []
     randomTraitPoolRefs: []
@@ -811,12 +826,25 @@ MonoBehaviour:
   characters:
   - id: char_1
     templateRef: "\u4EBA\u7C7B"
-    values: []
+    values:
+    - id: field_0
+      value:
+        type: 0
+        isArray: 0
+        enumTypeRef: 
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
     coreAttributes: []
     traits: []
     fatherRef: 
     motherRef: 
     childRefs: []
+    professions: []
+    titles: []
   coreAttributeTemplates: []
   traitTemplates: []
   groupTags:
@@ -2933,3 +2961,139 @@ MonoBehaviour:
         objRefs: []
         curves: []
         objAddresses: []
+  skillTrees: []
+  professionTemplates:
+  - name: prof_template_1
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    maxLevel: 10
+  professions:
+  - id: prof_1
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: prof_template_1
+    groupTagRef: 
+    maxLevel: 10
+    expCurve:
+      mode: 0
+      baseExp: 100
+      exponent: 1.5
+      linear: 0
+      perLevelExp: 
+      curveValue:
+        type: 18
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+      curveScale: 1
+    growth: []
+    unlocks: []
+    requirements:
+      groupOperator: 0
+      groups: []
+    allowedRaceRefs: []
+    skillTreeRefs: []
+    values: []
+  professionTrees: []
+  titleTemplates:
+  - name: title_template_1
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    attributes: []
+    kind: 0
+    isRevocable: 1
+  titles:
+  - id: title_1
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - 
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs:
+      - {fileID: 0}
+      curves: []
+      objAddresses:
+      - 
+    templateRef: title_template_1
+    kind: 0
+    groupTagRef: 
+    rankTier: 0
+    heritable: 0
+    successionPolicyRef: 
+    isUnique: 0
+    acquisitionConditions:
+      groupOperator: 0
+      groups: []
+    isRevocable: 1
+    modifiers: []
+    opinionModifiers: []
+    values: []
+  rankLadders: []
