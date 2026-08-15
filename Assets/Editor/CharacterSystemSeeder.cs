@@ -202,7 +202,7 @@ namespace Ale.Chronicle.DemoEditor
             var item = new ConditionItem("Chronicle.AttributeCompare");
             item.parameters.Add(IntParam("scope",  (int)EConditionScope.Actor));
             item.parameters.Add(StrParam("attrId", attrId));
-            item.parameters.Add(IntParam("op",     ChronicleCompareOp.GreaterOrEqual));
+            item.parameters.Add(IntParam("op",     ConditionCompare.GreaterOrEqual));
             item.parameters.Add(FloatParam("value", value));
 
             var group = new ConditionGroup { itemOperator = ConditionLogicOp.And };

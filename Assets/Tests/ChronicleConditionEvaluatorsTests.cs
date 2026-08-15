@@ -96,11 +96,43 @@ namespace Ale.Chronicle.Tests
                 return Wrap(it);
             }
 
-            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ChronicleCompareOp.GreaterOrEqual, 5f),  ctx, _reg).Passed);
-            Assert.IsFalse(ConditionEngine.Evaluate(Cmp(ChronicleCompareOp.Greater,        10f), ctx, _reg).Passed);
-            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ChronicleCompareOp.Equal,          10f), ctx, _reg).Passed);
-            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ChronicleCompareOp.LessOrEqual,    10f), ctx, _reg).Passed);
-            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ChronicleCompareOp.Less,           20f), ctx, _reg).Passed);
+            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ConditionCompare.GreaterOrEqual, 5f),  ctx, _reg).Passed);
+            Assert.IsFalse(ConditionEngine.Evaluate(Cmp(ConditionCompare.Greater,        10f), ctx, _reg).Passed);
+            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ConditionCompare.Equal,          10f), ctx, _reg).Passed);
+            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ConditionCompare.LessOrEqual,    10f), ctx, _reg).Passed);
+            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ConditionCompare.Less,           20f), ctx, _reg).Passed);
+
+            // 「大于」与「小于」的方向 —— 上面的用例里 Greater/Less 各只有一个方向，
+            // 万一两个 double 实参被传反（被测值与阈值互换），它们仍会通过。这两条把方向钉死。
+            Assert.IsTrue (ConditionEngine.Evaluate(Cmp(ConditionCompare.Greater,     5f),  ctx, _reg).Passed);
+            Assert.IsFalse(ConditionEngine.Evaluate(Cmp(ConditionCompare.Greater,     20f), ctx, _reg).Passed);
+            Assert.IsFalse(ConditionEngine.Evaluate(Cmp(ConditionCompare.Less,        5f),  ctx, _reg).Passed);
+            Assert.IsFalse(ConditionEngine.Evaluate(Cmp(ConditionCompare.GreaterOrEqual, 20f), ctx, _reg).Passed);
+            Assert.IsFalse(ConditionEngine.Evaluate(Cmp(ConditionCompare.LessOrEqual,     5f),  ctx, _reg).Passed);
+        }
+
+        /// <summary>
+        /// 「等于」在非整数属性上必须仍然成立。
+        ///
+        /// <para>属性经 <c>float</c> 存取、阈值经 <c>double</c> 存取：<c>10.1f</c> 扩宽后是
+        /// <c>10.100000381469727</c>，与 <c>10.1</c> 相差约 <c>3.8e-7</c>。本包一贯用 <c>1e-6</c> 容差，
+        /// 因此判为相等；若哪天容差被收紧到 <c>1e-9</c>（例如误跟随了别处的严格值），这条会红。</para>
+        ///
+        /// <para>上面的 <c>AttributeCompare_Operators</c> 全用整数值，测不出这个回归。</para>
+        /// </summary>
+        [Test]
+        public void AttributeCompare_EqualToleratesFloatWidening()
+        {
+            var src = new FakeSource(); src.Attrs["str"] = 10.1f;
+            var ctx = new Ctx { Source = src };
+
+            var it = new ConditionItem("Chronicle.AttributeCompare");
+            it.parameters.Add(PInt("scope", (int)EConditionScope.Actor));
+            it.parameters.Add(PStr("attrId", "str"));
+            it.parameters.Add(PInt("op", ConditionCompare.Equal));
+            it.parameters.Add(PFloat("value", 10.1d));
+
+            Assert.IsTrue(ConditionEngine.Evaluate(Wrap(it), ctx, _reg).Passed);
         }
 
         [Test]
