@@ -4,6 +4,39 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.2] - 2026-08-15
+
+**比较符改用 toolkit 的公共实现，移除本地副本。** 判定结果逐位不变；最低 toolkit 版本提至 1.8.0。
+
+### 破坏性变更
+
+- **删除 `ChronicleCompareOp`**（`Ale.Chronicle` 命名空间下的 public 静态类）。它的五个索引常量、`Labels` 与 `Compare`
+  已由 toolkit 1.8.0 的 `Ale.Condition.ConditionCompare` 提供，一一对应：
+  - `ChronicleCompareOp.Greater` … → `ConditionCompare.Greater` …（值不变，仍是 0~4）
+  - `ChronicleCompareOp.Labels` → `ConditionCompare.Labels`（文本与顺序逐字不变）
+  - `ChronicleCompareOp.Compare(a, op, b)` → `ConditionCompare.Compare(value, amount, op)`
+    ⚠️ **形参顺序不同**：比较符从中间挪到了末尾。外部若有调用，务必逐个核对实参顺序——三个参数里有两个是 `double`，传反了编译器不会报错，表现是「大于」和「小于」互换。
+  - 未留 `[Obsolete]` 转发壳：壳必须保持旧形参顺序才不破坏外部调用，而那与新 API 的顺序相反，本身就是个陷阱。
+
+### 变更
+
+- `AttributeCompareEvaluator` 改用 `ConditionCompare`，并把局部变量 `value` 改名为 `amount`——它其实是**阈值**，与新签名第一个形参 `value`（被测值）同名不同义。参数 id 仍是 `"value"`（已序列化，不改），已配置的条件资产与存档不受影响。
+- **「等于」的容差仍是 `1e-6`**：`ConditionCompare` 的浮点重载默认值与本包原先一致。这一点是刻意核对过的——toolkit 内置的 `NumberCompareEvaluator` 用的是更严的 `1e-9`，若公共实现照抄那个值，本包的属性比较会静默变严（`GetCoreAttribute` 返回 `float`，`10.1f` 扩宽后与配置里的 `double 10.1` 相差约 `3.8e-7`，恰好卡在两个容差之间）。
+
+### 新增
+
+- `ChronicleConditionEvaluatorsTests` 补两组用例：
+  - **方向断言**——原有用例里「大于」「小于」各只测了一个方向，实参传反仍会通过；新增的反向断言把方向钉死。
+  - **`AttributeCompare_EqualToleratesFloatWidening`**——属性 `10.1f` 对阈值 `10.1d` 判为相等，钉住上面那条容差。原有用例全用整数 `10f`，测不出这个回归。
+
+### 修复
+
+- `ChronicleInfo.Version` 由 `0.3.0` 订正为 `0.3.2`（自 0.3.1 起漏同步）。
+
+### 依赖
+
+- ⚠️ **最低 `com.ale.toolkit` 版本提至 1.8.0。** 本包的 asmdef 硬引用 `Ale.Condition.Core`，toolkit 版本不足时会直接编译报错（提示找不到 `ConditionCompare`），升级 toolkit 即可。
+
 ## [0.3.1] - 2026-08-06
 
 新增**运行时角色信息面板 `UiwCharacterView`** 与一个**「角色系统」演示 Sample**，把六大领域的配置串成一个「Play 即见」的角色档案界面。纯运行时 UI 组件 + 演示新增，**核心数据模型 / 编辑器 / 序列化（仍为 v6）零变化**。
