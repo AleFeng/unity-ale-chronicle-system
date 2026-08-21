@@ -80,7 +80,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 
 ## 📦 安装
 
-> ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](https://github.com/AleFeng/unity-ale-toolkit)（其中已内置 `Ale.Condition` 条件系统），必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，无法自动拉取，故**顺序不能颠倒**。先安装 toolkit（建议 1.4.0 或更新）：`https://github.com/AleFeng/unity-ale-toolkit.git?path=/Packages/com.ale.toolkit#1.4.0`。漏装或颠倒会报 `找不到 Ale.Toolkit.* / Ale.Condition.*` 一类编译错——补装 toolkit 并等重新编译即可。
+> ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](https://github.com/AleFeng/unity-ale-toolkit)（其中已内置 `Ale.Condition` 条件系统），必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，无法自动拉取，故**顺序不能颠倒**。先安装 toolkit（建议 1.4.0 或更新）：`https://github.com/AleFeng/unity-ale-toolkit.git?path=/Packages/com.ale.toolkit`。漏装或颠倒会报 `找不到 Ale.Toolkit.* / Ale.Condition.*` 一类编译错——补装 toolkit 并等重新编译即可。
 
 ### 使用 UPM（推荐）
 `Window > Package Manager` → 左上角 `+` → `Install package from git URL...` → 先粘贴 toolkit，再粘贴本插件：
