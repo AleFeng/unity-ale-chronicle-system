@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Ale.Toolkit.Runtime;
+using Ale.Modifier;
 
 namespace Ale.Chronicle
 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Ale.Toolkit.Runtime;
+using Ale.Modifier;
 using Ale.Condition;
 
 namespace Ale.Chronicle.DemoEditor

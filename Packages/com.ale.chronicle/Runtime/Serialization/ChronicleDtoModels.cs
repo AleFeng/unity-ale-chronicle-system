@@ -1,3 +1,4 @@
+using Ale.Modifier;
 using System;
 using Ale.Toolkit.Runtime.Serialization;
 
@@ -36,6 +37,9 @@ namespace Ale.Chronicle.Serialization
         public TitleTemplateDto[] titleTemplates;
         // v6 追加（技能树）
         public SkillTreeDto[] skillTrees;
+        // v7 追加（效果系统）
+        public ChronicleEffectDto[] effects;
+        public GameplayTagDto[] gameplayTags;
     }
 
     [Serializable]
@@ -182,6 +186,8 @@ namespace Ale.Chronicle.Serialization
         public string[] secondaryGroupTags;
         /// <summary>来自模板 schema 的自定义属性值。</summary>
         public AttributeEntryDto[] values;
+        /// <summary>v7：使用时施加的效果 id 列表（引用 effects）。</summary>
+        public string[] onUseEffectRefs;
     }
 
     [Serializable]
@@ -391,5 +397,28 @@ namespace Ale.Chronicle.Serialization
         public ModifierDefinitionDto modifier;
         /// <summary>condition（ConditionExpression）的 Condition System JSON 串。</summary>
         public string conditionJson;
+    }
+
+    /// <summary>效果 DTO（v7）：显示字段 + toolkit 效果定义（Effect System JSON 串，含时长 / 周期 / 叠加 / 标签 / 修饰器 / 执行）。</summary>
+    [Serializable]
+    public class ChronicleEffectDto
+    {
+        public string id;
+        /// <summary>显示名（Text：纯文本 fallback + 本地化引用）。</summary>
+        public AttributeValueDto displayText;
+        /// <summary>描述（Text）。</summary>
+        public AttributeValueDto descriptionText;
+        /// <summary>图标（Sprite 对象类属性值）。</summary>
+        public AttributeValueDto iconValue;
+        /// <summary><c>EffectDefinition</c> 的 Effect System JSON 串（导出前 id / displayName 已与本条目同步）。</summary>
+        public string definitionJson;
+    }
+
+    /// <summary>Gameplay 标签声明 DTO（v7）：点分层级名 + 注释。</summary>
+    [Serializable]
+    public class GameplayTagDto
+    {
+        public string name;
+        public string comment;
     }
 }

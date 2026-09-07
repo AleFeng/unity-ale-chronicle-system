@@ -3,6 +3,7 @@ using UnityEngine;
 using Ale.Chronicle;
 using Ale.Chronicle.Serialization;
 using Ale.Toolkit.Runtime;
+using Ale.Modifier;
 using Ale.Condition;
 
 namespace Ale.Chronicle.Tests

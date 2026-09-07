@@ -40,6 +40,12 @@ namespace Ale.Chronicle
         /// <summary>副分组标签 ID 列表（可多选，引用统一分组标签池的 id）。</summary>
         public List<string> secondaryGroupTags = new List<string>();
 
+        /// <summary>
+        /// 「使用 / 施放」时对目标施加的效果 id 列表（引用 <see cref="ChronicleDatabase.Effects"/>；按序施加）。
+        /// 空 = 使用只派发事件，不施加任何效果。
+        /// </summary>
+        public List<string> onUseEffectRefs = new List<string>();
+
         /// <summary>来自模板的自定义属性值。</summary>
         public List<AttributeEntry> values = new List<AttributeEntry>();
 
@@ -90,6 +96,7 @@ namespace Ale.Chronicle
                 iconValue          = iconValue != null ? iconValue.Clone() : new AttributeValue(EFieldType.Sprite),
                 primaryGroupTag    = primaryGroupTag,
                 secondaryGroupTags = new List<string>(secondaryGroupTags),
+                onUseEffectRefs    = onUseEffectRefs != null ? new List<string>(onUseEffectRefs) : new List<string>(),
             };
             foreach (var e in values)
                 clone.values.Add(e.Clone());

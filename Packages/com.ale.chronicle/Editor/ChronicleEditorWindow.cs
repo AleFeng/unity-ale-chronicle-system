@@ -23,6 +23,7 @@ namespace Ale.Chronicle.Editor
         private readonly ProfessionSystemTab _professionTab = new ProfessionSystemTab();
         private readonly TitleSystemTab      _titleTab      = new TitleSystemTab();
         private readonly GeneralSystemTab   _generalTab   = new GeneralSystemTab();
+        private readonly EffectSystemTab    _effectTab    = new EffectSystemTab();
         private IEditorSystemTab<ChronicleDatabase>[] _tabs;
 
         // 各实体种类的重复 id/name 集合（Layout 阶段由 RefreshCaches 刷新）。
@@ -65,10 +66,10 @@ namespace Ale.Chronicle.Editor
 
         protected override string EditorPrefKey => "ChronicleSystem.DatabasePath";
 
-        protected override string[] SystemTabLabels => new[] { "通用", "角色", "属性", "特质", "职业", "技能", "头衔" };
+        protected override string[] SystemTabLabels => new[] { "通用", "角色", "属性", "特质", "职业", "技能", "头衔", "效果" };
 
         protected override IEditorSystemTab<ChronicleDatabase>[] SystemTabs
-            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _generalTab, _characterTab, _attributeTab, _traitTab, _professionTab, _skillTab, _titleTab };
+            => _tabs ??= new IEditorSystemTab<ChronicleDatabase>[] { _generalTab, _characterTab, _attributeTab, _traitTab, _professionTab, _skillTab, _titleTab, _effectTab };
 
         protected override string EmptyDatabaseHint => "请创建或选择一个 ChronicleDatabase 数据文件";
 
@@ -102,6 +103,9 @@ namespace Ale.Chronicle.Editor
                 foreach (var t in db.Titles)          { t?.Normalize(); t?.RebuildAttributes(db); }
                 foreach (var l in db.RankLadders)     l?.Normalize();
                 foreach (var st in db.SkillTrees)     st?.Normalize();
+                // 效果：同步定义 id / 显示名、补 null、空阶段改写（幂等）；本库 Gameplay 标签并入编辑器标签目录。
+                foreach (var e in db.Effects)         e?.Normalize();
+                ChronicleGameplayTagSync.Sync(db);
             }
         }
 
@@ -176,6 +180,7 @@ namespace Ale.Chronicle.Editor
             Collect(db.Titles,             x => x?.id,   result[EChronicleEntityKind.Title]);
             Collect(db.RankLadders,        x => x?.id,   result[EChronicleEntityKind.RankLadder]);
             Collect(db.SkillTrees,         x => x?.id,   result[EChronicleEntityKind.SkillTree]);
+            Collect(db.Effects,            x => x?.id,   result[EChronicleEntityKind.Effect]);
             return result;
         }
 
@@ -205,6 +210,7 @@ namespace Ale.Chronicle.Editor
             EChronicleEntityKind.Title             => "头衔 id",
             EChronicleEntityKind.RankLadder        => "阶级序列 id",
             EChronicleEntityKind.SkillTree         => "技能树 id",
+            EChronicleEntityKind.Effect            => "效果 id",
             _                                      => k.ToString(),
         };
     }

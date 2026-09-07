@@ -6,6 +6,9 @@
         "Ale.Chronicle.Runtime.UI",
         "Ale.Toolkit.Runtime",
         "Ale.Condition.Core",
+        "Ale.Effect.Core",
+        "Ale.GameplayTags.Core",
+        "Ale.Modifier.Core",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Ale.Toolkit.Runtime;
+using Ale.Modifier;
 using Ale.Condition;
 
 namespace Ale.Chronicle.Tests

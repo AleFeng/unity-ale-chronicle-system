@@ -7,6 +7,7 @@ using UiText = UnityEngine.UI.Text;
 using System.Collections.Generic;
 using System.Text;
 using Ale.Toolkit.Runtime;
+using Ale.Modifier;
 using Ale.Toolkit.Runtime.UI;
 using UnityEngine;
 

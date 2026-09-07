@@ -4,7 +4,13 @@
     "references": [
         "Ale.Toolkit.Runtime",
         "Ale.Condition.Core",
-        "Ale.Condition.Runtime"
+        "Ale.Condition.Runtime",
+        "Ale.Effect.Core",
+        "Ale.Effect.Runtime",
+        "Ale.GameplayTags.Core",
+        "Ale.GameplayTags.Condition",
+        "Ale.GameplayTags.Runtime",
+        "Ale.Modifier.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

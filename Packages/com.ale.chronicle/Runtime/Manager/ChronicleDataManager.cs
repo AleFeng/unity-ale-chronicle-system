@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Ale.Toolkit.Runtime;
+using Ale.Effect;
+using Ale.GameplayTags;
 
 namespace Ale.Chronicle
 {
@@ -12,7 +14,7 @@ namespace Ale.Chronicle
     /// <para>索引在注册 / 注销 / 清空后置脏，下次查询时重建一次；构建按 <see cref="Databases"/> 顺序
     /// 「先注册先得」，与逐库线性查找语义一致。</para>
     /// </summary>
-    public class ChronicleDataManager : ToolkitSingleton<ChronicleDataManager>
+    public class ChronicleDataManager : ToolkitSingleton<ChronicleDataManager>, IEffectDefinitionSource
     {
         private readonly List<ChronicleDatabase> _databases = new List<ChronicleDatabase>();
 
@@ -23,26 +25,33 @@ namespace Ale.Chronicle
 
         #region 注册 / 加载
 
-        /// <summary>注册一个数据库（去重）。</summary>
+        /// <summary>
+        /// 注册一个数据库（去重）。同时：把库里声明的 Gameplay 标签并入 toolkit 标签注册表（编辑器下拉 / 校验用），
+        /// 并把本管理器登记为 toolkit 效果定义注册表的来源（道具等跨库按 id 引用效果时可解析）。
+        /// </summary>
         public void Register(ChronicleDatabase database)
         {
             if (!database || _databases.Contains(database)) return;
             _databases.Add(database);
             InvalidateIndex();
+            GameplayTagRuntime.Register(database.GameplayTags);
+            EffectDefinitionRegistry.Default.AddSource(this);
         }
 
-        /// <summary>注销一个数据库。</summary>
+        /// <summary>注销一个数据库（最后一个注销后从效果定义注册表移除本来源）。</summary>
         public void Unregister(ChronicleDatabase database)
         {
             if (!database) return;
             if (_databases.Remove(database)) InvalidateIndex();
+            if (_databases.Count == 0) EffectDefinitionRegistry.Default.RemoveSource(this);
         }
 
-        /// <summary>清空所有已注册数据库。</summary>
+        /// <summary>清空所有已注册数据库（并从效果定义注册表移除本来源）。</summary>
         public void ClearDatabases()
         {
             _databases.Clear();
             InvalidateIndex();
+            EffectDefinitionRegistry.Default.RemoveSource(this);
         }
 
         /// <summary>从二进制反序列化为一个新的 <see cref="ChronicleDatabase"/> 并注册。</summary>
@@ -74,6 +83,7 @@ namespace Ale.Chronicle
         private readonly Dictionary<string, TitleTemplate>          _titleTemplates  = new Dictionary<string, TitleTemplate>();
         private readonly Dictionary<string, TitleDefinition>        _titles          = new Dictionary<string, TitleDefinition>();
         private readonly Dictionary<string, RankLadder>             _rankLadders     = new Dictionary<string, RankLadder>();
+        private readonly Dictionary<string, ChronicleEffect>        _effects         = new Dictionary<string, ChronicleEffect>();
 
         /// <summary>使查询索引失效，下次查询时重建。运行期直接改动已注册数据库内容后需手动调用。</summary>
         public void InvalidateIndex() => _indexDirty = true;
@@ -88,11 +98,15 @@ namespace Ale.Chronicle
             _skills.Clear();    _groupTags.Clear();
             _professionTemplates.Clear(); _titleTemplates.Clear();
             _professions.Clear(); _professionTrees.Clear(); _titles.Clear(); _rankLadders.Clear();
-            _skillTrees.Clear();
+            _skillTrees.Clear(); _effects.Clear();
 
             foreach (var db in _databases)
             {
                 if (!db) continue;
+                // 效果：索引前归一（同步定义 id / 显示名、补 null），保证运行时容器拿到的定义 id 与引用键一致。
+                if (db.Effects != null)
+                    foreach (var e in db.Effects) e?.Normalize();
+                Index(_effects,    db.Effects,           x => x.id);
                 Index(_enumTypes,  db.EnumTypesList,     x => x.name);
                 Index(_tags,       db.Tags,              x => x.name);
                 Index(_coreAttrs,  db.CoreAttributes,    x => x.id);
@@ -158,6 +172,12 @@ namespace Ale.Chronicle
 
         /// <summary>按 id 跨库查找技能树，未找到返回 null。</summary>
         public SkillTree GetSkillTree(string treeId) => Lookup(_skillTrees, treeId);
+
+        /// <summary>按 id 跨库查找效果，未找到返回 null。</summary>
+        public ChronicleEffect GetEffect(string effectId) => Lookup(_effects, effectId);
+
+        // 显式实现 IEffectDefinitionSource：toolkit 效果容器 / EffectApplier / 全局定义注册表按 id 取定义。
+        EffectDefinition IEffectDefinitionSource.GetEffect(string id) => GetEffect(id)?.definition;
 
         /// <summary>按 id 跨库查找分组标签，未找到返回 null。</summary>
         public ChronicleGroupTag GetGroupTag(string tagId) => Lookup(_groupTags, tagId);

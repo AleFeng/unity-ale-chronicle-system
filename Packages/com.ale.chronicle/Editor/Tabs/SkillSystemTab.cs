@@ -166,6 +166,13 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.Space(6);
             SkillConfigDrawer.DrawGroupTags(ctx, skill);
 
+            // 使用 / 施放时施加的效果（引用「效果」页签的效果 id；按序施加）
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("使用时施加的效果", ToolkitEditorStyles.Header);
+            skill.onUseEffectRefs ??= new List<string>();
+            ChronicleEffectFields.EffectRefList(ctx, skill.onUseEffectRefs, "技能效果引用",
+                "（暂无效果；请先在「效果」页签中添加）");
+
             EditorGUILayout.Space(6);
             var tmpl = ctx.Database.GetSkillTemplate(skill.templateRef);
             ChronicleEntityHeader.DrawCustomAttributes(ctx, skill.values, tmpl?.attributes,

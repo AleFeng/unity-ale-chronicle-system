@@ -8,7 +8,13 @@
         "Ale.Toolkit.Runtime.UI",
         "Ale.Toolkit.Editor",
         "Ale.Condition.Core",
-        "Ale.Condition.Editor"
+        "Ale.Condition.Editor",
+        "Ale.Effect.Core",
+        "Ale.Effect.Editor",
+        "Ale.GameplayTags.Core",
+        "Ale.GameplayTags.Runtime",
+        "Ale.GameplayTags.Editor",
+        "Ale.Modifier.Core"
     ],
     "includePlatforms": [
         "Editor"

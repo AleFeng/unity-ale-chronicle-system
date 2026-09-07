@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Ale.Toolkit.Runtime;
+using Ale.Effect;
+using Ale.GameplayTags;
 
 namespace Ale.Chronicle
 {
@@ -18,7 +20,7 @@ namespace Ale.Chronicle
     /// 独立修饰器库 / 想法（thought）等列表待其类型落地后再加列。</para>
     /// </summary>
     [CreateAssetMenu(fileName = "ChronicleDatabase", menuName = "ChronicleSystem/Chronicle Database")]
-    public class ChronicleDatabase : ScriptableObject, IEnumTypeSource, IChronicleSchemaSource
+    public class ChronicleDatabase : ScriptableObject, IEnumTypeSource, IChronicleSchemaSource, IEffectDefinitionSource
     {
         [SerializeField] private List<EnumType>               enumTypes          = new List<EnumType>();
         [SerializeField] private List<Tag>                    tags               = new List<Tag>();
@@ -39,6 +41,8 @@ namespace Ale.Chronicle
         [SerializeField] private List<TitleTemplate>          titleTemplates         = new List<TitleTemplate>();
         [SerializeField] private List<TitleDefinition>        titles                 = new List<TitleDefinition>();
         [SerializeField] private List<RankLadder>             rankLadders            = new List<RankLadder>();
+        [SerializeField] private List<ChronicleEffect>        effects                = new List<ChronicleEffect>();
+        [SerializeField] private List<GameplayTagDefinition>  gameplayTags           = new List<GameplayTagDefinition>();
 
         #region 访问器
 
@@ -101,6 +105,12 @@ namespace Ale.Chronicle
 
         /// <summary>阶级序列 列表。</summary>
         public List<RankLadder> RankLadders => rankLadders;
+
+        /// <summary>效果 列表（toolkit GAS 效果定义的编年史包装；技能 / 道具按 id 引用）。</summary>
+        public List<ChronicleEffect> Effects => effects;
+
+        /// <summary>本库声明的 Gameplay 标签（注册数据库时并入 toolkit 标签注册表，供编辑器下拉与校验；运行时匹配不依赖它）。</summary>
+        public List<GameplayTagDefinition> GameplayTags => gameplayTags;
 
         #endregion
 
@@ -179,6 +189,12 @@ namespace Ale.Chronicle
         /// <summary>按 id 查找阶级序列，未找到返回 null。</summary>
         public RankLadder GetRankLadder(string ladderId) => Find(rankLadders, ladderId, l => l.id);
 
+        /// <summary>按 id 查找效果，未找到返回 null。</summary>
+        public ChronicleEffect GetEffect(string effectId) => Find(effects, effectId, e => e.id);
+
+        // 显式实现 IEffectDefinitionSource：供 toolkit 效果容器 / EffectApplier 按 id 取定义。
+        EffectDefinition IEffectDefinitionSource.GetEffect(string id) => GetEffect(id)?.definition;
+
         #endregion
 
         #region 数据填充
@@ -230,6 +246,7 @@ namespace Ale.Chronicle
             CheckDuplicates(titleTemplates,     t => t.name, "头衔模板 name", errors);
             CheckDuplicates(titles,             t => t.id,   "头衔 id",       errors);
             CheckDuplicates(rankLadders,        l => l.id,   "阶级序列 id",   errors);
+            CheckDuplicates(effects,            e => e.id,   "效果 id",       errors);
 
             var dangling = new HashSet<string>();
 
@@ -298,6 +315,46 @@ namespace Ale.Chronicle
                     foreach (var g in s.secondaryGroupTags)
                         if (!string.IsNullOrEmpty(g) && GetGroupTag(g) == null)
                             dangling.Add($"技能[{s.id}].secondaryGroupTags → 分组标签 '{g}'");
+                if (s.onUseEffectRefs != null)
+                    foreach (var r in s.onUseEffectRefs)
+                        if (!string.IsNullOrEmpty(r) && GetEffect(r) == null)
+                            dangling.Add($"技能[{s.id}].onUseEffectRefs → 效果 '{r}'");
+            }
+
+            // 效果：定义自校验（对「已同步 id / 显示名并归一」的副本校验，不改动数据；toolkit 的「警告:」不阻断）
+            //       / 修饰器与属性幅度的目标属性
+            foreach (var e in effects)
+            {
+                if (e == null) continue;
+                if (e.definition == null) { errors.Add($"效果[{e.id}]：定义为空"); continue; }
+                var def = e.definition.Clone();
+                def.id          = e.id;
+                def.displayName = e.PlainName();
+                def.Normalize();
+                var defMessages = new List<string>();
+                def.Validate(defMessages);
+                foreach (var m in defMessages)
+                    if (!EffectDefinition.IsWarning(m)) errors.Add(m);
+                if (e.definition.modifiers != null)
+                    foreach (var m in e.definition.modifiers)
+                    {
+                        if (m == null) continue;
+                        if (!string.IsNullOrEmpty(m.attributeId) && GetCoreAttribute(m.attributeId) == null)
+                            dangling.Add($"效果[{e.id}].modifiers.attributeId → 属性 '{m.attributeId}'");
+                        var mag = m.magnitude;
+                        if (mag != null && mag.kind == EMagnitudeKind.AttributeBased
+                            && !string.IsNullOrEmpty(mag.attributeId) && GetCoreAttribute(mag.attributeId) == null)
+                            dangling.Add($"效果[{e.id}].modifiers.magnitude.attributeId → 属性 '{mag.attributeId}'");
+                    }
+            }
+
+            // Gameplay 标签：名称须合法（层级匹配语义依赖归一后的点分名）
+            for (int i = 0; i < gameplayTags.Count; i++)
+            {
+                var t = gameplayTags[i];
+                if (t == null) continue;
+                if (!GameplayTag.IsValidName(t.name))
+                    errors.Add($"Gameplay 标签[{i}] '{t.name}' 不合法（段不能为空，段内不能含空白或 '/'）");
             }
 
             // 职业：分组标签 / 成长目标属性 / 解锁授予的特质·头衔

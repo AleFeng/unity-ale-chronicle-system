@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Ale.Chronicle;
 using Ale.Toolkit.Runtime;
+using Ale.Modifier;
 
 namespace Ale.Chronicle.Tests
 {
