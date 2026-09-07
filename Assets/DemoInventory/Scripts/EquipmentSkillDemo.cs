@@ -15,7 +15,7 @@ namespace Ale.Chronicle.Inventory
     ///
     /// <para>覆盖两种模式：① 装备<b>持有</b>技能（<see cref="EquipmentSkillBridge"/> 并集同步，含多来源留存 / 不误删永久）；
     /// ② 使用消耗品<b>施加效果</b>（<see cref="ConsumableEffectUse"/> → <c>UseItem</c> + <c>ChronicleEffectContext</c>：
-    /// 回复药水引用 toolkit 效果库（<c>EffectDatabase</c>，0.5.0 起所有上层系统共用）定义的 <c>regen_draught</c>，磨刀油引用 Inventory 库自己定义的 <c>sharpen_oil</c>；
+    /// 回复药水与磨刀油都引用 toolkit 效果库（<c>EffectDatabase</c>，所有上层系统共用）定义的 <c>regen_draught</c> / <c>sharpen_oil</c>；
     /// 无使用效果的道具（剑）不扣减）。</para>
     ///
     /// <para>仅供开发期验证，非正式游戏 UI；正式整合请用真实数据资产 + uGUI（桥接 / helper 同款）。</para>
@@ -42,9 +42,9 @@ namespace Ale.Chronicle.Inventory
 
         // ── 与效果系统相关的 id ─────────────────────────────────────────────
         private const string PotionId      = "potion";          // 回复药水 → toolkit 效果库效果 regen_draught
-        private const string OilId         = "oil";             // 磨刀油   → Inventory 库效果 sharpen_oil
+        private const string OilId         = "oil";             // 磨刀油   → toolkit 效果库效果 sharpen_oil
         private const string FxRegen       = "regen_draught";   // 定义在 toolkit 效果库：5 天、每天 耐力 +5 永久落地
-        private const string FxSharpen     = "sharpen_oil";     // 定义在 Inventory 库：3 天 战力 +3
+        private const string FxSharpen     = "sharpen_oil";     // 定义在 toolkit 效果库：3 天 战力 +3
         private const string AtStamina     = "stamina";
         private const string AtMight       = "might";
 
@@ -99,9 +99,9 @@ namespace Ale.Chronicle.Inventory
 
             ChronicleDataManager.Instance.Register(cdb);
 
-            // 效果：回复药剂——0.5.0 起效果由 toolkit 效果库承载（所有上层系统共用；道具经 onUseEffectRefs 按 id 跨库引用）
+            // 效果库：所有上层系统共用（Chronicle 0.5.0 / Inventory 1.13.0 起效果不再存于各自库）；道具经 onUseEffectRefs 按 id 引用
             var edb   = ScriptableObject.CreateInstance<EffectDatabase>();
-            var regen = new EffectEntry(FxRegen, EDurationPolicy.HasDuration);
+            var regen = new EffectEntry(FxRegen, EDurationPolicy.HasDuration);         // 回复药剂：5 天、每天 耐力 +5 永久落地
             regen.displayText.SetTextValue(0, "回复药剂");
             regen.definition.duration = EffectMagnitude.Scalable(5f);
             regen.definition.period   = EffectMagnitude.Scalable(1f);
@@ -109,7 +109,16 @@ namespace Ale.Chronicle.Inventory
             regen.definition.modifiers.Add(new EffectModifier(AtStamina, EModifierOperation.Add, 5f));
             regen.definition.assetTags.AddTag("Status.Regen");
             edb.Effects.Add(regen);
+            var sharpen = new EffectEntry(FxSharpen, EDurationPolicy.HasDuration);     // 磨刀：3 天 战力 +3，同目标上限 1 层刷新
+            sharpen.displayText.SetTextValue(0, "磨刀");
+            sharpen.definition.duration     = EffectMagnitude.Scalable(3f);
+            sharpen.definition.stackingType = EEffectStackingType.AggregateByTarget;
+            sharpen.definition.stackLimit   = 1;
+            sharpen.definition.modifiers.Add(new EffectModifier(AtMight, EModifierOperation.Add, 3f));
+            sharpen.definition.assetTags.AddTag("Status.Buff.Sharpen");
+            edb.Effects.Add(sharpen);
             edb.GameplayTags.Add(new GameplayTagDefinition("Status.Regen", "持续回复"));
+            edb.GameplayTags.Add(new GameplayTagDefinition("Status.Buff.Sharpen", "磨刀类增益"));
             EffectDataManager.Instance.Register(edb);   // 归一 + 登记为全局效果定义源 + 并入 Gameplay 标签
         }
 
@@ -125,22 +134,11 @@ namespace Ale.Chronicle.Inventory
 
             // 消耗品：使用时施加效果（stackLimit 0 = 可堆叠）
             var potion = new Item(PotionId) { stackLimit = 0 };
-            potion.onUseEffectRefs.Add(FxRegen);      // 跨库：Chronicle 库定义
+            potion.onUseEffectRefs.Add(FxRegen);      // toolkit 效果库定义
             idb.Items.Add(potion);
             var oil = new Item(OilId) { stackLimit = 0 };
-            oil.onUseEffectRefs.Add(FxSharpen);       // 本库：下方定义
+            oil.onUseEffectRefs.Add(FxSharpen);       // toolkit 效果库定义
             idb.Items.Add(oil);
-
-            // Inventory 库自己的效果：磨刀（3 天 战力 +3，同目标上限 1 层刷新）
-            var sharpen = new EffectDefinition(FxSharpen, EDurationPolicy.HasDuration) { displayName = "磨刀" };
-            sharpen.duration     = EffectMagnitude.Scalable(3f);
-            sharpen.stackingType = EEffectStackingType.AggregateByTarget;
-            sharpen.stackLimit   = 1;
-            sharpen.modifiers.Add(new EffectModifier(AtMight, EModifierOperation.Add, 3f));
-            sharpen.assetTags.AddTag("Status.Buff.Sharpen");
-            sharpen.Normalize();
-            idb.Effects.Add(sharpen);
-            idb.GameplayTags.Add(new GameplayTagDefinition("Status.Buff.Sharpen", "磨刀类增益"));
 
             // 装备组：id == characterId；一个宽松槽位列表（无标签 / 无约束）含 3 个空过滤槽 → 任意道具可装。
             var group = new EquipmentGroup(characterId);
@@ -151,7 +149,7 @@ namespace Ale.Chronicle.Inventory
             group.slotLists.Add(slotList);
             idb.EquipmentGroups.Add(group);
 
-            InventoryDataManager.Instance.Register(idb);   // 同时登记为全局效果定义源 → sharpen_oil 可按 id 解析
+            InventoryDataManager.Instance.Register(idb);   // 1.13.0 起不再充当效果定义源；效果统一经 toolkit 效果库解析
         }
 
         // 直接构建带一个 String 标量属性的道具（值为 Chronicle 技能 ID），无需模板 / RebuildAttributes。
@@ -223,7 +221,7 @@ namespace Ale.Chronicle.Inventory
         /// <summary>使用一瓶回复药水（效果定义在 toolkit 效果库）。</summary>
         public ItemUseResult UsePotion() => ConsumableEffectUse.Use(inventoryId, PotionId, characterId, characterId);
 
-        /// <summary>使用一份磨刀油（效果定义在 Inventory 库，经全局效果注册表解析）。</summary>
+        /// <summary>使用一份磨刀油（效果定义在 toolkit 效果库，经全局效果注册表解析）。</summary>
         public ItemUseResult UseOil() => ConsumableEffectUse.Use(inventoryId, OilId, characterId, characterId);
 
         /// <summary>「使用」剑：无使用效果 → NoEffects，不扣减。</summary>
@@ -293,7 +291,7 @@ namespace Ale.Chronicle.Inventory
             GUILayout.Space(6);
             GUILayout.Label("<b>消耗品（模式二 · 使用施加效果）</b>", _rich);
             DrawUseRow($"回复药水 x{PotionCount} · 效果=回复药剂（toolkit 效果库定义：5 天每天耐力 +5 永久）", PotionCount > 0, () => UsePotion());
-            DrawUseRow($"磨刀油 x{OilCount} · 效果=磨刀（Inventory 库定义：3 天战力 +3）", OilCount > 0, () => UseOil());
+            DrawUseRow($"磨刀油 x{OilCount} · 效果=磨刀（toolkit 效果库定义：3 天战力 +3）", OilCount > 0, () => UseOil());
             DrawUseRow("剑（无使用效果 → 不扣减）", !IsEquipped("sword"), () => UseSword());
 
             GUILayout.BeginHorizontal();
