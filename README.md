@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.4.0-orange">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.5.0-orange">
   <img alt="Unity Version" src="https://img.shields.io/badge/Unity-2022.3%2B-black?logo=unity">
   <img alt="Unity Version" src="https://img.shields.io/badge/Unity-6000.3%2B-black?logo=unity">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blueviolet">
@@ -21,7 +21,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 它用一个 `ChronicleDatabase` 资产集中配置各领域的**静态定义数据**（角色 / 属性 / 特质 / 技能 / 职业 / 头衔，及配套的枚举 / 功能标签 / 分组标签 / 数字格式），配套**运行时管理器**维护动态状态（已学技能、外部来源提供的技能、职业等级 / 经验、持有头衔、核心属性合流结果等）。
 面向**设计师**：编辑器始终且仅在 ScriptableObject 上工作，全程支持 Undo / Redo；二进制仅作为**单向导出**格式。构建于通用底层包 [`com.ale.toolkit`](Packages/com.ale.chronicle/README.md#依赖)（Schema 属性引擎 / 编辑器三列框架 / 虚拟滚动列表 / 序列化 / `Ale.Condition` 条件系统）之上，本插件包自身零硬依赖（TMP / Localization / Addressable 均经编译宏可选启用）。
 
-> ⚠️ **当前版本 `0.4.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成、继承结算、派生属性等尚为**预留**、暂未接入。
+> ⚠️ **当前版本 `0.5.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成、继承结算、派生属性等尚为**预留**、暂未接入。
 
 ## 📜 目录
 - [简介](#简介)
@@ -55,13 +55,13 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 | 技能两层模型 | 运行时分「永久学会（入存档）」与「外部提供者（如装备授予，不入存档）」两层，合并为有效集；另有无状态「一次性使用 / 施放」派发。 |
 | 职业系统 | 等级上限 / 经验曲线（公式·表格·曲线）/ 每级成长汇入核心属性 / 等级解锁 / 转职树（进阶 DAG，编辑器加子防环）/ 关联技能树；运行时 `AddExp` 按曲线升级、封顶、施加解锁。 |
 | 头衔系统 | 阶级头衔（逐级晋升、一序列一持有）与称号（多为唯一）两类；修饰器汇入核心属性 / 获得条件 / 阶级序列有序阶梯；运行时 `Grant` 晋升替换 + 唯一头衔易主。 |
-| 效果系统（GAS 式，`0.4.0`） | 接入 toolkit `Ale.Effect`：效果 = 时长 / 周期 / 叠加 / Gameplay 标签 / 施加条件 / 修饰器 / 执行阶段；技能「使用」按序施加，`Chronicle.*` 执行器落到特质 / 头衔 / 职业经验 / 技能；每角色效果容器 + 永久落地、世界时钟推进、运行时特质，均可存档。 |
+| 效果系统（GAS 式，`0.4.0`） | 接入 toolkit `Ale.Effect`：效果 = 时长 / 周期 / 叠加 / Gameplay 标签 / 施加条件 / 修饰器 / 执行阶段；技能「使用」按序施加，`Chronicle.*` 执行器落到特质 / 头衔 / 职业经验 / 技能；每角色效果容器 + 永久落地、世界时钟推进、运行时特质，均可存档；`0.5.0` 起效果 / 标签存放在 toolkit 共用效果库 `EffectDatabase`（Effect Editor 配置、跨系统按 id 引用），本包只保留引用 + 跳转与 `Chronicle.*` 执行器。 |
 | 条件系统整合 | 内置 7 个 `Ale.Condition` 求值器（年龄 / 属性比较 / 拥有特质 / 拥有职业 / 职业等级 / 持有头衔 / 位阶达到），支持多作用域（本人 / 配偶 / 父 / 母 …）。 |
 | 运行时技能 UI | 虚拟滚动网格 / 顺序列表、主+副分组标签 AND 过滤、搜索、悬停 Tooltip、目录 / 角色双来源。 |
 | 运行时角色面板 | `UiwCharacterView`（`0.3.1`，`0.4.0` 接入运行时）：一屏展示角色个人档案 + 6 项能力「基础→当前」运行时汇流明细 + 特质（临时剩余时长）/ 效果（活动效果 + 永久落地）/ 职业 / 头衔（阶级位次）/ 技能；订阅运行时事件自动刷新；TMP 富文本信息卡排版、随内容自适应，无额外美术依赖。 |
-| 单向导出 | `ChronicleConfigSerializer` → 紧凑二进制（魔数 `CHRO`，格式 v7），**append-only 向后兼容**旧版本（含 v3 ~ v6）；对象引用以 AssetGUID 承载。 |
+| 单向导出 | `ChronicleConfigSerializer` → 紧凑二进制（魔数 `CHRO`，格式 v8：效果块外移至 toolkit 效果库），**append-only 向后兼容**旧版本（含 v3 ~ v7，v7 的效果读入 legacy 字段供迁移）；对象引用以 AssetGUID 承载。 |
 | 三个可选宏 | TextMeshPro（`ATK_TMP`）/ Unity Localization（`ATK_LOCALIZATION`）/ Unity Addressables（`ATK_ADDRESSABLE`），在 Ale Toolkit 欢迎窗口一键开关；插件包本身零硬依赖。 |
-| 跨包整合 | 与 `com.ale.inventory` 协同的「装备持有技能 / 消耗品使用施加效果」整合 Demo（道具经 toolkit 效果契约引用 Chronicle 或 Inventory 库定义的效果），两包互不依赖。 |
+| 跨包整合 | 与 `com.ale.inventory` 协同的「装备持有技能 / 消耗品使用施加效果」整合 Demo（道具经 toolkit 效果契约引用 toolkit 效果库或 Inventory 库定义的效果），两包互不依赖。 |
 
 ### 六大领域
 | 领域 | 配置内容 | 运行时 |
@@ -72,7 +72,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 | **技能系统** | 技能模板、技能（显示 / 图标 / 分组标签 / 自定义属性 / **使用时施加的效果**）、**技能树**（列表 / 层级 / 树状 + 技能点获取） | `SkillRuntimeManager`（永久 + 提供者两层 + 使用施加效果）+ 技能 UI |
 | **职业系统** | 职业模板、职业（等级上限 / 经验曲线 / 每级成长 / 解锁 / 从业条件）、转职树 | `ProfessionRuntimeManager`（AddExp 按曲线升级 + 解锁）；成长汇入核心属性 |
 | **头衔系统** | 头衔模板、头衔（阶级头衔 / 称号 · 位阶 / 修饰器 / 获得条件）、阶级序列 | `TitleRuntimeManager`（授予 / 晋升替换 / 唯一头衔易主）；加成汇入核心属性 |
-| **效果系统**（`0.4.0`） | 效果（toolkit GAS 定义：时长 / 周期 / 叠加 / 标签 / 条件 / 修饰器 / 执行阶段）、Gameplay 标签 | `EffectRuntimeManager`（效果容器 + 永久落地）+ `ChronicleClock` + `TraitRuntimeManager`；`ChronicleCharacterRuntime` 运行时汇流；`Chronicle.*` 执行器 |
+| **效果系统**（`0.4.0`；`0.5.0` 效果外移） | 效果 / Gameplay 标签在 toolkit 共用效果库 `EffectDatabase`（Effect Editor 配置），本库只保留技能的效果 id 引用 + 跳转 | `EffectRuntimeManager`（效果容器 + 永久落地）+ `ChronicleClock` + `TraitRuntimeManager`；`ChronicleCharacterRuntime` 运行时汇流；`Chronicle.*` 执行器 |
 
 > 另有 **通用（General）** 领域：枚举类型 / 功能标签 / 分组标签 / 数字格式，被上述系统引用。每个领域的完整说明见[详细文档](#-详细文档)。
 
@@ -82,7 +82,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 
 ## 📦 安装
 
-> ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](https://github.com/AleFeng/unity-ale-toolkit)（其中已内置 `Ale.Condition` 条件系统），必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，无法自动拉取，故**顺序不能颠倒**。先安装 toolkit（`0.4.0` 起需 1.9.0 或更新）：`https://github.com/AleFeng/unity-ale-toolkit.git?path=/Packages/com.ale.toolkit`。漏装或颠倒会报 `找不到 Ale.Toolkit.* / Ale.Condition.* / Ale.Effect.*` 一类编译错——补装 toolkit 并等重新编译即可。
+> ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](https://github.com/AleFeng/unity-ale-toolkit)（其中已内置 `Ale.Condition` 条件系统），必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，无法自动拉取，故**顺序不能颠倒**。先安装 toolkit（`0.5.0` 起需 1.10.0 或更新）：`https://github.com/AleFeng/unity-ale-toolkit.git?path=/Packages/com.ale.toolkit`。漏装或颠倒会报 `找不到 Ale.Toolkit.* / Ale.Condition.* / Ale.Effect.*` 一类编译错——补装 toolkit 并等重新编译即可。
 
 ### 使用 UPM（推荐）
 `Window > Package Manager` → 左上角 `+` → `Install package from git URL...` → 先粘贴 toolkit，再粘贴本插件：
@@ -94,13 +94,13 @@ https://github.com/AleFeng/unity-ale-chronicle-system.git?path=/Packages/com.ale
 **要固定版本，把 `#<tag>` 加在整条 URL 的最末尾**（必须在 `?path=` 之后）：
 
 ```
-https://github.com/AleFeng/unity-ale-chronicle-system.git?path=/Packages/com.ale.chronicle#0.4.0
+https://github.com/AleFeng/unity-ale-chronicle-system.git?path=/Packages/com.ale.chronicle#0.5.0
 ```
 
 ### 其他方式
 也可以下载仓库，把 `Packages/com.ale.chronicle` 整个文件夹拷进你项目的 **`Packages/` 目录**（不是 `Assets/`）—— Unity 会自动识别为本地包。
 
-安装成功后，菜单栏会出现 **`Tools > Ale Toolkit > Chronicle System`**（Chronicle Editor / Demo Wizard）。
+安装成功后，菜单栏会出现 **`Tools > Ale Toolkit > Chronicle System`**（Chronicle Editor / Demo Wizard / 迁移效果到 Effect Database）。
 
 > **整合 Demo（可选）**：`Assets/DemoInventory/` 的 Chronicle × Inventory 整合演示额外依赖 [`com.ale.inventory`](https://github.com/AleFeng/unity-ale-inventory-system)；核心包不需要它。
 
@@ -113,14 +113,15 @@ Project 面板右键 > Create > ChronicleSystem > Chronicle Database
 ```
 
 ### 2. 打开编辑器并配置
-选中 `.asset`，Inspector 顶部点「在 Chronicle Editor 中编辑」，或菜单 `Tools > Ale Toolkit > Chronicle System > Chronicle Editor`。依次在 **通用 / 角色 / 属性 / 特质 / 职业 / 技能 / 头衔 / 效果** 页签中配置。
+选中 `.asset`，Inspector 顶部点「在 Chronicle Editor 中编辑」，或菜单 `Tools > Ale Toolkit > Chronicle System > Chronicle Editor`。依次在 **通用 / 角色 / 属性 / 特质 / 职业 / 技能 / 头衔** 页签中配置；效果 / Gameplay 标签在 toolkit 的 **Effect Editor**（`Tools > Ale Toolkit > Effect System > Effect Editor`）配置，技能 Inspector 的效果引用可一键跳转。
 
 ### 3. 运行时接入
 ```csharp
 using Ale.Chronicle;
 
-// 注册配置数据库（或 LoadFromBinary(bytes) 从导出的二进制加载）
+// 注册配置数据库（或 LoadFromBinary(bytes) 从导出的二进制加载）+ toolkit 效果库（0.5.0；放 Resources 下则自动登记）
 ChronicleDataManager.Instance.Register(chronicleDatabase);
+EffectDataManager.Instance.Register(effectDatabase);
 
 // 技能：永久学会 / 外部提供 / 一次性使用 / 有效集
 SkillRuntimeManager.Instance.Learn("hero", "fireball");
@@ -135,7 +136,7 @@ ProfessionRuntimeManager.Instance.AddExp("hero", "warrior", 100);
 // 头衔：授予（阶级头衔按阶梯晋升替换、唯一头衔从他人剥夺）
 TitleRuntimeManager.Instance.Grant("hero", "duke", worldDay: 0);
 
-// 效果（0.4.0）：技能使用施加效果 / 直接施加 / 推进世界时钟 / 运行时汇流
+// 效果（0.4.0；0.5.0 起定义来自 toolkit 效果库）：技能使用施加效果 / 直接施加 / 推进世界时钟 / 运行时汇流
 SkillRuntimeManager.Instance.UseSkill("hero", "war_cry", sourceCharacterId: "hero");
 EffectRuntimeManager.Instance.Apply("regen_draught", "hero");
 ChronicleClock.Instance.AdvanceDays(30);
@@ -170,7 +171,7 @@ Packages/com.ale.chronicle/          ← 包根
 │   ├── Character/     角色 定义 / 模板 / 身份字段常量
 │   ├── Condition/     Ale.Condition 整合（作用域 + 七个求值器）
 │   ├── Database/      ChronicleDatabase（中心配置 ScriptableObject）
-│   ├── Effect/        ChronicleEffect / 效果上下文 / 运行时条件源 / Chronicle.* 执行器 / 运行时状态
+│   ├── Effect/        效果上下文 / 运行时条件源 / Chronicle.* 执行器 / 运行时状态 / legacy 迁移（ChronicleEffect 已过时）
 │   ├── Manager/       DataManager / RuntimeManager / Skill·Profession·Title·Trait·Effect RuntimeManager / ChronicleClock / ChronicleCharacterRuntime
 │   ├── Modifier/      CoreAttributeResolver（属性合流）
 │   ├── Profession/    职业 / ExpCurve / 转职树 / 角色职业状态 / 运行时状态
@@ -180,12 +181,12 @@ Packages/com.ale.chronicle/          ← 包根
 │   ├── Title/         头衔 / 阶级序列 / 角色头衔 / 运行时状态
 │   └── Trait/         特质 定义 / 模板 / 实例 / 兼容 / AI 权重
 ├── Runtime/UI/                       Ale.Chronicle.Runtime.UI（角色面板 UiwCharacterView + 技能 UI 组件）
-├── Editor/                           Ale.Chronicle.Editor（三列编辑器 + 八页签）
+├── Editor/                           Ale.Chronicle.Editor（三列编辑器 + 七页签 + 效果迁移窗口）
 ├── Docs~/                            （预留）
 └── Samples~/Demo/                    「Chronicle 演示」Sample（CharacterSystemDemo 场景 + 角色/技能 UI 预制体 + 代码生成示例数据库 + 本地化）
 ```
 
-工程内演示与测试：`Packages/com.ale.chronicle/Samples~/Demo/`（**角色面板 + 技能 UI** 演示场景 `CharacterSystemDemo`，Package Manager 可导入）、`Assets/DemoInventory/`（Chronicle × Inventory 整合）、`Assets/Editor/DemoWizard/`（技能预制体生成）、`Assets/Tests/`（23 个 EditMode 测试文件，含职业 / 头衔 / 技能树 / 效果运行时）。
+工程内演示与测试：`Packages/com.ale.chronicle/Samples~/Demo/`（**角色面板 + 技能 UI** 演示场景 `CharacterSystemDemo`，Package Manager 可导入）、`Assets/DemoInventory/`（Chronicle × Inventory 整合）、`Assets/Editor/DemoWizard/`（技能预制体生成）、`Assets/Tests/`（23 个 EditMode 测试文件，含职业 / 头衔 / 技能树 / 效果运行时与 legacy 迁移）。
 
 ## 📄 许可
 本项目基于 [MIT License](LICENSE) 开源，可自由用于商业与非商业项目。

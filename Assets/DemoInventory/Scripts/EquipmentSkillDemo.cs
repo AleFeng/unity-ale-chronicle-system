@@ -10,12 +10,12 @@ namespace Ale.Chronicle.Inventory
 {
     /// <summary>
     /// 自包含整合 Demo 驱动（Chronicle × Inventory）。<b>拖到空场景里一个 GameObject 上、按 Play 即可验证</b>，
-    /// 无需任何数据资产或场景装配：本脚本在运行时用代码构建示例数据（Chronicle 属性 / 角色 / 技能 / 效果 + Inventory 背包 / 道具 / 效果 / 装备组），
+    /// 无需任何数据资产或场景装配：本脚本在运行时用代码构建示例数据（Chronicle 属性 / 角色 / 技能 + toolkit 效果库 + Inventory 背包 / 道具 / 效果 / 装备组），
     /// 注册进各管理器，并用 IMGUI 按钮驱动 装备 / 卸下 / 使用 / 推进时钟，实时显示角色「有效技能」、耐力 / 战力、活动效果与日志。
     ///
     /// <para>覆盖两种模式：① 装备<b>持有</b>技能（<see cref="EquipmentSkillBridge"/> 并集同步，含多来源留存 / 不误删永久）；
     /// ② 使用消耗品<b>施加效果</b>（<see cref="ConsumableEffectUse"/> → <c>UseItem</c> + <c>ChronicleEffectContext</c>：
-    /// 回复药水引用 Chronicle 库定义的 <c>regen_draught</c>，磨刀油引用 Inventory 库自己定义的 <c>sharpen_oil</c>；
+    /// 回复药水引用 toolkit 效果库（<c>EffectDatabase</c>，0.5.0 起所有上层系统共用）定义的 <c>regen_draught</c>，磨刀油引用 Inventory 库自己定义的 <c>sharpen_oil</c>；
     /// 无使用效果的道具（剑）不扣减）。</para>
     ///
     /// <para>仅供开发期验证，非正式游戏 UI；正式整合请用真实数据资产 + uGUI（桥接 / helper 同款）。</para>
@@ -41,9 +41,9 @@ namespace Ale.Chronicle.Inventory
         };
 
         // ── 与效果系统相关的 id ─────────────────────────────────────────────
-        private const string PotionId      = "potion";          // 回复药水 → Chronicle 库效果 regen_draught
+        private const string PotionId      = "potion";          // 回复药水 → toolkit 效果库效果 regen_draught
         private const string OilId         = "oil";             // 磨刀油   → Inventory 库效果 sharpen_oil
-        private const string FxRegen       = "regen_draught";   // 定义在 Chronicle 库：5 天、每天 耐力 +5 永久落地
+        private const string FxRegen       = "regen_draught";   // 定义在 toolkit 效果库：5 天、每天 耐力 +5 永久落地
         private const string FxSharpen     = "sharpen_oil";     // 定义在 Inventory 库：3 天 战力 +3
         private const string AtStamina     = "stamina";
         private const string AtMight       = "might";
@@ -97,18 +97,20 @@ namespace Ale.Chronicle.Inventory
             cdb.Skills.Add(new Skill("guard"));      // 守护
             cdb.Skills.Add(new Skill("heal"));       // 治疗
 
-            // 效果：回复药剂（Chronicle 库定义；道具经 onUseEffectRefs 跨库引用）
-            var regen = new ChronicleEffect(FxRegen, EDurationPolicy.HasDuration);
+            ChronicleDataManager.Instance.Register(cdb);
+
+            // 效果：回复药剂——0.5.0 起效果由 toolkit 效果库承载（所有上层系统共用；道具经 onUseEffectRefs 按 id 跨库引用）
+            var edb   = ScriptableObject.CreateInstance<EffectDatabase>();
+            var regen = new EffectEntry(FxRegen, EDurationPolicy.HasDuration);
             regen.displayText.SetTextValue(0, "回复药剂");
             regen.definition.duration = EffectMagnitude.Scalable(5f);
             regen.definition.period   = EffectMagnitude.Scalable(1f);
             regen.definition.executePeriodicOnApplication = false;
             regen.definition.modifiers.Add(new EffectModifier(AtStamina, EModifierOperation.Add, 5f));
             regen.definition.assetTags.AddTag("Status.Regen");
-            regen.Normalize();
-            cdb.Effects.Add(regen);
-
-            ChronicleDataManager.Instance.Register(cdb);
+            edb.Effects.Add(regen);
+            edb.GameplayTags.Add(new GameplayTagDefinition("Status.Regen", "持续回复"));
+            EffectDataManager.Instance.Register(edb);   // 归一 + 登记为全局效果定义源 + 并入 Gameplay 标签
         }
 
         private void BuildAndRegisterInventoryData()
@@ -218,7 +220,7 @@ namespace Ale.Chronicle.Inventory
 
         // ── 使用 / 时钟（模式二；公开供按钮 / 自动化验证调用）──────────────────
 
-        /// <summary>使用一瓶回复药水（效果定义在 Chronicle 库）。</summary>
+        /// <summary>使用一瓶回复药水（效果定义在 toolkit 效果库）。</summary>
         public ItemUseResult UsePotion() => ConsumableEffectUse.Use(inventoryId, PotionId, characterId, characterId);
 
         /// <summary>使用一份磨刀油（效果定义在 Inventory 库，经全局效果注册表解析）。</summary>
@@ -290,7 +292,7 @@ namespace Ale.Chronicle.Inventory
 
             GUILayout.Space(6);
             GUILayout.Label("<b>消耗品（模式二 · 使用施加效果）</b>", _rich);
-            DrawUseRow($"回复药水 x{PotionCount} · 效果=回复药剂（Chronicle 库定义：5 天每天耐力 +5 永久）", PotionCount > 0, () => UsePotion());
+            DrawUseRow($"回复药水 x{PotionCount} · 效果=回复药剂（toolkit 效果库定义：5 天每天耐力 +5 永久）", PotionCount > 0, () => UsePotion());
             DrawUseRow($"磨刀油 x{OilCount} · 效果=磨刀（Inventory 库定义：3 天战力 +3）", OilCount > 0, () => UseOil());
             DrawUseRow("剑（无使用效果 → 不扣减）", !IsEquipped("sword"), () => UseSword());
 

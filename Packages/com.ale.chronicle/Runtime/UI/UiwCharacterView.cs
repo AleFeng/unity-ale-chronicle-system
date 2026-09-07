@@ -568,11 +568,11 @@ namespace Ale.Chronicle.Runtime.UI
             return string.IsNullOrEmpty(n) ? c.id : n;
         }
 
-        /// <summary>效果显示名：数据库效果条目的显示名 → 定义 displayName → id。</summary>
+        /// <summary>效果显示名：toolkit 效果库条目的显示名 → 定义 displayName → id。</summary>
         private static string EffectName(EffectDefinition def, ChronicleDataManager dm)
         {
             if (def == null) return "?";
-            var e = dm.GetEffect(def.id);
+            var e = EffectDataManager.Instance?.GetEffect(def.id);
             if (e != null) return e.ResolveDisplayName();
             return !string.IsNullOrEmpty(def.displayName) ? def.displayName : def.id;
         }
@@ -608,7 +608,7 @@ namespace Ale.Chronicle.Runtime.UI
                 string body = sourceTag.Substring(effect.Length);
                 int hash = body.IndexOf('#');
                 if (hash >= 0) body = body.Substring(0, hash);
-                var e = dm.GetEffect(body);
+                var e = EffectDataManager.Instance?.GetEffect(body);
                 return e != null ? e.ResolveDisplayName() : sourceTag;
             }
             if (sourceTag.StartsWith(attr) && sourceTag.EndsWith(":cond"))

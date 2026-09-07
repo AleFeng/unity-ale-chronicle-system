@@ -4,6 +4,39 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.5.0] - 2026-09-07
+
+**效果与 Gameplay 标签外移至 toolkit 1.10.0 的共用效果库 `EffectDatabase`；编年史库只保留技能的效果 id 引用。** 0.4.0 把效果存在编年史库里、编辑器自带一份「效果」页签——Inventory 也有一份结构相同的，效果只能在各自库内定义。本版按 toolkit 1.10.0 的共用化方案改造：效果 / 标签在 Effect Editor 一处配置、所有上层系统按 id 引用；Chronicle 只保留「效果引用列表 + 跳转」，并继续实现自己的 `Chronicle.*` 执行器（效果本质是「对某个系统的操作」，系统如何被操作由系统自己实现）。运行时语义不变：`CharacterSystemDemo` 的精神篡改 / 战意 / 心智护盾 / 回复药剂 / 推进时钟流程与 0.4.0 逐位一致，只是效果来自 `EffectDatabase.asset`。
+
+### 破坏性变更
+
+- ⚠️ **`ChronicleDatabase.Effects` / `GameplayTags` / `GetEffect` 与 `IEffectDefinitionSource` 实现移除**；`ChronicleEffect` 标记 `[Obsolete]`，仅用于承接旧数据。0.4.0 资产里的效果 / 标签经 `FormerlySerializedAs` 落入隐藏字段 `legacyEffects` / `legacyGameplayTags`（`[Obsolete]` 访问器 `LegacyEffects` / `LegacyGameplayTags`，`HasLegacyEffectData`），运行时不再读取——请用迁移菜单搬入效果库（见下文「迁移指引」）。legacy 字段保留一个版本，下一版删除。
+- ⚠️ **`ChronicleDataManager` 不再登记为 toolkit 效果定义源、不再并入 Gameplay 标签、删除 `GetEffect`**；效果按 id 经 toolkit `EffectDataManager`（`ChronicleEffectContext` 把它注册为上下文定义源）→ 全局 `EffectDefinitionRegistry.Default` 解析。宿主须注册效果库：放在 `Resources` 下随启动自动登记，或 `EffectDataManager.Instance.Register(effectDatabase)`（Demo 的 `ChronicleDemoBootstrap` 新增 `effectDatabase` 字段）。`EffectRuntimeManager.LoadSaveData` 亦改按全局注册表解析定义。
+- **二进制格式 v8**：不再写出 v7 的效果 / Gameplay 标签两块（效果库改由 toolkit `EffectConfigSerializer` 单独导出）；技能块的 `onUseEffectRefs` 保留。读 v7 文件时两块读入 legacy 字段（同样经迁移菜单进入效果库）；`LoadFromBinary` 的旧文件效果不再直接生效。
+- `ChronicleDatabase.Validate` 不再校验效果 / 标签，也不再把技能 `onUseEffectRefs` 作悬空校验（效果在其它库，运行时按 id 解析；编辑器以「未找到」标注、不阻断）。
+- 编辑器删除「效果」页签（`EffectSystemTab` / `ChronicleEffectFields` / `EChronicleEntityKind.Effect`，及旧的属性 id 整字段委托）；效果在 toolkit 的 **Effect Editor**（`Tools > Ale Toolkit > Effect System > Effect Editor`）配置。
+- `UiwCharacterView` 的效果显示名改经 `EffectDataManager` 解析（`Ale.Chronicle.Runtime.UI` 新增引用 `Ale.Effect.Runtime`）。
+
+### 新增
+
+- **迁移**：`Tools > Ale Toolkit > Chronicle System > 迁移效果到 Effect Database`（`EditorChronicleEffectMigration` 窗口：来源编年史库 + 目标效果库（可就地新建）→ 迁移 → 报告 → 在 Effect Editor 打开）；`ChronicleDatabase` 资产 Inspector 检测到 legacy 数据时给出提示与同一入口。纯数据部分 `ChronicleLegacyEffects.MigrateInto(source, target)`（运行时程序集，可测试）：逐条 `ChronicleEffect → EffectEntry`（显示名 / 描述 / 图标 / 定义深拷贝并归一，不挂模板）并从 legacy 移除；目标库已有同 id 的跳过、报告并留在 legacy（不覆盖，处理后可重跑）；标签按归一名去重并入。
+- **技能 Inspector 的效果引用**改用 toolkit `EditorEffectRefListDrawer`：「+」从工程内全部效果库的目录选择（按库分组）、拖拽重排 / 删除、「打开」跳转到 Effect Editor 并定位、未找到标注（不阻断）、自由输入。
+- **属性 id 候选 provider** `ChronicleEffectAttributeProvider`（`[InitializeOnLoad]`）：向 toolkit 效果定义绘制器登记系统「Chronicle」的核心属性候选（扫描工程内全部 `ChronicleDatabase` 资产，资产变动后重扫），Effect Editor 里修饰器 / 属性幅度的属性 id 下拉可直接选编年史属性（多系统并存时按系统名分组）。
+- Demo：Character Seeder **D7 改为「效果库+特质技能」**——生成 `Assets/Demo/Data/EffectDatabase.asset`（枚举「效果类别」、模板「通用」schema：category 枚举 + priority 整数、4 个 Gameplay 标签、4 个效果均挂模板并填自定义属性）并清空编年史库 legacy；`ChronicleDemoBootstrap` 增 `effectDatabase` 字段并注册；`Samples~/Demo` 同步（新增 `Data/EffectDatabase.asset`）。整合 Demo `EquipmentSkillDemo` 的 `regen_draught` 改建在 toolkit 效果库（Inventory 侧待其 1.13.0）。
+- 测试：`ChronicleEffectDatabaseTests` 重建（校验不再查效果引用、数据管理器不再是定义源、v8 往返、手工 v7 字节流读入 legacy、迁移含冲突 / 重跑 / 干跑）；`EffectRuntimeManagerTests` 改建 `EffectDatabase` + `EffectDataManager`。
+
+### 依赖
+
+- ⚠️ **最低 `com.ale.toolkit` 版本提至 1.10.0**（效果库 `EffectDatabase` / `EffectDataManager` / Effect Editor / `EditorEffectRefListDrawer` / 属性 id provider）。
+- 程序集引用：`Ale.Chronicle.Runtime.UI` / `Ale.Chronicle.Editor` / 测试程序集新增 `Ale.Effect.Runtime`。
+
+### 迁移指引（0.4.0 → 0.5.0）
+
+1. 升级 toolkit 至 1.10.0，重新编译（旧资产的效果 / 标签自动落入 legacy 字段，Inspector 出现黄色提示）。
+2. 选中旧的 `ChronicleDatabase` 资产 → 「迁移效果到 Effect Database…」→ 目标库「新建…」（或选已有效果库）→ 迁移。报告有同 id 冲突时在目标库处理后重跑。
+3. 把效果库放进 `Resources`，或在引导代码里 `EffectDataManager.Instance.Register(effectDatabase)`；`ChronicleDataManager.Register` 照旧。
+4. 旧的 v7 二进制：导入编年史库后同样经迁移菜单进入效果库，再用 toolkit `EffectConfigSerializer` 导出效果库的二进制 / JSON。
+
 ## [0.4.0] - 2026-09-07
 
 **接入 toolkit 1.9.0 的效果系统（GAS 式 GameplayEffect）与 Gameplay 标签：技能「使用」施加效果，效果落到角色的属性 / 特质 / 头衔 / 职业 / 技能；新增世界时钟与运行时特质。**

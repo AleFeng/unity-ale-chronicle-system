@@ -10,6 +10,7 @@
         "Ale.Condition.Core",
         "Ale.Condition.Editor",
         "Ale.Effect.Core",
+        "Ale.Effect.Runtime",
         "Ale.Effect.Editor",
         "Ale.GameplayTags.Core",
         "Ale.GameplayTags.Runtime",

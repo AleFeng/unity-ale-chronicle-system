@@ -7,6 +7,7 @@
         "Ale.Toolkit.Runtime.UI",
         "Ale.Modifier.Core",
         "Ale.Effect.Core",
+        "Ale.Effect.Runtime",
         "Ale.GameplayTags.Core",
         "Ale.Condition.Core",
         "Unity.TextMeshPro",

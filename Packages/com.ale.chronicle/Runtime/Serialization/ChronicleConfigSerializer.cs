@@ -9,6 +9,8 @@ using Ale.Effect;
 using Ale.GameplayTags;
 using static Ale.Toolkit.Runtime.Serialization.ToolkitBinaryCodec;
 
+#pragma warning disable 618   // ChronicleEffect / LegacyEffects：v7 文件的效果 / 标签块读入 legacy 字段（迁移用）
+
 namespace Ale.Chronicle.Serialization
 {
     /// <summary>
@@ -31,8 +33,9 @@ namespace Ale.Chronicle.Serialization
         /// v4：尾部追加 职业/转职树/头衔/阶级序列 四块，角色块尾追加 职业/头衔 持有字段。
         /// v5：尾部追加 职业模板/头衔模板 两块，职业/头衔块尾追加 templateRef+values（自定义字段）。
         /// v6：尾部追加 技能树 一块；职业块尾追加 skillTreeRefs；核心属性块尾追加 conditionalModifiers（条件修改值）。
-        /// v7：尾部追加 效果 / Gameplay 标签 两块（效果定义以 Effect System JSON 串承载）；技能块尾追加 onUseEffectRefs。</summary>
-        public const int Version = 7;
+        /// v7：尾部追加 效果 / Gameplay 标签 两块（效果定义以 Effect System JSON 串承载）；技能块尾追加 onUseEffectRefs。
+        /// v8：不再写出 v7 的效果 / Gameplay 标签两块（外移至 toolkit EffectDatabase，由 EffectConfigSerializer 承载）；读 v7 文件时两块读入 legacy 字段。</summary>
+        public const int Version = 8;
 
         /// <summary>可正确解析的最低格式版本。</summary>
         private const int MinReadableVersion = 1;
@@ -81,9 +84,7 @@ namespace Ale.Chronicle.Serialization
                 // v6 追加块（技能树）
                 WriteArray(w, dto.skillTrees, WriteSkillTree);
 
-                // v7 追加块（效果系统：效果 / Gameplay 标签）
-                WriteArray(w, dto.effects, WriteEffect);
-                WriteArray(w, dto.gameplayTags, WriteGameplayTag);
+                // v7 的效果 / Gameplay 标签两块自 v8 起不再写出（效果外移至 toolkit EffectDatabase）。
             }
             return stream.ToArray();
         }
@@ -167,8 +168,8 @@ namespace Ale.Chronicle.Serialization
                 dto.skillTrees = ReadArray(r, ReadSkillTree);
             }
 
-            // v7 追加块（效果系统）：旧 v6 文件到技能树即结束。
-            if (version >= 7)
+            // v7 独有块（效果 / Gameplay 标签）：旧 v6 文件到技能树即结束；v8 起不再写出，读到时灌入 legacy 字段供迁移。
+            if (version == 7)
             {
                 dto.effects      = ReadArray(r, ReadEffect);
                 dto.gameplayTags = ReadArray(r, ReadGameplayTag);
@@ -212,11 +213,7 @@ namespace Ale.Chronicle.Serialization
                 titleTemplates         = ToolkitDtoMapper.ToArray(db.TitleTemplates, t => ToDto(t, resolver)),
                 skillTrees             = ToolkitDtoMapper.ToArrayFiltered(db.SkillTrees,
                                             t => t != null && !string.IsNullOrWhiteSpace(t.id), t => ToDto(t, resolver)),
-                effects                = ToolkitDtoMapper.ToArrayFiltered(db.Effects,
-                                            e => e != null && !string.IsNullOrWhiteSpace(e.id), e => ToDto(e, resolver)),
-                gameplayTags           = ToolkitDtoMapper.ToArrayFiltered(db.GameplayTags,
-                                            t => t != null && !string.IsNullOrWhiteSpace(t.name),
-                                            t => new GameplayTagDto { name = t.name, comment = t.comment }),
+                // 效果 / Gameplay 标签：v8 起不写出（外移至 toolkit EffectDatabase）。
             };
         }
 
@@ -241,8 +238,8 @@ namespace Ale.Chronicle.Serialization
             target.Titles.Clear();
             target.RankLadders.Clear();
             target.SkillTrees.Clear();
-            target.Effects.Clear();
-            target.GameplayTags.Clear();
+            target.LegacyEffects.Clear();
+            target.LegacyGameplayTags.Clear();
             if (dto == null) return;
 
             if (dto.enumTypes != null)          foreach (var e in dto.enumTypes)          target.EnumTypesList.Add(FromDto(e, resolver));
@@ -264,10 +261,11 @@ namespace Ale.Chronicle.Serialization
             if (dto.titles != null)                 foreach (var t in dto.titles)                 target.Titles.Add(FromDto(t, resolver));
             if (dto.rankLadders != null)            foreach (var l in dto.rankLadders)            target.RankLadders.Add(FromDto(l, resolver));
             if (dto.skillTrees != null)             foreach (var t in dto.skillTrees)             target.SkillTrees.Add(FromDto(t, resolver));
-            if (dto.effects != null)                foreach (var e in dto.effects)                target.Effects.Add(FromDto(e, resolver));
+            // v7 文件独有：效果 / Gameplay 标签读入 legacy 字段（运行时不读取；经 ChronicleLegacyEffects / 迁移菜单迁入 toolkit 效果库）。
+            if (dto.effects != null)                foreach (var e in dto.effects)                target.LegacyEffects.Add(FromDto(e, resolver));
             if (dto.gameplayTags != null)
                 foreach (var t in dto.gameplayTags)
-                    if (t != null) target.GameplayTags.Add(new GameplayTagDefinition(t.name, t.comment));
+                    if (t != null) target.LegacyGameplayTags.Add(new GameplayTagDefinition(t.name, t.comment));
         }
 
         // ── 枚举类型 ────────────────────────────────────────────────────────────────
@@ -624,23 +622,7 @@ namespace Ale.Chronicle.Serialization
             return s;
         }
 
-        // ── 效果（v7）：定义以 Effect System JSON 串承载；id / 显示名在导出前同步进定义副本 ──────
-
-        private static ChronicleEffectDto ToDto(ChronicleEffect e, IAssetRefResolver resolver)
-        {
-            var def = e.definition != null ? e.definition.Clone() : new EffectDefinition();
-            def.id          = e.id;
-            def.displayName = e.PlainName();
-            def.Normalize();
-            return new ChronicleEffectDto
-            {
-                id              = e.id,
-                displayText     = ToolkitDtoMapper.ToDto(e.displayText, resolver),
-                descriptionText = ToolkitDtoMapper.ToDto(e.descriptionText, resolver),
-                iconValue       = ToolkitDtoMapper.ToDto(e.iconValue, resolver),
-                definitionJson  = EffectJson.ToJson(def, false),
-            };
-        }
+        // ── 效果（仅 v7 文件读取 → legacy 字段）：定义以 Effect System JSON 串承载 ──────────────
 
         private static ChronicleEffect FromDto(ChronicleEffectDto dto, IAssetRefResolver resolver)
         {
@@ -1784,16 +1766,7 @@ namespace Ale.Chronicle.Serialization
             };
         }
 
-        // ── v7 追加块：效果 / Gameplay 标签 ─────────────────────────────────────────────
-
-        private static void WriteEffect(BinaryWriter w, ChronicleEffectDto e)
-        {
-            WriteStr(w, e.id);
-            WriteValue(w, e.displayText);
-            WriteValue(w, e.descriptionText);
-            WriteValue(w, e.iconValue);
-            WriteStr(w, e.definitionJson);
-        }
+        // ── v7 独有块：效果 / Gameplay 标签（v8 起只读不写）────────────────────────────────
 
         private static ChronicleEffectDto ReadEffect(BinaryReader r)
         {
@@ -1805,12 +1778,6 @@ namespace Ale.Chronicle.Serialization
                 iconValue       = ReadValue(r),
                 definitionJson  = ReadStr(r),
             };
-        }
-
-        private static void WriteGameplayTag(BinaryWriter w, GameplayTagDto t)
-        {
-            WriteStr(w, t.name);
-            WriteStr(w, t.comment);
         }
 
         private static GameplayTagDto ReadGameplayTag(BinaryReader r)

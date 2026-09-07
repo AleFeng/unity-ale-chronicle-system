@@ -37,7 +37,7 @@ namespace Ale.Chronicle.Serialization
         public TitleTemplateDto[] titleTemplates;
         // v6 追加（技能树）
         public SkillTreeDto[] skillTrees;
-        // v7 追加（效果系统）
+        // v7 独有（效果系统）：v8 起不再写出（效果外移至 toolkit EffectDatabase），仅读 v7 文件时填充 → legacy 字段
         public ChronicleEffectDto[] effects;
         public GameplayTagDto[] gameplayTags;
     }
@@ -399,7 +399,7 @@ namespace Ale.Chronicle.Serialization
         public string conditionJson;
     }
 
-    /// <summary>效果 DTO（v7）：显示字段 + toolkit 效果定义（Effect System JSON 串，含时长 / 周期 / 叠加 / 标签 / 修饰器 / 执行）。</summary>
+    /// <summary>效果 DTO（仅 v7 文件读取；v8 起效果外移至 toolkit EffectDatabase）：显示字段 + 效果定义（Effect System JSON 串）。</summary>
     [Serializable]
     public class ChronicleEffectDto
     {
@@ -414,7 +414,7 @@ namespace Ale.Chronicle.Serialization
         public string definitionJson;
     }
 
-    /// <summary>Gameplay 标签声明 DTO（v7）：点分层级名 + 注释。</summary>
+    /// <summary>Gameplay 标签声明 DTO（仅 v7 文件读取）：点分层级名 + 注释。</summary>
     [Serializable]
     public class GameplayTagDto
     {

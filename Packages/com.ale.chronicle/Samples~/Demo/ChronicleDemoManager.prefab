@@ -893,6 +893,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ale.Chronicle.Demo.ChronicleDemoBootstrap
   database: {fileID: 11400000, guid: e591deb305919354dbea58c83f72cee4, type: 2}
+  effectDatabase: {fileID: 11400000, guid: 88750ce4f62b62b42b59fc3c8dfc5aea, type: 2}
 --- !u!1001 &494702124311110770
 PrefabInstance:
   m_ObjectHideFlags: 0

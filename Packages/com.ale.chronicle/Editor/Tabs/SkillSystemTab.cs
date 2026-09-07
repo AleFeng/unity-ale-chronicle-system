@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Ale.Effect.Editor;
 using Ale.Toolkit.Runtime;
 using Ale.Toolkit.Editor;
 using UnityEditor;
@@ -144,9 +145,11 @@ namespace Ale.Chronicle.Editor
         }
     }
 
-    /// <summary>技能实例检视器（技能页右列）：ID / 显示信息 / 来源模板 / 分组标签 / 自定义属性字段。</summary>
+    /// <summary>技能实例检视器（技能页右列）：ID / 显示信息 / 来源模板 / 分组标签 / 使用时施加的效果（toolkit 效果库引用）/ 自定义属性字段。</summary>
     public static class SkillInspectorPanel
     {
+        private static readonly EditorReorderableDrag EffectRefDrag = new EditorReorderableDrag("ChronicleSkillEffectRefs");
+
         public static void Draw(IChronicleEditorContext ctx, Skill skill)
         {
             if (skill == null)
@@ -166,12 +169,12 @@ namespace Ale.Chronicle.Editor
             EditorGUILayout.Space(6);
             SkillConfigDrawer.DrawGroupTags(ctx, skill);
 
-            // 使用 / 施放时施加的效果（引用「效果」页签的效果 id；按序施加）
+            // 使用 / 施放时施加的效果：引用 toolkit 效果库（EffectDatabase）里的效果 id，按序施加；
+            // 目录菜单 / 拖拽重排 / 「打开」跳转到 Effect Editor / 未找到标注 / 自由输入，均由 toolkit 绘制器提供。
             EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("使用时施加的效果", ToolkitEditorStyles.Header);
             skill.onUseEffectRefs ??= new List<string>();
-            ChronicleEffectFields.EffectRefList(ctx, skill.onUseEffectRefs, "技能效果引用",
-                "（暂无效果；请先在「效果」页签中添加）");
+            EditorEffectRefListDrawer.Draw(ctx, skill.onUseEffectRefs, EffectRefDrag, "使用时施加的效果", "技能效果引用",
+                "引用 toolkit 效果库中的效果 id（按序施加）；「+」从工程内效果库目录选择，「打开」跳转到 Effect Editor。");
 
             EditorGUILayout.Space(6);
             var tmpl = ctx.Database.GetSkillTemplate(skill.templateRef);

@@ -41,7 +41,8 @@ namespace Ale.Chronicle
         public List<string> secondaryGroupTags = new List<string>();
 
         /// <summary>
-        /// 「使用 / 施放」时对目标施加的效果 id 列表（引用 <see cref="ChronicleDatabase.Effects"/>；按序施加）。
+        /// 「使用 / 施放」时对目标施加的效果 id 列表（引用 toolkit 效果库 <c>EffectDatabase</c> 中的效果 id，跨库、按序施加；
+        /// 运行时经全局效果注册表解析，本库不作悬空校验）。
         /// 空 = 使用只派发事件，不施加任何效果。
         /// </summary>
         public List<string> onUseEffectRefs = new List<string>();

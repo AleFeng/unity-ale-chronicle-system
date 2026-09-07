@@ -13,11 +13,12 @@ namespace Ale.Chronicle.Tests
     /// 效果运行时（C2）门槛：持续效果施加 → 属性汇流 +10（明细含 effect:{id}#h）→ 叠加刷新 → 时钟推进到期回落；
     /// 瞬时效果经 Chronicle.GrantTrait 授予临时特质（智力 −20）→ 3 年后消失；免疫阻断；周期效果逐日永久落地且不随到期回退；
     /// 施加条件走运行时条件源（配置 ∪ 运行时特质）；头衔 / 技能 / 职业经验执行器；存档往返（效果 + 特质 + 时钟）；
-    /// UseSkill 施加 onUseEffectRefs 并在事件中报告；时钟事件；按标签驱散。
+    /// UseSkill 施加 onUseEffectRefs 并在事件中报告；时钟事件；按标签驱散。效果定义来自 toolkit 效果库（<see cref="EffectDataManager"/>，0.5.0）。
     /// </summary>
     public class EffectRuntimeManagerTests
     {
         private ChronicleDatabase    _db;
+        private EffectDatabase       _edb;
         private EffectRuntimeManager _em;
         private TraitRuntimeManager  _tm;
         private ChronicleClock       _clock;
@@ -26,7 +27,8 @@ namespace Ale.Chronicle.Tests
         public void Setup()
         {
             ResetManagers();
-            _db = ScriptableObject.CreateInstance<ChronicleDatabase>();
+            _db  = ScriptableObject.CreateInstance<ChronicleDatabase>();
+            _edb = ScriptableObject.CreateInstance<EffectDatabase>();
 
             _db.CoreAttributes.Add(new CoreAttributeDefinition("might")     { minValue = 0f, maxValue = 100f,  defaultBase = 10f });
             _db.CoreAttributes.Add(new CoreAttributeDefinition("intellect") { minValue = 0f, maxValue = 100f,  defaultBase = 30f });
@@ -46,39 +48,39 @@ namespace Ale.Chronicle.Tests
             _db.Characters.Add(weakling);
 
             // 战意：持续 30 天，战力 +10，ByTarget 叠加上限 1（重复施加刷新时长）
-            var focus = new ChronicleEffect("battle_focus", EDurationPolicy.HasDuration);
+            var focus = new EffectEntry("battle_focus", EDurationPolicy.HasDuration);
             focus.definition.duration     = EffectMagnitude.Scalable(30f);
             focus.definition.stackingType = EEffectStackingType.AggregateByTarget;
             focus.definition.stackLimit   = 1;
             focus.definition.modifiers.Add(new EffectModifier("might", EModifierOperation.Add, 10f));
             focus.definition.assetTags.AddTag("Status.Buff.Might");
-            _db.Effects.Add(focus);
+            _edb.Effects.Add(focus);
 
             // 精神篡改：瞬时，onApply 授予「精神异常」（按定义 1095 天）
-            var tamper = new ChronicleEffect("mind_tamper");
+            var tamper = new EffectEntry("mind_tamper");
             tamper.definition.assetTags.AddTag("Status.Mental.Tamper");
             var tg    = new EffectGroup(EffectPhases.OnApply);
             var grant = new EffectItem("Chronicle.GrantTrait");
             grant.parameters.Add(PStr("traitId", "deranged"));
             tg.items.Add(grant);
             tamper.definition.executions.groups.Add(tg);
-            _db.Effects.Add(tamper);
+            _edb.Effects.Add(tamper);
 
             // 心智护盾：无限，免疫 Status.Mental.*
-            var ward = new ChronicleEffect("mental_ward", EDurationPolicy.Infinite);
+            var ward = new EffectEntry("mental_ward", EDurationPolicy.Infinite);
             ward.definition.grantedApplicationImmunityTags.AddTag("Status.Mental");
-            _db.Effects.Add(ward);
+            _edb.Effects.Add(ward);
 
             // 回复：持续 5 天、周期 1 天、耐力 +5 永久落地（施加时不结算）
-            var regen = new ChronicleEffect("regen", EDurationPolicy.HasDuration);
+            var regen = new EffectEntry("regen", EDurationPolicy.HasDuration);
             regen.definition.duration = EffectMagnitude.Scalable(5f);
             regen.definition.period   = EffectMagnitude.Scalable(1f);
             regen.definition.executePeriodicOnApplication = false;
             regen.definition.modifiers.Add(new EffectModifier("stamina", EModifierOperation.Add, 5f));
-            _db.Effects.Add(regen);
+            _edb.Effects.Add(regen);
 
             // 门控增益：施加条件 = 主体拥有特质 brave
-            var gated = new ChronicleEffect("gated_buff", EDurationPolicy.HasDuration);
+            var gated = new EffectEntry("gated_buff", EDurationPolicy.HasDuration);
             gated.definition.duration = EffectMagnitude.Scalable(10f);
             gated.definition.modifiers.Add(new EffectModifier("stamina", EModifierOperation.Add, 1f));
             var cg = new ConditionGroup { itemOperator = ConditionLogicOp.And };
@@ -87,16 +89,16 @@ namespace Ale.Chronicle.Tests
             ci.parameters.Add(CStr("traitId", "brave"));
             cg.items.Add(ci);
             gated.definition.applicationCondition.groups.Add(cg);
-            _db.Effects.Add(gated);
+            _edb.Effects.Add(gated);
 
             // 奖赏：瞬时，授予头衔 + 学会技能 + 职业经验
-            var reward = new ChronicleEffect("reward");
+            var reward = new EffectEntry("reward");
             var rg = new EffectGroup(EffectPhases.OnApply);
             var t1 = new EffectItem("Chronicle.GrantTitle");       t1.parameters.Add(PStr("titleId", "veteran"));       rg.items.Add(t1);
             var s1 = new EffectItem("Chronicle.LearnSkill");       s1.parameters.Add(PStr("skillId", "spark"));         rg.items.Add(s1);
             var p1 = new EffectItem("Chronicle.AddProfessionExp"); p1.parameters.Add(PStr("professionId", "warrior")); p1.parameters.Add(PInt("amount", 10)); rg.items.Add(p1);
             reward.definition.executions.groups.Add(rg);
-            _db.Effects.Add(reward);
+            _edb.Effects.Add(reward);
 
             _db.Titles.Add(new TitleDefinition("veteran") { kind = ETitleKind.Epithet });
             var warrior = new ProfessionDefinition("warrior") { maxLevel = 3 };
@@ -110,10 +112,12 @@ namespace Ale.Chronicle.Tests
             _db.Skills.Add(skill);
             _db.Skills.Add(new Skill("spark"));
 
-            foreach (var e in _db.Effects) e.Normalize();
+            _edb.NormalizeAll();
             Assert.IsTrue(_db.Validate(out var errors), string.Join("\n", errors));
+            Assert.IsTrue(_edb.Validate(out var effectErrors), string.Join("\n", effectErrors));
 
             ChronicleDataManager.Instance.Register(_db);
+            EffectDataManager.Instance.Register(_edb);
             _em    = EffectRuntimeManager.Instance;
             _tm    = TraitRuntimeManager.Instance;
             _clock = ChronicleClock.Instance;
@@ -123,13 +127,16 @@ namespace Ale.Chronicle.Tests
         public void Cleanup()
         {
             ResetManagers();
-            if (_db) UnityEngine.Object.DestroyImmediate(_db);
-            _db = null;
+            if (_db)  UnityEngine.Object.DestroyImmediate(_db);
+            if (_edb) UnityEngine.Object.DestroyImmediate(_edb);
+            _db  = null;
+            _edb = null;
         }
 
         private static void ResetManagers()
         {
             ChronicleDataManager.Instance.ClearDatabases();
+            EffectDataManager.Instance.ClearDatabases();
             EffectRuntimeManager.Instance.ResetAll();
             TraitRuntimeManager.Instance.ResetAll();
             ChronicleClock.Instance.ResetAll();

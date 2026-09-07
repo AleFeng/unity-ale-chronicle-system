@@ -12,7 +12,7 @@ namespace Ale.Chronicle
     /// 效果运行时管理器：每个角色一个 toolkit <see cref="EffectContainer"/>（GAS 式 ASC：活动效果 / 叠加 / 周期 / 抑制 / 授予标签）
     /// + 一份<b>永久落地修饰器</b>列表（瞬时与周期效果的修饰器经 <see cref="IEffectAttributeSink"/> 写入，来源 <c>effect:{id}#{句柄}</c>；
     /// 不改配置基础值，可存档、可追溯）。施加走 <see cref="ChronicleEffectContext"/> + toolkit <see cref="EffectApplier"/>：
-    /// 定义按 id 经 <see cref="ChronicleDataManager"/> 解析；属性汇流由 <see cref="ChronicleCharacterRuntime"/> 经 <see cref="CollectModifiers"/> 取用。
+    /// 定义按 id 经 toolkit 效果库（<c>EffectDataManager</c> → 全局效果注册表）解析；属性汇流由 <see cref="ChronicleCharacterRuntime"/> 经 <see cref="CollectModifiers"/> 取用。
     /// 时间推进由 <see cref="ChronicleClock.AdvanceDays"/> 驱动 <see cref="Tick"/>（单位：世界日）。
     /// </summary>
     public class EffectRuntimeManager
@@ -265,12 +265,12 @@ namespace Ale.Chronicle
             return result;
         }
 
-        /// <summary>恢复（覆盖语义）：容器经 <see cref="EffectContainer.ImportState"/> 静默重建（不跑阶段不发事件），定义按数据管理器解析。</summary>
+        /// <summary>恢复（覆盖语义）：容器经 <see cref="EffectContainer.ImportState"/> 静默重建（不跑阶段不发事件），定义按全局效果注册表解析（toolkit 效果库须已注册）。</summary>
         public void LoadSaveData(List<RuntimeCharacterEffectState> data)
         {
             _byChar.Clear();
             if (data == null) return;
-            var defs = ChronicleDataManager.Instance;
+            IEffectDefinitionSource defs = EffectDefinitionRegistry.Default;
             foreach (var st in data)
             {
                 if (st == null || string.IsNullOrEmpty(st.characterId)) continue;

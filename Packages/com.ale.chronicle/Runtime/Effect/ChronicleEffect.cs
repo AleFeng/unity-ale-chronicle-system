@@ -5,13 +5,11 @@ using Ale.Toolkit.Runtime;
 namespace Ale.Chronicle
 {
     /// <summary>
-    /// 效果条目（编年史包装实体）：toolkit 的 <see cref="EffectDefinition"/>（GAS GameplayEffect：时长 / 周期 / 叠加 / 标签 / 修饰器 / 执行）
-    /// 外加面向玩家的本地化显示字段（名称 / 描述 / 图标，走 <see cref="AttributeValue"/>）。技能「使用」、道具「使用」等以 <see cref="id"/> 引用。
-    ///
-    /// <para><b>放置</b>：位于 <see cref="ChronicleDatabase.Effects"/> 顶层列表——定义内嵌的 执行表达式 → 组 → 项 → 条件 → 组 → 项 → 参数 已达 8 层，
-    /// 本包装再占 1 层，不可再多包。<see cref="Normalize"/> 把 <see cref="id"/> 与纯文本名同步进 <see cref="definition"/>（定义自身也有 id / displayName，
-    /// 供 toolkit 侧与执行信息使用），并对定义做归一（补 null、空阶段改写为 onApply）。</para>
+    /// <b>0.4.0 legacy</b> 效果条目（编年史包装实体）：toolkit 的 <see cref="EffectDefinition"/> 外加本地化显示字段（名称 / 描述 / 图标）。
+    /// 0.5.0 起效果外移至 toolkit 效果库（<c>EffectDatabase</c> / <c>EffectEntry</c>，所有上层系统共用），本类型只用于承接旧资产 /
+    /// 旧二进制里的数据（<c>ChronicleDatabase.LegacyEffects</c>）并经 <see cref="ChronicleLegacyEffects"/> / 迁移菜单迁入效果库。
     /// </summary>
+    [Obsolete("0.5.0：效果已外移至 toolkit 效果库（EffectDatabase / EffectEntry）；本类型仅用于 legacy 字段反序列化与 ChronicleLegacyEffects 迁移。")]
     [Serializable]
     public class ChronicleEffect
     {
