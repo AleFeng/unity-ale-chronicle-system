@@ -22,13 +22,14 @@
 - **迁移**：`Tools > Ale Toolkit > Chronicle System > 迁移效果到 Effect Database`（`EditorChronicleEffectMigration` 窗口：来源编年史库 + 目标效果库（可就地新建）→ 迁移 → 报告 → 在 Effect Editor 打开）；`ChronicleDatabase` 资产 Inspector 检测到 legacy 数据时给出提示与同一入口。纯数据部分 `ChronicleLegacyEffects.MigrateInto(source, target)`（运行时程序集，可测试）：逐条 `ChronicleEffect → EffectEntry`（显示名 / 描述 / 图标 / 定义深拷贝并归一，不挂模板）并从 legacy 移除；目标库已有同 id 的跳过、报告并留在 legacy（不覆盖，处理后可重跑）；标签按归一名去重并入。
 - **技能 Inspector 的效果引用**改用 toolkit `EditorEffectRefListDrawer`：「+」从工程内全部效果库的目录选择（按库分组）、拖拽重排 / 删除、「打开」跳转到 Effect Editor 并定位、未找到标注（不阻断）、自由输入。
 - **属性 id 候选 provider** `ChronicleEffectAttributeProvider`（`[InitializeOnLoad]`）：向 toolkit 效果定义绘制器登记系统「Chronicle」的核心属性候选（扫描工程内全部 `ChronicleDatabase` 资产，资产变动后重扫），Effect Editor 里修饰器 / 属性幅度的属性 id 下拉可直接选编年史属性（多系统并存时按系统名分组）。
-- Demo：Character Seeder **D7 改为「效果库+特质技能」**——生成 `Assets/Demo/Data/EffectDatabase.asset`（枚举「效果类别」、模板「通用」schema：category 枚举 + priority 整数、4 个 Gameplay 标签、4 个效果均挂模板并填自定义属性）并清空编年史库 legacy；`ChronicleDemoBootstrap` 增 `effectDatabase` 字段并注册；`Samples~/Demo` 同步（新增 `Data/EffectDatabase.asset`）。整合 Demo `EquipmentSkillDemo` 的 `regen_draught` 改建在 toolkit 效果库（Inventory 侧待其 1.13.0）。
+- Demo：Character Seeder **D7 改为「效果库+特质技能」**——生成 `Assets/Demo/Data/EffectDatabase.asset`（枚举「效果类别」、模板「通用」schema：category 枚举 + priority 整数、4 个 Gameplay 标签、4 个效果均挂模板并填自定义属性）并清空编年史库 legacy；`ChronicleDemoBootstrap` 增 `effectDatabase` 字段并注册；`Samples~/Demo` 同步（新增 `Data/EffectDatabase.asset`）。整合 Demo `EquipmentSkillDemo` 的 `regen_draught` / `sharpen_oil` 均改建在同一 toolkit 效果库（Inventory 1.13.0 起同样不再自持效果；`ConsumableEffectUse` 不变）。
 - 测试：`ChronicleEffectDatabaseTests` 重建（校验不再查效果引用、数据管理器不再是定义源、v8 往返、手工 v7 字节流读入 legacy、迁移含冲突 / 重跑 / 干跑）；`EffectRuntimeManagerTests` 改建 `EffectDatabase` + `EffectDataManager`。
 
 ### 依赖
 
 - ⚠️ **最低 `com.ale.toolkit` 版本提至 1.10.0**（效果库 `EffectDatabase` / `EffectDataManager` / Effect Editor / `EditorEffectRefListDrawer` / 属性 id provider）。
 - 程序集引用：`Ale.Chronicle.Runtime.UI` / `Ale.Chronicle.Editor` / 测试程序集新增 `Ale.Effect.Runtime`。
+- 整合 Demo（`Assets/DemoInventory`）需 `com.ale.inventory` ≥ 1.13.0（其效果亦外移至 toolkit 效果库）；核心包仍不依赖它。
 
 ### 迁移指引（0.4.0 → 0.5.0）
 

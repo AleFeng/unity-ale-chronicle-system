@@ -10,7 +10,7 @@ namespace Ale.Chronicle.Inventory
 {
     /// <summary>
     /// 自包含整合 Demo 驱动（Chronicle × Inventory）。<b>拖到空场景里一个 GameObject 上、按 Play 即可验证</b>，
-    /// 无需任何数据资产或场景装配：本脚本在运行时用代码构建示例数据（Chronicle 属性 / 角色 / 技能 + toolkit 效果库 + Inventory 背包 / 道具 / 效果 / 装备组），
+    /// 无需任何数据资产或场景装配：本脚本在运行时用代码构建示例数据（Chronicle 属性 / 角色 / 技能 + toolkit 效果库（回复药剂 / 磨刀）+ Inventory 背包 / 道具 / 装备组），
     /// 注册进各管理器，并用 IMGUI 按钮驱动 装备 / 卸下 / 使用 / 推进时钟，实时显示角色「有效技能」、耐力 / 战力、活动效果与日志。
     ///
     /// <para>覆盖两种模式：① 装备<b>持有</b>技能（<see cref="EquipmentSkillBridge"/> 并集同步，含多来源留存 / 不误删永久）；

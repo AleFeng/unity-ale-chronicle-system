@@ -150,12 +150,12 @@
 
 编年史与[仓库系统 `com.ale.inventory`](https://github.com/AleFeng/unity-ale-inventory-system) 可**协同使用**：让装备系统里的道具「持有」编年史技能、消耗品「使用」时施加编年史效果。**两个包互不依赖**——装备桥只用道具的通用 `AttributeValue`（存 Chronicle 技能 id 的纯 String）；道具使用走 toolkit 效果契约（`Item.onUseEffectRefs` + `UseItem` + `IEffectContext`），**从不引用对方的领域类型**。
 
-演示位于工程 `Assets/DemoInventory/`（命名空间 `Ale.Chronicle.Inventory`，编入 `Assembly-CSharp`，是唯一同时引用两包的地方；依赖 `com.ale.inventory` ≥ 1.12.0）：
+演示位于工程 `Assets/DemoInventory/`（命名空间 `Ale.Chronicle.Inventory`，编入 `Assembly-CSharp`，是唯一同时引用两包的地方；依赖 `com.ale.inventory` ≥ 1.13.0）：
 
 - **装备「持有」技能**（`EquipmentSkillBridge`）：订阅 `EquipmentRuntimeManager.OnEquipmentChanged`，把已装备道具「技能」属性里的技能 id 取并集，作为一个提供者推入 `SetProvidedSkills(角色, "equipment", …)`。卸下时并集重算——**别的装备仍提供则保留，永不动永久层**。
-- **消耗品「使用」施加效果**（`ConsumableEffectUse`，`0.4.0`）：`InventoryRuntimeManager.UseItem(背包, 道具, ChronicleEffectContext.Create(目标角色))`——道具的 `onUseEffectRefs` 可引用 toolkit 效果库定义的效果（回复药水 → `regen_draught`：5 天内每天耐力 +5 永久落地）或 Inventory 库自己定义的效果（磨刀油 → `sharpen_oil`：3 天 战力 +3），定义先经上下文的 toolkit `EffectDataManager` 定义源、再经全局 `EffectDefinitionRegistry.Default`（Inventory 数据管理器已登记）按 id 解析；至少一个效果施加成功才扣 1 个，无使用效果的道具不扣减。
+- **消耗品「使用」施加效果**（`ConsumableEffectUse`，`0.4.0`）：`InventoryRuntimeManager.UseItem(背包, 道具, ChronicleEffectContext.Create(目标角色))`——道具的 `onUseEffectRefs` 引用 toolkit 共用效果库里的效果 id（`0.5.0` / Inventory `1.13.0` 起两包都不再自持效果：回复药水 → `regen_draught`：5 天内每天耐力 +5 永久落地；磨刀油 → `sharpen_oil`：3 天 战力 +3，同目标上限 1 层刷新），定义先经上下文的 toolkit `EffectDataManager` 定义源、再经全局 `EffectDefinitionRegistry.Default` 按 id 解析（效果库注册即登记为来源，任何系统定义的效果都可引用）；至少一个效果施加成功才扣 1 个，无使用效果的道具不扣减。
 - **结果监听示例**（`SkillEffectDemoListener`）：订阅 `SkillRuntimeManager.OnSkillUsed` 与 `InventoryRuntimeManager.OnItemUsed`，打印逐效果施加结果。
-- **一键驱动**（`EquipmentSkillDemo`）：自包含 IMGUI 驱动，代码内建技能 / 效果 / 道具数据，现场演示装备/卸下/使用 + 永久学会/遗忘 + 推进世界时钟，实时显示有效技能、角色耐力 / 战力、活动效果与日志（含「多来源保留」「不删永久」「无使用效果不扣减」验证）。
+- **一键驱动**（`EquipmentSkillDemo`）：自包含 IMGUI 驱动，代码内建 toolkit 效果库（回复药剂 / 磨刀）与技能 / 道具数据，现场演示装备/卸下/使用 + 永久学会/遗忘 + 推进世界时钟，实时显示有效技能、角色耐力 / 战力、活动效果与日志（含「多来源保留」「不删永久」「无使用效果不扣减」验证）。
 
 ---
 

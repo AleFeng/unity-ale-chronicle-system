@@ -61,7 +61,7 @@ Ale Chronicle System 是一款面向 `Unity` 的**数据驱动角色 / 人生模
 | 运行时角色面板 | `UiwCharacterView`（`0.3.1`，`0.4.0` 接入运行时）：一屏展示角色个人档案 + 6 项能力「基础→当前」运行时汇流明细 + 特质（临时剩余时长）/ 效果（活动效果 + 永久落地）/ 职业 / 头衔（阶级位次）/ 技能；订阅运行时事件自动刷新；TMP 富文本信息卡排版、随内容自适应，无额外美术依赖。 |
 | 单向导出 | `ChronicleConfigSerializer` → 紧凑二进制（魔数 `CHRO`，格式 v8：效果块外移至 toolkit 效果库），**append-only 向后兼容**旧版本（含 v3 ~ v7，v7 的效果读入 legacy 字段供迁移）；对象引用以 AssetGUID 承载。 |
 | 三个可选宏 | TextMeshPro（`ATK_TMP`）/ Unity Localization（`ATK_LOCALIZATION`）/ Unity Addressables（`ATK_ADDRESSABLE`），在 Ale Toolkit 欢迎窗口一键开关；插件包本身零硬依赖。 |
-| 跨包整合 | 与 `com.ale.inventory` 协同的「装备持有技能 / 消耗品使用施加效果」整合 Demo（道具经 toolkit 效果契约引用 toolkit 效果库或 Inventory 库定义的效果），两包互不依赖。 |
+| 跨包整合 | 与 `com.ale.inventory` 协同的「装备持有技能 / 消耗品使用施加效果」整合 Demo（道具经 toolkit 效果契约引用 toolkit 共用效果库里的效果，两包都不再自持效果），两包互不依赖。 |
 
 ### 六大领域
 | 领域 | 配置内容 | 运行时 |

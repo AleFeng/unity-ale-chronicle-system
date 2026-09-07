@@ -4,12 +4,12 @@ using Ale.Inventory.Runtime;   // InventoryRuntimeManager / ItemUseResult
 namespace Ale.Chronicle.Inventory
 {
     /// <summary>
-    /// 使用消耗品「施加效果」（模式二 · 效果契约）——Chronicle × Inventory 整合层（Chronicle 0.4.0 / Inventory 1.12.0）。
+    /// 使用消耗品「施加效果」（模式二 · 效果契约）——Chronicle × Inventory 整合层（Chronicle 0.5.0 / Inventory 1.13.0）。
     ///
-    /// <para>业务流程：道具的 <c>Item.onUseEffectRefs</c> 引用效果 id（可定义在 Chronicle 库，如回复药剂 <c>regen_draught</c>；
-    /// 也可定义在 Inventory 库自己的「效果系统」页签）→ <see cref="InventoryRuntimeManager.UseItem"/> 经 toolkit
+    /// <para>业务流程：道具的 <c>Item.onUseEffectRefs</c> 引用 toolkit 效果库（<c>EffectDatabase</c>，所有上层系统共用；
+    /// 如回复药剂 <c>regen_draught</c>、磨刀 <c>sharpen_oil</c>）中的效果 id → <see cref="InventoryRuntimeManager.UseItem"/> 经 toolkit
     /// <c>EffectApplier</c> 把效果按序施加到 <see cref="ChronicleEffectContext.Create"/> 组装的目标上下文
-    /// （主体 = 目标角色；定义先经 Chronicle 数据管理器解析，再查全局效果注册表）→ 至少一个效果施加成功才扣减 1 个。</para>
+    /// （主体 = 目标角色；定义先经上下文的 toolkit <c>EffectDataManager</c> 解析，再查全局效果注册表）→ 至少一个效果施加成功才扣减 1 个。</para>
     ///
     /// <para>两个包互不依赖：Inventory 只认 toolkit 的 <c>IEffectContext</c>，Chronicle 负责把效果落到属性 / 特质 / 头衔…；
     /// 本类是唯一同时引用两包的胶水，故放在整合 Demo（<c>Assets/DemoInventory</c>），不进任何运行时包。</para>
