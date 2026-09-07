@@ -153,7 +153,11 @@ namespace Ale.Chronicle
                 if (u.grantTraitRefs != null)
                     foreach (var traitRef in u.grantTraitRefs)
                         if (!string.IsNullOrEmpty(traitRef))
+                        {
+                            // 运行时授予（按特质定义时效；互斥 / 未定义时静默不授予），事件照旧派发供业务层监听
+                            TraitRuntimeManager.Instance.Grant(characterId, traitRef);
                             OnUnlockTrait?.Invoke(characterId, traitRef);
+                        }
             }
         }
 

@@ -1,28 +1,54 @@
+using System;
+using System.Collections.Generic;
+using Ale.Effect;
+
 namespace Ale.Chronicle
 {
     /// <summary>
-    /// 技能「使用 / 施放」一次性事件负载：对 <see cref="TargetCharacterId"/> 施放 <see cref="SkillId"/>，
-    /// 触发来源由 <see cref="SourceKey"/> 标识（可空，如触发本次使用的道具 ID）。
-    ///
-    /// <para>由 <see cref="SkillRuntimeManager.UseSkill"/> 触发、经 <see cref="SkillRuntimeManager.OnSkillUsed"/> 派发；
-    /// 具体效果（治疗 / 加 buff 等）由业务层订阅实现——本阶段 Chronicle 不内置任何效果执行、也不改任何状态。</para>
+    /// 技能「使用 / 施放」派发事件：目标角色、技能、可选来源键（装备 / UI 等）、可选来源角色（施放者），
+    /// 以及本次按序施加 <see cref="Skill.onUseEffectRefs"/> 的逐个结果（无引用 → 空列表）。
     /// </summary>
     public readonly struct SkillUseEvent
     {
-        /// <summary>被施放技能的目标角色 ID。</summary>
+        private readonly IReadOnlyList<EffectApplyResult> _effectResults;
+
+        /// <summary>目标角色 id。</summary>
         public readonly string TargetCharacterId;
 
-        /// <summary>被施放的技能 ID。</summary>
+        /// <summary>技能 id。</summary>
         public readonly string SkillId;
 
-        /// <summary>施放来源标识（可空；如触发本次使用的道具 ID）。</summary>
+        /// <summary>来源键（调用方自定，如装备 / UI 入口；可空）。</summary>
         public readonly string SourceKey;
 
+        /// <summary>来源角色 id（施放者；可空）。进入效果的来源与条件「对象」作用域。</summary>
+        public readonly string SourceCharacterId;
+
+        /// <summary>逐效果施加结果（顺序同 onUseEffectRefs；永不为 null）。</summary>
+        public IReadOnlyList<EffectApplyResult> EffectResults => _effectResults ?? Array.Empty<EffectApplyResult>();
+
+        /// <summary>成功施加（含叠加 / 刷新）的效果数。</summary>
+        public int EffectsApplied
+        {
+            get
+            {
+                int n = 0;
+                foreach (var r in EffectResults) if (r.IsSuccess) n++;
+                return n;
+            }
+        }
+
         public SkillUseEvent(string targetCharacterId, string skillId, string sourceKey)
+            : this(targetCharacterId, skillId, sourceKey, null, null) { }
+
+        public SkillUseEvent(string targetCharacterId, string skillId, string sourceKey, string sourceCharacterId,
+            IReadOnlyList<EffectApplyResult> effectResults)
         {
             TargetCharacterId = targetCharacterId;
             SkillId           = skillId;
             SourceKey         = sourceKey;
+            SourceCharacterId = sourceCharacterId;
+            _effectResults    = effectResults;
         }
     }
 }

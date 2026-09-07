@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Ale.Toolkit.Runtime;
+using Ale.Effect;
 
 namespace Ale.Chronicle
 {
@@ -251,21 +252,28 @@ namespace Ale.Chronicle
         #region 使用 / 施放（一次性派发）
 
         /// <summary>
-        /// 对目标角色「使用 / 施放」一个技能：校验技能存在（<see cref="ChronicleDataManager.GetSkill"/> 非空）后，
-        /// 经 <see cref="OnSkillUsed"/> 派发 <see cref="SkillUseEvent"/> 并返回 true；技能不存在则返回 false 且不派发。
-        /// <para><b>无状态</b>：不改「永久已学」/「提供」层、不触发 <see cref="OnLearnedChanged"/>、不入存档；
-        /// 具体效果（治疗 / 加 buff 等）由业务层订阅 <see cref="OnSkillUsed"/> 实现。</para>
+        /// 使用 / 施放技能：校验目标与技能存在后，按序对目标施加 <see cref="Skill.onUseEffectRefs"/>（经 <see cref="EffectRuntimeManager"/>；
+        /// 来源角色进入效果来源与条件「对象」作用域），再派发 <see cref="OnSkillUsed"/>（携带逐效果结果）。
+        /// 不做冷却 / 消耗 / 学会校验（由调用方决定）；单个效果被阻断不影响返回值（true = 已派发）。
         /// </summary>
-        /// <param name="targetCharacterId">被施放的目标角色 ID。</param>
-        /// <param name="skillId">被施放的技能 ID。</param>
-        /// <param name="sourceKey">施放来源标识（可空；如触发本次使用的道具 ID）。</param>
-        public bool UseSkill(string targetCharacterId, string skillId, string sourceKey = null)
+        public bool UseSkill(string targetCharacterId, string skillId, string sourceKey = null, string sourceCharacterId = null)
         {
             if (string.IsNullOrEmpty(targetCharacterId) || string.IsNullOrEmpty(skillId)) return false;
-            var dm = ChronicleDataManager.Instance;
-            if (dm == null || dm.GetSkill(skillId) == null) return false;
+            var dm    = ChronicleDataManager.Instance;
+            var skill = dm?.GetSkill(skillId);
+            if (skill == null) return false;
 
-            OnSkillUsed?.Invoke(new SkillUseEvent(targetCharacterId, skillId, sourceKey));
+            List<EffectApplyResult> results = null;
+            if (skill.onUseEffectRefs != null && skill.onUseEffectRefs.Count > 0)
+            {
+                results = new List<EffectApplyResult>(skill.onUseEffectRefs.Count);
+                var em = EffectRuntimeManager.Instance;
+                foreach (var effectId in skill.onUseEffectRefs)
+                    if (!string.IsNullOrEmpty(effectId))
+                        results.Add(em.Apply(effectId, targetCharacterId, sourceCharacterId));
+            }
+
+            OnSkillUsed?.Invoke(new SkillUseEvent(targetCharacterId, skillId, sourceKey, sourceCharacterId, results));
             return true;
         }
 
