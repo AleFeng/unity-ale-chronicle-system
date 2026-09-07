@@ -1183,6 +1183,77 @@ MonoBehaviour:
             - 30
             strings: []
     values: []
+  - id: deranged
+    templateRef: "\u6027\u683C"
+    displayName:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7CBE\u795E\u5F02\u5E38"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    description:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7CBE\u795E\u88AB\u7BE1\u6539\u540E\u7684\u5F02\u5E38\u72B6\u6001,\u7EA6\u4E09\u5E74\u540E\u81EA\u6108;\u667A\u529B\u5927\u51CF,\u611F\u77E5\u5374\u5F02\u5E38\u654F\u9510\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    icon:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    lifetime: 1
+    defaultDurationDays: 1095
+    durationStacksRefresh: 1
+    categoryEnumRef: 
+    groupEquivalenceRef: 
+    incompatibleTraitRefs: []
+    modifiers:
+    - targetAttributeId: intellect
+      operation: 0
+      magnitude: -20
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    - targetAttributeId: perception
+      operation: 0
+      magnitude: 5
+      duration: 2
+      durationDays: 0
+      sourceTag: 
+      stackLimit: 1
+      stackRule: 0
+    functionTagRef: 
+    compatibilities: []
+    genetic: 0
+    inheritChance: 0
+    birthChance: 0
+    aiWeights: []
+    eligibility:
+      groupOperator: 0
+      groups: []
+    values: []
   characterTemplates:
   - name: "\u4E3B\u89D2"
     color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
@@ -1683,6 +1754,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -1737,6 +1809,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: magic
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -1791,6 +1864,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: social
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -1845,6 +1919,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -1899,6 +1974,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -1953,6 +2029,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: combat
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -2007,6 +2084,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: magic
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -2061,6 +2139,7 @@ MonoBehaviour:
     templateRef: "\u4E3B\u52A8\u6280\u80FD"
     primaryGroupTag: magic
     secondaryGroupTags: []
+    onUseEffectRefs: []
     values:
     - id: "\u9636\u7EA7"
       value:
@@ -2068,6 +2147,168 @@ MonoBehaviour:
         isArray: 0
         enumTypeRef: "\u9636\u7EA7"
         ints: 02000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: psychic_tamper
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7CBE\u795E\u7BE1\u6539"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7BE1\u6539\u76EE\u6807\u5FC3\u667A,\u4F7F\u5176\u9677\u5165\u4E09\u5E74\u7684\u7CBE\u795E\u5F02\u5E38\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: magic
+    secondaryGroupTags: []
+    onUseEffectRefs:
+    - mind_tamper
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: war_cry
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6218\u610F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6FC0\u53D1\u6597\u5FD7,30 \u5929\u5185\u6218\u529B +10\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: combat
+    secondaryGroupTags: []
+    onUseEffectRefs:
+    - battle_focus
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+  - id: mind_ward
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5FC3\u667A\u62A4\u76FE"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u62A4\u4F4F\u5FC3\u667A,\u514D\u75AB\u7CBE\u795E\u7C7B\u6548\u679C\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    templateRef: "\u4E3B\u52A8\u6280\u80FD"
+    primaryGroupTag: magic
+    secondaryGroupTags: []
+    onUseEffectRefs:
+    - mental_ward
+    values:
+    - id: "\u9636\u7EA7"
+      value:
+        type: 4
+        isArray: 0
+        enumTypeRef: "\u9636\u7EA7"
+        ints: 00000000
         floats: []
         strings: []
         objRefs: []
@@ -4343,3 +4584,451 @@ MonoBehaviour:
     - count
     - marquis
     - duke
+  effects:
+  - id: mind_tamper
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u7CBE\u795E\u7BE1\u6539"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u77AC\u65F6:\u6388\u4E88\u300C\u7CBE\u795E\u5F02\u5E38\u300D(\u6309\u7279\u8D28\u5B9A\u4E49
+        3 \u5E74)\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    definition:
+      id: mind_tamper
+      displayName: "\u7CBE\u795E\u7BE1\u6539"
+      durationPolicy: 0
+      duration:
+        kind: 0
+        baseValue: 0
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      period:
+        kind: 0
+        baseValue: 0
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      executePeriodicOnApplication: 1
+      stackingType: 0
+      stackLimit: 1
+      stackDurationRefreshPolicy: 0
+      stackPeriodResetPolicy: 0
+      stackExpirationPolicy: 0
+      assetTags:
+        tags:
+        - Status.Mental.Deranged
+      grantedTags:
+        tags: []
+      removeEffectsWithTags:
+        tags: []
+      grantedApplicationImmunityTags:
+        tags: []
+      applicationTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      ongoingTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      applicationCondition:
+        groupOperator: 0
+        groups: []
+      chanceToApply: 1
+      modifiers: []
+      executions:
+        groups:
+        - phase: onApply
+          items:
+          - key: Chronicle.GrantTrait
+            parameters:
+            - id: traitId
+              type: 0
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats: []
+              strings:
+              - deranged
+            - id: durationDays
+              type: 2
+              isArray: 0
+              enumTypeRef: 
+              ints: 
+              floats:
+              - 0
+              strings: []
+            - id: stacks
+              type: 1
+              isArray: 0
+              enumTypeRef: 
+              ints: 0100000000000000
+              floats: []
+              strings: []
+            gate:
+              groupOperator: 0
+              groups: []
+      cueTags:
+        tags: []
+  - id: battle_focus
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6218\u610F"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6301\u7EED 30 \u5929:\u6218\u529B +10;\u91CD\u590D\u65BD\u52A0\u5237\u65B0\u65F6\u957F(\u540C\u76EE\u6807\u4E0A\u9650
+        1 \u5C42)\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    definition:
+      id: battle_focus
+      displayName: "\u6218\u610F"
+      durationPolicy: 1
+      duration:
+        kind: 0
+        baseValue: 30
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      period:
+        kind: 0
+        baseValue: 0
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      executePeriodicOnApplication: 1
+      stackingType: 2
+      stackLimit: 1
+      stackDurationRefreshPolicy: 0
+      stackPeriodResetPolicy: 0
+      stackExpirationPolicy: 0
+      assetTags:
+        tags:
+        - Status.Buff.Might
+      grantedTags:
+        tags: []
+      removeEffectsWithTags:
+        tags: []
+      grantedApplicationImmunityTags:
+        tags: []
+      applicationTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      ongoingTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      applicationCondition:
+        groupOperator: 0
+        groups: []
+      chanceToApply: 1
+      modifiers:
+      - attributeId: might
+        operation: 0
+        magnitude:
+          kind: 0
+          baseValue: 10
+          perLevel: 0
+          attributeId: 
+          captureFrom: 0
+          coefficient: 1
+          preAdd: 0
+          postAdd: 0
+          setByCallerKey: 
+      executions:
+        groups: []
+      cueTags:
+        tags: []
+  - id: mental_ward
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u5FC3\u667A\u62A4\u76FE"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u65E0\u9650:\u514D\u75AB Status.Mental.* \u7C7B\u6548\u679C(\u7CBE\u795E\u7BE1\u6539\u88AB\u963B\u65AD),\u5E76\u6388\u4E88
+        Immunity.Mental \u6807\u7B7E\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    definition:
+      id: mental_ward
+      displayName: "\u5FC3\u667A\u62A4\u76FE"
+      durationPolicy: 2
+      duration:
+        kind: 0
+        baseValue: 0
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      period:
+        kind: 0
+        baseValue: 0
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      executePeriodicOnApplication: 1
+      stackingType: 0
+      stackLimit: 1
+      stackDurationRefreshPolicy: 0
+      stackPeriodResetPolicy: 0
+      stackExpirationPolicy: 0
+      assetTags:
+        tags: []
+      grantedTags:
+        tags:
+        - Immunity.Mental
+      removeEffectsWithTags:
+        tags: []
+      grantedApplicationImmunityTags:
+        tags:
+        - Status.Mental
+      applicationTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      ongoingTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      applicationCondition:
+        groupOperator: 0
+        groups: []
+      chanceToApply: 1
+      modifiers: []
+      executions:
+        groups: []
+      cueTags:
+        tags: []
+  - id: regen_draught
+    displayText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u56DE\u590D\u836F\u5242"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    descriptionText:
+      type: 10
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings:
+      - "\u6301\u7EED 5 \u5929\u3001\u6BCF\u5929\u7ED3\u7B97:\u8010\u529B +5 \u6C38\u4E45\u843D\u5730(\u5230\u671F\u4E0D\u56DE\u9000)\u3002"
+      - 
+      - 
+      objRefs: []
+      curves: []
+      objAddresses: []
+    iconValue:
+      type: 9
+      isArray: 0
+      enumTypeRef: 
+      ints: 
+      floats: []
+      strings: []
+      objRefs: []
+      curves: []
+      objAddresses: []
+    definition:
+      id: regen_draught
+      displayName: "\u56DE\u590D\u836F\u5242"
+      durationPolicy: 1
+      duration:
+        kind: 0
+        baseValue: 5
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      period:
+        kind: 0
+        baseValue: 1
+        perLevel: 0
+        attributeId: 
+        captureFrom: 0
+        coefficient: 1
+        preAdd: 0
+        postAdd: 0
+        setByCallerKey: 
+      executePeriodicOnApplication: 0
+      stackingType: 0
+      stackLimit: 1
+      stackDurationRefreshPolicy: 0
+      stackPeriodResetPolicy: 0
+      stackExpirationPolicy: 0
+      assetTags:
+        tags:
+        - Status.Regen
+      grantedTags:
+        tags: []
+      removeEffectsWithTags:
+        tags: []
+      grantedApplicationImmunityTags:
+        tags: []
+      applicationTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      ongoingTagRequirements:
+        requireTags:
+          tags: []
+        ignoreTags:
+          tags: []
+      applicationCondition:
+        groupOperator: 0
+        groups: []
+      chanceToApply: 1
+      modifiers:
+      - attributeId: stamina
+        operation: 0
+        magnitude:
+          kind: 0
+          baseValue: 5
+          perLevel: 0
+          attributeId: 
+          captureFrom: 0
+          coefficient: 1
+          preAdd: 0
+          postAdd: 0
+          setByCallerKey: 
+      executions:
+        groups: []
+      cueTags:
+        tags: []
+  gameplayTags:
+  - name: Status.Mental.Deranged
+    comment: "\u7CBE\u795E\u7BE1\u6539\u7C7B\u6548\u679C(\u88AB\u5FC3\u667A\u62A4\u76FE\u514D\u75AB)"
+  - name: Status.Buff.Might
+    comment: "\u6218\u529B\u7C7B\u589E\u76CA"
+  - name: Status.Regen
+    comment: "\u6301\u7EED\u56DE\u590D"
+  - name: Immunity.Mental
+    comment: "\u514D\u75AB\u7CBE\u795E\u7C7B\u6548\u679C(\u5FC3\u667A\u62A4\u76FE\u6388\u4E88)"

@@ -8,6 +8,7 @@
         "Ale.Modifier.Core",
         "Ale.Effect.Core",
         "Ale.GameplayTags.Core",
+        "Ale.Condition.Core",
         "Unity.TextMeshPro",
         "Unity.Localization"
     ],

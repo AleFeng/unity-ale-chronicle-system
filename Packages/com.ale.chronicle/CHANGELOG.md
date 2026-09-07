@@ -4,6 +4,35 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.4.0] - 2026-09-07
+
+**接入 toolkit 1.9.0 的效果系统（GAS 式 GameplayEffect）与 Gameplay 标签：技能「使用」施加效果，效果落到角色的属性 / 特质 / 头衔 / 职业 / 技能；新增世界时钟与运行时特质。**
+
+### 新增
+
+- **效果（Effect）领域**：`ChronicleDatabase.Effects`（`ChronicleEffect` = 显示名 / 描述 / 图标 + toolkit `EffectDefinition`：时长策略 / 周期 / 叠加 / 标签 / 施加条件 / 概率 / 修饰器 / 执行阶段）、`ChronicleDatabase.GameplayTags`（本库声明的层级标签，注册数据库时并入 toolkit 标签注册表）；`Skill.onUseEffectRefs`（使用时按序施加的效果 id）。`Validate` 校验效果 id 重复、技能效果引用与修饰器 / 属性幅度目标属性悬空、定义错误（toolkit 警告不阻断）、非法标签名。
+- **编辑器「效果」页签**：左列 Gameplay 标签目录、中列效果列表（以时长策略充当过滤 / 新建入口）、右列 ID / 名称 / 描述 / 图标 + 内联 toolkit 效果定义绘制器（属性 id 走核心属性下拉）+ 校验摘要；技能 Inspector 增「使用时施加的效果」。
+- **运行时**（均为 `ToolkitSingleton` + `ISaveable`）：
+  - `ChronicleClock`：世界日时钟，`AdvanceDays` / `AdvanceYears` 依次驱动特质到期与效果周期 / 到期，派发 `OnDaysAdvanced`。
+  - `TraitRuntimeManager`：运行期授予的特质与配置层合成有效特质；互斥 / 等价组拒绝、临时特质到期、重复授予刷新 / 叠层、按来源成组撤销。
+  - `EffectRuntimeManager`：每角色一个 toolkit `EffectContainer` + 永久落地修饰器列表；`Apply` / `Remove*` / `Tick` / 驱散 / 存档；实现 toolkit 的容器源 / 属性读写 / 标签源。
+  - `ChronicleCharacterRuntime`：运行时属性汇流（特质、职业成长、头衔各取配置 ∪ 运行时，条件修改值，活动效果，永久落地）。
+  - `ChronicleRuntimeConditionSource` / `ChronicleEffectContext`：首个真实条件源（主体 = 效果目标、对象 = 效果来源）与效果上下文组装；`IChronicleRuntimeSink` 执行器落地门面。
+  - 七个 `Chronicle.*` 执行器：授予 / 移除特质、授予 / 剥夺头衔、增加职业经验、学会 / 遗忘技能。
+- `UiwCharacterView`：改为按「配置 ∪ 运行时」展示，新增「效果」分区（活动效果 / 剩余 / 层数 / 修饰器 + 永久落地汇总）与临时特质剩余时长；订阅运行时事件自动刷新；年龄按世界时钟推算。
+- 演示：Character Seeder 新增 **D7 效果+标签**（精神异常 / 精神篡改 / 战意 / 心智护盾 / 回复药剂）；`CharacterSystemDemo` 场景新增「效果演示」按钮面板（`ChronicleEffectDemo`）。
+- 测试：`ChronicleEffectDatabaseTests` / `TraitRuntimeManagerTests` / `EffectRuntimeManagerTests`。
+
+### 变更
+
+- `SkillRuntimeManager.UseSkill(target, skillId, sourceKey, sourceCharacterId)`：校验后按序施加 `onUseEffectRefs`，`SkillUseEvent` 增 `SourceCharacterId` / `EffectResults` / `EffectsApplied`。
+- 职业等级解锁的特质改为直接经 `TraitRuntimeManager` 授予（`OnUnlockTrait` 事件照旧派发）。
+- 二进制格式 **v7**：技能块尾追加 `onUseEffectRefs`；尾部追加 效果 / Gameplay 标签 两块（效果定义以 Effect System JSON 串承载）。旧 v6 及更早文件仍可导入。
+
+### 依赖
+
+- ⚠️ **最低 `com.ale.toolkit` 版本提至 1.9.0**（`Ale.Effect` GAS 层、`Ale.GameplayTags`、`Ale.Modifier.Core`）。修饰器类型（`ModifierDefinition` 等）随 toolkit 1.9.0 迁入命名空间 `Ale.Modifier`——本包已同步；宿主项目若直接引用这些类型需补 `using Ale.Modifier;`。
+
 ## [0.3.2] - 2026-08-15
 
 **比较符改用 toolkit 的公共实现，移除本地副本。** 判定结果逐位不变；最低 toolkit 版本提至 1.8.0。

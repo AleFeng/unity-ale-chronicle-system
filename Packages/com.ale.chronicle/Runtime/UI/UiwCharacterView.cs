@@ -4,8 +4,10 @@ using UiText = TMPro.TMP_Text;
 using UiText = UnityEngine.UI.Text;
 #endif
 
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Ale.Effect;
 using Ale.Toolkit.Runtime;
 using Ale.Modifier;
 using Ale.Toolkit.Runtime.UI;
@@ -15,12 +17,14 @@ namespace Ale.Chronicle.Runtime.UI
 {
     /// <summary>
     /// 角色信息主界面（MonoBehaviour，继承 <see cref="UiwViewBase"/>，与 <see cref="UiwSkillView"/> 同规格）。
-    /// 从 <see cref="ChronicleDataManager"/> 取 <see cref="CharacterDefinition"/>，分区展示：姓名 + 头衔/主职业副标题、
-    /// 个人档案（两列）、6 项能力（数值网格 + 逐来源明细，经 <see cref="CoreAttributeResolver"/> 汇流特质/职业成长/头衔）、
-    /// 特质、职业（等级/主职业）、头衔（含爵位阶级位次）、以及由职业技能树导出的可用技能。
+    /// 从 <see cref="ChronicleDataManager"/> 取 <see cref="CharacterDefinition"/>，按「配置 ∪ 运行时」的有效状态分区展示：
+    /// 姓名 + 头衔/主职业副标题、个人档案（两列）、6 项能力（数值网格 + 逐来源明细，经 <see cref="ChronicleCharacterRuntime"/>
+    /// 汇流特质 / 职业成长 / 头衔 / 条件修改值 / 活动效果 / 永久落地）、特质（临时特质附剩余时长）、效果（活动效果：时长策略 /
+    /// 剩余 / 层数 / 修饰器；永久落地汇总）、职业（等级 / 主职业）、头衔（含爵位阶级位次）、以及由职业技能树导出的可用技能 + 已学技能。
     ///
     /// <para>排版参考桌游式角色面板：TMP 富文本做配色 / 分栏 / 层级（无需额外美术图标）。
-    /// 展示<b>静态配置</b>，无运行时进度订阅，故 <see cref="Unsubscribe"/> 为空、<see cref="Reopen"/> 直接重开。</para>
+    /// 打开期间订阅各运行时管理器与世界时钟事件，变化后在 LateUpdate 合并重建一次（同帧多次事件只重建一次）。
+    /// 年龄按 <see cref="ChronicleClock"/> 的世界日推算（<see cref="useWorldClock"/> 关闭时用本组件的 <see cref="worldDay"/>）。</para>
     /// </summary>
     public class UiwCharacterView : UiwViewBase
     {
@@ -34,13 +38,16 @@ namespace Ale.Chronicle.Runtime.UI
         private const string ColAccent = "#8FB4E0"; // 强调标签（浅蓝，如 主职业）
         private const string ColPos    = "#8FCf9a"; // 正加成（绿）
         private const string ColNeg    = "#E08A8A"; // 负加成（红）
+        private const string ColTemp   = "#D7B26B"; // 临时 / 剩余时长（琥珀）
 
         [Header("角色")]
         [Tooltip("要展示的角色 ID（→ ChronicleDataManager.GetCharacter）。")]
         public string characterId = "luna";
-        [Tooltip("用于计算年龄的当前世界日：年龄 = 当前世界日 − 出生世界日。")]
+        [Tooltip("是否以 ChronicleClock 的世界日计算年龄（推进时钟后自动刷新）；关闭则使用下方 worldDay。")]
+        public bool useWorldClock = true;
+        [Tooltip("useWorldClock 关闭时用于计算年龄的世界日：年龄 = 世界日 − 出生世界日。")]
         public int worldDay;
-        [Tooltip("把「世界日」换算为「岁」的每岁天数（仅用于显示；历法子系统落地前的近似）。")]
+        [Tooltip("把「世界日」换算为「岁 / 年」的每年天数（仅用于显示；历法子系统落地前的近似）。")]
         public int daysPerYear = 365;
 
         [Header("头部")]
@@ -56,21 +63,27 @@ namespace Ale.Chronicle.Runtime.UI
         [SerializeField] private UiText profileLabel;
         [Tooltip("能力：数值网格 + 逐来源明细。")]
         [SerializeField] private UiText attributesLabel;
-        [Tooltip("特质（含携带的属性修饰器摘要）。")]
+        [Tooltip("特质（配置 ∪ 运行时；临时特质附剩余时长；含携带的属性修饰器摘要）。")]
         [SerializeField] private UiText traitsLabel;
+        [Tooltip("效果：活动效果（策略 / 剩余 / 层数 / 修饰器）+ 永久落地汇总。留空则并入「特质」文本之后。")]
+        [SerializeField] private UiText effectsLabel;
         [Tooltip("职业：显示名 + 等级（+ 主职业标记）。")]
         [SerializeField] private UiText professionsLabel;
         [Tooltip("头衔：称号；阶级头衔附带其在阶级序列中的位次。")]
         [SerializeField] private UiText titlesLabel;
-        [Tooltip("技能：由角色各职业关联的技能树导出。")]
+        [Tooltip("技能：由角色各职业关联的技能树导出 + 运行时已学。")]
         [SerializeField] private UiText skillsLabel;
+
+        private bool _subscribed;
+        private bool _dirty;
 
         #region 打开 / 关闭
 
-        /// <summary>用当前 <see cref="characterId"/> 打开并构建各分区。</summary>
+        /// <summary>用当前 <see cref="characterId"/> 打开、订阅运行时事件并构建各分区。</summary>
         public override void Open()
         {
-            base.Open();   // 激活面板（公共步骤）
+            base.Open();   // 激活面板（公共步骤；先 Unsubscribe）
+            Subscribe();
             Rebuild();
         }
 
@@ -81,15 +94,62 @@ namespace Ale.Chronicle.Runtime.UI
             if (IsOpen) Rebuild();
         }
 
-        /// <summary>展示静态配置，无运行时事件订阅。</summary>
-        protected override void Unsubscribe() { }
+        /// <summary>手动刷新（数据变动未经事件通知时调用）。</summary>
+        public void Refresh()
+        {
+            if (IsOpen) Rebuild();
+        }
 
         /// <summary>用当前角色重新打开（供基类 <see cref="UiwViewBase.ToggleOpenClose"/>）。</summary>
         protected override void Reopen() => Open();
 
+        private void Subscribe()
+        {
+            if (_subscribed) return;
+            _subscribed = true;
+            EffectRuntimeManager.Instance.OnEffectsChanged        += OnCharacterChanged;
+            EffectRuntimeManager.Instance.OnModifiersChanged      += OnCharacterChanged;
+            TraitRuntimeManager.Instance.OnTraitsChanged          += OnCharacterChanged;
+            TitleRuntimeManager.Instance.OnTitlesChanged          += OnCharacterChanged;
+            ProfessionRuntimeManager.Instance.OnProfessionsChanged += OnCharacterChanged;
+            SkillRuntimeManager.Instance.OnLearnedChanged         += OnCharacterChanged;
+            ChronicleClock.Instance.OnDaysAdvanced                += OnDaysAdvanced;
+        }
+
+        /// <summary>退订运行时事件（基类在 Open / Close / OnDestroy 调用）。</summary>
+        protected override void Unsubscribe()
+        {
+            if (!_subscribed) return;
+            _subscribed = false;
+            EffectRuntimeManager.Instance.OnEffectsChanged        -= OnCharacterChanged;
+            EffectRuntimeManager.Instance.OnModifiersChanged      -= OnCharacterChanged;
+            TraitRuntimeManager.Instance.OnTraitsChanged          -= OnCharacterChanged;
+            TitleRuntimeManager.Instance.OnTitlesChanged          -= OnCharacterChanged;
+            ProfessionRuntimeManager.Instance.OnProfessionsChanged -= OnCharacterChanged;
+            SkillRuntimeManager.Instance.OnLearnedChanged         -= OnCharacterChanged;
+            ChronicleClock.Instance.OnDaysAdvanced                -= OnDaysAdvanced;
+        }
+
+        private void OnCharacterChanged(string id)
+        {
+            if (id == characterId) _dirty = true;
+        }
+
+        private void OnDaysAdvanced(int days, int day) => _dirty = true;
+
+        private void LateUpdate()
+        {
+            if (!_dirty) return;
+            _dirty = false;
+            if (IsOpen) Rebuild();
+        }
+
         #endregion
 
         #region 构建
+
+        /// <summary>当前用于年龄推算的世界日。</summary>
+        private int CurrentWorldDay => useWorldClock ? ChronicleClock.Instance.WorldDay : worldDay;
 
         /// <summary>从数据管理器取角色并重建全部分区文本。</summary>
         private void Rebuild()
@@ -103,17 +163,27 @@ namespace Ale.Chronicle.Runtime.UI
                 return;
             }
 
-            var src = FindSchemaSource(dm, characterId);
-
             // 头部：姓名 / 副标题（爵位·主职业）/ 元信息（性别·年龄）/ 头像占位（姓名首字）
             if (titleLabel)          titleLabel.text          = ResolveName(character);
             if (portraitInitialText) portraitInitialText.text = Initial(character);
             if (subtitleText)        subtitleText.text        = BuildSubtitle(character, dm);
             if (metaText)            metaText.text            = BuildMeta(character, dm);
 
+            string traits  = BuildTraits(character, dm);
+            string effects = BuildEffects(character, dm);
+
             if (profileLabel)     profileLabel.text     = Section("个人档案", BuildProfile(character, dm));
-            if (attributesLabel)  attributesLabel.text  = Section("能力",     BuildAttributes(character, dm, src));
-            if (traitsLabel)      traitsLabel.text      = Section("特质",     BuildTraits(character, dm));
+            if (attributesLabel)  attributesLabel.text  = Section("能力",     BuildAttributes(character, dm));
+            if (effectsLabel)
+            {
+                if (traitsLabel) traitsLabel.text = Section("特质", traits);
+                effectsLabel.text = Section("效果", effects);
+            }
+            else if (traitsLabel)
+            {
+                // 无独立效果节点：效果并入特质文本之后
+                traitsLabel.text = Section("特质", traits) + "\n\n" + Section("效果", effects);
+            }
             if (professionsLabel) professionsLabel.text = Section("职业",     BuildProfessions(character, dm));
             if (titlesLabel)      titlesLabel.text      = Section("头衔",     BuildTitles(character, dm));
             if (skillsLabel)      skillsLabel.text      = Section("技能",     BuildSkills(character, dm));
@@ -129,6 +199,7 @@ namespace Ale.Chronicle.Runtime.UI
             if (profileLabel)     profileLabel.text     = text;
             if (attributesLabel)  attributesLabel.text  = text;
             if (traitsLabel)      traitsLabel.text      = text;
+            if (effectsLabel)     effectsLabel.text     = text;
             if (professionsLabel) professionsLabel.text = text;
             if (titlesLabel)      titlesLabel.text      = text;
             if (skillsLabel)      skillsLabel.text      = text;
@@ -141,24 +212,27 @@ namespace Ale.Chronicle.Runtime.UI
             return string.IsNullOrEmpty(n) ? "?" : n.Substring(0, 1);
         }
 
-        /// <summary>副标题：最高爵位 · 主职业 Lv.x（纯文本，配色由节点设定）。</summary>
+        /// <summary>副标题：最高爵位 · 主职业 Lv.x（配置 ∪ 运行时；纯文本，配色由节点设定）。</summary>
         private string BuildSubtitle(CharacterDefinition c, ChronicleDataManager dm)
         {
             TitleDefinition topRank = null;
-            foreach (var ct in c.titles)
+            foreach (var titleId in ChronicleCharacterRuntime.EffectiveTitleIds(c.id, c))
             {
-                var t = dm.GetTitle(ct.titleRef);
+                var t = dm.GetTitle(titleId);
                 if (t != null && t.kind == ETitleKind.RankTitle && (topRank == null || t.rankTier > topRank.rankTier))
                     topRank = t;
             }
+
             string primary = null;
-            foreach (var cp in c.professions)
+            var professions = ChronicleCharacterRuntime.EffectiveProfessions(c.id, c);
+            foreach (var kv in professions)
             {
-                if (!cp.isPrimary) continue;
-                var p = dm.GetProfession(cp.professionRef);
-                if (p != null) primary = p.ResolveDisplayName() + " Lv." + cp.level;
+                if (!IsPrimaryProfession(c, kv.Key)) continue;
+                var p = dm.GetProfession(kv.Key);
+                if (p != null) primary = p.ResolveDisplayName() + " Lv." + kv.Value;
                 break;
             }
+
             var parts = new List<string>();
             if (topRank != null) parts.Add(topRank.ResolveDisplayName());
             if (primary != null) parts.Add(primary);
@@ -171,10 +245,14 @@ namespace Ale.Chronicle.Runtime.UI
             var parts = new List<string>();
             string sex = FieldValue(c, dm, WellKnownAttr.Sex);
             if (!string.IsNullOrEmpty(sex)) parts.Add(sex);
-            int ageDays = c.GetAge(worldDay);
-            int years = daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
-            parts.Add(years + " 岁");
+            parts.Add(AgeYears(c) + " 岁");
             return string.Join("  ·  ", parts);
+        }
+
+        private int AgeYears(CharacterDefinition c)
+        {
+            int ageDays = c.GetAge(CurrentWorldDay);
+            return daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
         }
 
         /// <summary>个人档案：两列键值。性别/年龄/身高/体重/三围/血型两两成行，兴趣独占一行。</summary>
@@ -182,9 +260,7 @@ namespace Ale.Chronicle.Runtime.UI
         {
             var cells = new List<string>();
             cells.Add(Cell("性别", FieldValue(c, dm, WellKnownAttr.Sex)));
-            int ageDays = c.GetAge(worldDay);
-            int years = daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
-            cells.Add(Cell("年龄", years + " 岁"));
+            cells.Add(Cell("年龄", AgeYears(c) + " 岁"));
             cells.Add(Cell("身高", FieldValue(c, dm, WellKnownAttr.Height) + " cm"));
             cells.Add(Cell("体重", FieldValue(c, dm, WellKnownAttr.Weight) + " kg"));
             cells.Add(Cell("三围", FieldValue(c, dm, "measurements")));
@@ -220,8 +296,8 @@ namespace Ale.Chronicle.Runtime.UI
             return av.ToDisplayString();
         }
 
-        /// <summary>能力：上半三列「属性名 当前值（金）」网格；下半逐属性「基础→当前 · 各来源明细」（弱化小号）。</summary>
-        private string BuildAttributes(CharacterDefinition c, ChronicleDataManager dm, IChronicleSchemaSource src)
+        /// <summary>能力：上半三列「属性名 当前值（金）」网格；下半逐属性「基础→当前 · 各来源明细」（弱化小号）。运行时汇流。</summary>
+        private string BuildAttributes(CharacterDefinition c, ChronicleDataManager dm)
         {
             var defs = new List<CoreAttributeDefinition>();
             var evs  = new List<ModifierEvaluation>();
@@ -230,7 +306,7 @@ namespace Ale.Chronicle.Runtime.UI
                 var def = dm.GetCoreAttribute(cv.attrId);
                 if (def == null) continue;
                 defs.Add(def);
-                evs.Add(CoreAttributeResolver.Evaluate(c, def, src));
+                evs.Add(ChronicleCharacterRuntime.Evaluate(c, def));
             }
 
             var sb = new StringBuilder();
@@ -268,12 +344,12 @@ namespace Ale.Chronicle.Runtime.UI
             return sb.ToString();
         }
 
-        /// <summary>特质：名（近白）+ 携带的属性修饰器摘要（弱化）。</summary>
+        /// <summary>特质（配置 ∪ 运行时）：名（近白）+ 临时特质剩余时长 / 层数（琥珀）+ 携带的属性修饰器摘要（弱化）。</summary>
         private string BuildTraits(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
             bool firstLine = true;
-            foreach (var ti in c.traits)
+            foreach (var ti in TraitRuntimeManager.Instance.GetEffectiveTraits(c.id, c))
             {
                 var t = dm.GetTrait(ti.traitRef);
                 if (t == null) continue;
@@ -281,6 +357,12 @@ namespace Ale.Chronicle.Runtime.UI
                 firstLine = false;
 
                 sb.Append("<color=").Append(ColName).Append(">· ").Append(t.ResolveDisplayName()).Append("</color>");
+
+                if (!ti.IsPermanent)
+                    sb.Append("  <size=85%><color=").Append(ColTemp).Append(">[临时 · 剩余 ").Append(FormatDays(ti.remainingDays)).Append("]</color></size>");
+                if (ti.stacks > 1)
+                    sb.Append("  <size=85%><color=").Append(ColTemp).Append(">×").Append(ti.stacks).Append("</color></size>");
+
                 if (t.modifiers != null && t.modifiers.Count > 0)
                 {
                     var mods = new StringBuilder();
@@ -299,35 +381,108 @@ namespace Ale.Chronicle.Runtime.UI
             return sb.ToString();
         }
 
-        /// <summary>职业：名（近白）+ 等级（金/弱化上限）+ 主职业标签（浅蓝）。</summary>
+        /// <summary>效果：活动效果逐条（名 / 策略 / 剩余 / 周期 / 层数 / 抑制 / 修饰器摘要）+ 永久落地按属性汇总。</summary>
+        private string BuildEffects(CharacterDefinition c, ChronicleDataManager dm)
+        {
+            var em = EffectRuntimeManager.Instance;
+            var sb = new StringBuilder();
+            bool firstLine = true;
+
+            foreach (var e in em.GetActiveEffects(c.id))
+            {
+                if (e == null || !e.IsActive) continue;
+                if (!firstLine) sb.Append('\n');
+                firstLine = false;
+
+                sb.Append("<color=").Append(ColName).Append(">· ").Append(EffectName(e.Definition, dm)).Append("</color>");
+
+                var meta = new List<string>();
+                switch (e.Definition.durationPolicy)
+                {
+                    case EDurationPolicy.HasDuration: meta.Add("剩余 " + FormatDays(e.Remaining)); break;
+                    case EDurationPolicy.Infinite:    meta.Add("永久");                              break;
+                    default:                          meta.Add("瞬时");                              break;
+                }
+                if (e.IsPeriodic) meta.Add("每 " + FormatDays(e.Period) + " 结算");
+                if (e.Stacks > 1) meta.Add("×" + e.Stacks);
+                if (e.IsInhibited) meta.Add("抑制中");
+                sb.Append("  <size=85%><color=").Append(ColTemp).Append(">[").Append(string.Join(" · ", meta)).Append("]</color></size>");
+
+                if (e.ScaledModifiers != null && e.ScaledModifiers.Count > 0)
+                {
+                    var mods = new StringBuilder();
+                    bool first = true;
+                    foreach (var m in e.ScaledModifiers)
+                    {
+                        if (m == null) continue;
+                        if (!first) mods.Append('，');
+                        mods.Append(AttrName(dm, m.targetAttributeId)).Append(SignedColored(m.magnitude));
+                        first = false;
+                    }
+                    if (mods.Length > 0)
+                        sb.Append("  <size=88%><color=").Append(ColDim).Append(">（").Append(mods)
+                          .Append(e.IsPeriodic ? "，每次结算永久落地" : "").Append("）</color></size>");
+                }
+            }
+
+            // 永久落地：按属性汇总加法幅度（其它运算只计次数）
+            var permanent = em.GetPermanentModifiers(c.id);
+            if (permanent.Count > 0)
+            {
+                var sums  = new Dictionary<string, float>();
+                var order = new List<string>();
+                int others = 0;
+                foreach (var m in permanent)
+                {
+                    if (m == null) continue;
+                    if (m.operation != EModifierOperation.Add) { others++; continue; }
+                    if (!sums.ContainsKey(m.targetAttributeId)) { sums[m.targetAttributeId] = 0f; order.Add(m.targetAttributeId); }
+                    sums[m.targetAttributeId] += m.magnitude;
+                }
+                if (!firstLine) sb.Append('\n');
+                sb.Append("<color=").Append(ColSub).Append(">永久落地</color> <size=88%><color=").Append(ColDim).Append('>');
+                bool first = true;
+                foreach (var id in order)
+                {
+                    if (!first) sb.Append('，');
+                    sb.Append(AttrName(dm, id)).Append(SignedColored(sums[id]));
+                    first = false;
+                }
+                if (others > 0) sb.Append(first ? "" : "，").Append("其它 ").Append(others).Append(" 条");
+                sb.Append("</color></size>");
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>职业（配置 ∪ 运行时）：名（近白）+ 等级（金/弱化上限）+ 主职业标签（浅蓝）。</summary>
         private string BuildProfessions(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
             bool firstLine = true;
-            foreach (var cp in c.professions)
+            foreach (var kv in ChronicleCharacterRuntime.EffectiveProfessions(c.id, c))
             {
-                var p = dm.GetProfession(cp.professionRef);
+                var p = dm.GetProfession(kv.Key);
                 if (p == null) continue;
                 if (!firstLine) sb.Append('\n');
                 firstLine = false;
 
                 sb.Append("<color=").Append(ColName).Append(">· ").Append(p.ResolveDisplayName()).Append("</color>")
-                  .Append("  <color=").Append(ColValue).Append(">Lv.").Append(cp.level).Append("</color>")
+                  .Append("  <color=").Append(ColValue).Append(">Lv.").Append(kv.Value).Append("</color>")
                   .Append("<color=").Append(ColDim).Append(">/").Append(p.maxLevel).Append("</color>");
-                if (cp.isPrimary)
+                if (IsPrimaryProfession(c, kv.Key))
                     sb.Append("  <size=85%><color=").Append(ColAccent).Append(">[主职业]</color></size>");
             }
             return sb.ToString();
         }
 
-        /// <summary>头衔：名（近白）；阶级头衔附带其在阶级序列中的位次（弱化）。</summary>
+        /// <summary>头衔（配置 ∪ 运行时）：名（近白）；阶级头衔附带其在阶级序列中的位次（弱化）。</summary>
         private string BuildTitles(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
             bool firstLine = true;
-            foreach (var ct in c.titles)
+            foreach (var titleId in ChronicleCharacterRuntime.EffectiveTitleIds(c.id, c))
             {
-                var t = dm.GetTitle(ct.titleRef);
+                var t = dm.GetTitle(titleId);
                 if (t == null) continue;
                 if (!firstLine) sb.Append('\n');
                 firstLine = false;
@@ -345,15 +500,15 @@ namespace Ale.Chronicle.Runtime.UI
             return sb.ToString();
         }
 
-        /// <summary>技能：按技能树分组（树名浅金），列出各技能（近白、去重）。</summary>
+        /// <summary>技能：按职业技能树分组（树名浅金），列出各技能（近白、去重）；另列运行时已学（永久 ∪ 提供者）。</summary>
         private string BuildSkills(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
             var seenTrees = new HashSet<string>();
             bool firstLine = true;
-            foreach (var cp in c.professions)
+            foreach (var kv in ChronicleCharacterRuntime.EffectiveProfessions(c.id, c))
             {
-                var p = dm.GetProfession(cp.professionRef);
+                var p = dm.GetProfession(kv.Key);
                 if (p == null || p.skillTreeRefs == null) continue;
                 foreach (var treeId in p.skillTreeRefs)
                 {
@@ -376,6 +531,20 @@ namespace Ale.Chronicle.Runtime.UI
                     }
                 }
             }
+
+            var learned = SkillRuntimeManager.Instance.GetEffectiveSkills(c.id);
+            if (learned.Count > 0)
+            {
+                if (!firstLine) sb.Append('\n');
+                sb.Append("<color=").Append(ColSub).Append(">「已学」</color>");
+                bool first = true;
+                foreach (var skill in learned)
+                {
+                    sb.Append("<color=").Append(ColName).Append('>').Append(first ? "" : "、")
+                      .Append(UiwSkillText.ResolveName(skill)).Append("</color>");
+                    first = false;
+                }
+            }
             return sb.ToString();
         }
 
@@ -383,14 +552,13 @@ namespace Ale.Chronicle.Runtime.UI
 
         #region 辅助
 
-        /// <summary>找到包含该角色的已注册数据库作为求值 schema 源；找不到回退首个已注册库。</summary>
-        private static IChronicleSchemaSource FindSchemaSource(ChronicleDataManager dm, string charId)
+        /// <summary>主职业判定：配置层标记 或 运行时职业管理器标记。</summary>
+        private static bool IsPrimaryProfession(CharacterDefinition c, string professionId)
         {
-            if (dm == null) return null;
-            var dbs = dm.Databases;
-            for (int i = 0; i < dbs.Count; i++)
-                if (dbs[i] != null && dbs[i].GetCharacter(charId) != null) return dbs[i];
-            return dbs.Count > 0 ? dbs[0] : null;
+            if (c.professions != null)
+                foreach (var cp in c.professions)
+                    if (cp.professionRef == professionId && cp.isPrimary) return true;
+            return ProfessionRuntimeManager.Instance.IsPrimary(c.id, professionId);
         }
 
         /// <summary>角色显示名：读 <see cref="WellKnownAttr.Name"/> 自由字段，空则回退角色 id。</summary>
@@ -400,12 +568,24 @@ namespace Ale.Chronicle.Runtime.UI
             return string.IsNullOrEmpty(n) ? c.id : n;
         }
 
-        /// <summary>把修饰器来源标记翻译为可读来源名：trait:{id}→特质名、prof:{id}:growth→职业名+成长、title:{id}→头衔名。</summary>
+        /// <summary>效果显示名：数据库效果条目的显示名 → 定义 displayName → id。</summary>
+        private static string EffectName(EffectDefinition def, ChronicleDataManager dm)
+        {
+            if (def == null) return "?";
+            var e = dm.GetEffect(def.id);
+            if (e != null) return e.ResolveDisplayName();
+            return !string.IsNullOrEmpty(def.displayName) ? def.displayName : def.id;
+        }
+
+        /// <summary>
+        /// 把修饰器来源标记翻译为可读来源名：trait:{id}→特质名、prof:{id}:growth→职业名+成长、title:{id}→头衔名、
+        /// effect:{id}#h→效果名、attr:{id}:cond→条件。
+        /// </summary>
         private static string PrettySource(string sourceTag, ChronicleDataManager dm)
         {
             if (string.IsNullOrEmpty(sourceTag)) return "?";
 
-            const string trait = "trait:", title = "title:", prof = "prof:", growth = ":growth";
+            const string trait = "trait:", title = "title:", prof = "prof:", growth = ":growth", effect = "effect:", attr = "attr:";
             if (sourceTag.StartsWith(trait))
             {
                 var t = dm.GetTrait(sourceTag.Substring(trait.Length));
@@ -423,6 +603,16 @@ namespace Ale.Chronicle.Runtime.UI
                 var p = dm.GetProfession(body);
                 return p != null ? p.ResolveDisplayName() + "成长" : sourceTag;
             }
+            if (sourceTag.StartsWith(effect))
+            {
+                string body = sourceTag.Substring(effect.Length);
+                int hash = body.IndexOf('#');
+                if (hash >= 0) body = body.Substring(0, hash);
+                var e = dm.GetEffect(body);
+                return e != null ? e.ResolveDisplayName() : sourceTag;
+            }
+            if (sourceTag.StartsWith(attr) && sourceTag.EndsWith(":cond"))
+                return "条件";
             return sourceTag;
         }
 
@@ -454,6 +644,15 @@ namespace Ale.Chronicle.Runtime.UI
         {
             string s = t != null && t.displayName != null ? t.displayName.ResolveText() : null;
             return string.IsNullOrEmpty(s) ? (t != null ? t.id : string.Empty) : s;
+        }
+
+        /// <summary>天数 → 「x 年」（≥ 一年）或「n 天」（向上取整）。</summary>
+        private string FormatDays(float days)
+        {
+            if (days < 0f) return "永久";
+            if (daysPerYear > 0 && days >= daysPerYear)
+                return (days / daysPerYear).ToString("0.#") + " 年";
+            return Mathf.CeilToInt(days) + " 天";
         }
 
         /// <summary>数值格式：最多两位小数，去除多余零。</summary>

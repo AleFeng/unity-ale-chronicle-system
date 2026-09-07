@@ -5,16 +5,18 @@ using UnityEngine;
 using Ale.Toolkit.Runtime;
 using Ale.Modifier;
 using Ale.Condition;
+using Ale.Effect;
+using Ale.GameplayTags;
 
 namespace Ale.Chronicle.DemoEditor
 {
     /// <summary>
     /// 角色系统 Demo 数据 seeder —— 用代码「全量重建」<see cref="ChronicleDatabase"/>(<see cref="DbPath"/>),
-    /// 填入属性 / 特质 / 职业 / 技能 / 技能树 / 头衔 / 阶级序列 + 示例角色。分 D1~D6 步骤,经菜单
+    /// 填入属性 / 特质 / 职业 / 技能 / 技能树 / 头衔 / 阶级序列 + 示例角色 + 效果 / Gameplay 标签。分 D1~D7 步骤,经菜单
     /// (Tools ▸ Ale Toolkit ▸ Chronicle System ▸ Character Seeder)或 MCP execute_code 逐步触发。
     ///
     /// <para>约定:模板键用 name、实例键用 id;引用一律字符串键;先建被引对象、再建引用方;每步末尾 <see cref="ChronicleDatabase.Validate"/> 兜底。
-    /// D1 作为重建起点会清空全部列表;后续每步只清空自身负责的列表,故每步独立幂等。</para>
+    /// D1 作为重建起点会清空全部列表;后续每步只清空自身负责的列表,故每步独立幂等(D7 追加的特质 / 技能会被 D2 / D4 重建清掉,重跑 D2 / D4 后需再跑 D7)。</para>
     /// </summary>
     public static partial class CharacterSystemSeeder
     {
@@ -64,6 +66,20 @@ namespace Ale.Chronicle.DemoEditor
         public const string KnightTreeId  = "knight_tree";
         public const string MageTreeId    = "mage_tree";
         public const string ScholarTreeId = "scholar_tree";
+
+        // ── 效果系统(D7 建立;与 Assets/Demo/Scripts/ChronicleEffectDemo 的 id 一致) ──
+        public const string TrDeranged        = "deranged";           // 特质:精神异常(临时 3 年)
+        public const string FxMindTamper      = "mind_tamper";        // 效果:精神篡改(瞬时 → 授予精神异常)
+        public const string FxBattleFocus     = "battle_focus";       // 效果:战意(30 天 战力+10)
+        public const string FxMentalWard      = "mental_ward";        // 效果:心智护盾(无限,免疫 Status.Mental.*)
+        public const string FxRegenDraught    = "regen_draught";      // 效果:回复药剂(5 天 每天 耐力+5 永久落地)
+        public const string SkPsychicTamper   = "psychic_tamper";     // 技能:精神篡改 → FxMindTamper
+        public const string SkWarCry          = "war_cry";            // 技能:战意 → FxBattleFocus
+        public const string SkMindWard        = "mind_ward";          // 技能:心智护盾 → FxMentalWard
+        public const string TagDeranged       = "Status.Mental.Deranged";
+        public const string TagBuffMight      = "Status.Buff.Might";
+        public const string TagRegen          = "Status.Regen";
+        public const string TagImmunityMental = "Immunity.Mental";
 
         // ════════════════════════════════════════════════════════════════════════
         //  D1 · 基础层
@@ -381,13 +397,14 @@ namespace Ale.Chronicle.DemoEditor
             return ValidateReport(db, "D4", $"技能={db.Skills.Count}, 技能树={db.SkillTrees.Count}(List3/Tiered1/Tree1)");
         }
 
-        /// <summary>新增一个技能(挂「主动技能」模板 + 主分组标签)。</summary>
-        private static void AddSkill(ChronicleDatabase db, string id, string name, string desc, string groupTag)
+        /// <summary>新增一个技能(挂「主动技能」模板 + 主分组标签),返回以便追加效果引用。</summary>
+        private static Skill AddSkill(ChronicleDatabase db, string id, string name, string desc, string groupTag)
         {
             var s = new Skill(id, TplSkill) { primaryGroupTag = groupTag };
             s.displayText.SetTextValue(0, name);
             s.descriptionText.SetTextValue(0, desc);
             db.Skills.Add(s);
+            return s;
         }
 
         /// <summary>新增一棵 List 型技能树(一组技能打包,无层级/前置)。</summary>
@@ -558,6 +575,108 @@ namespace Ale.Chronicle.DemoEditor
         }
 
         // ════════════════════════════════════════════════════════════════════════
+        //  D7 · 效果 + Gameplay 标签(效果系统,0.4.0)
+        // ════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// D7:生成效果系统演示数据——4 个 Gameplay 标签;1 个临时特质「精神异常」(3 年:智力 −20 / 感知 +5);
+        /// 4 个效果:精神篡改(瞬时,onApply 经 Chronicle.GrantTrait 授予精神异常)、战意(30 天 战力 +10,同目标上限 1 层刷新时长)、
+        /// 心智护盾(无限,免疫 Status.Mental.*,授予 Immunity.Mental)、回复药剂(5 天、每天结算 耐力 +5 永久落地);
+        /// 3 个技能(精神篡改 / 战意 / 心智护盾)经 onUseEffectRefs 引用前三个效果。
+        /// 只清空并重建 <see cref="ChronicleDatabase.Effects"/> 与 <see cref="ChronicleDatabase.GameplayTags"/>,并替换自身的特质 / 技能条目。
+        /// </summary>
+        [MenuItem("Tools/Ale Toolkit/Chronicle System/Character Seeder/D7 效果+标签")]
+        public static string Build_D7()
+        {
+            var db = GetOrCreateDb();
+            db.Effects.Clear();
+            db.GameplayTags.Clear();
+            db.Traits.RemoveAll(t => t != null && t.id == TrDeranged);
+            db.Skills.RemoveAll(s => s != null && (s.id == SkPsychicTamper || s.id == SkWarCry || s.id == SkMindWard));
+
+            // ── Gameplay 标签(层级点分;注册数据库时并入 toolkit 注册表,供编辑器下拉 / 校验) ──
+            db.GameplayTags.Add(new GameplayTagDefinition(TagDeranged,       "精神篡改类效果(被心智护盾免疫)"));
+            db.GameplayTags.Add(new GameplayTagDefinition(TagBuffMight,      "战力类增益"));
+            db.GameplayTags.Add(new GameplayTagDefinition(TagRegen,          "持续回复"));
+            db.GameplayTags.Add(new GameplayTagDefinition(TagImmunityMental, "免疫精神类效果(心智护盾授予)"));
+
+            // ── 特质:精神异常(临时,按定义 3 年;智力 −20 / 感知 +5) ─────────────────
+            var deranged = AddTrait(db, TrDeranged, "精神异常", "精神被篡改后的异常状态,约三年后自愈;智力大减,感知却异常敏锐。");
+            deranged.lifetime              = ETraitLifetime.Temporary;
+            deranged.defaultDurationDays   = 3 * ChronicleClock.DaysPerYear;
+            deranged.durationStacksRefresh = true;
+            Mod(deranged, AtIntellect, -20f);
+            Mod(deranged, AtPerception, 5f);
+            deranged.RebuildAttributes(db);
+
+            // ── 效果 ───────────────────────────────────────────────────────────────
+            var tamper = AddEffect(db, FxMindTamper, "精神篡改", "瞬时:授予「精神异常」(按特质定义 3 年)。", EDurationPolicy.Instant);
+            tamper.definition.assetTags.AddTag(TagDeranged);
+            tamper.definition.executions.groups.Add(Exec(EffectPhases.OnApply,
+                Item("Chronicle.GrantTrait", EStr("traitId", TrDeranged), EFloat("durationDays", 0), EInt("stacks", 1))));
+
+            var focus = AddEffect(db, FxBattleFocus, "战意", "持续 30 天:战力 +10;重复施加刷新时长(同目标上限 1 层)。", EDurationPolicy.HasDuration);
+            focus.definition.duration     = EffectMagnitude.Scalable(30f);
+            focus.definition.stackingType = EEffectStackingType.AggregateByTarget;
+            focus.definition.stackLimit   = 1;
+            focus.definition.modifiers.Add(new EffectModifier(AtMight, EModifierOperation.Add, 10f));
+            focus.definition.assetTags.AddTag(TagBuffMight);
+
+            var ward = AddEffect(db, FxMentalWard, "心智护盾", "无限:免疫 Status.Mental.* 类效果(精神篡改被阻断),并授予 Immunity.Mental 标签。", EDurationPolicy.Infinite);
+            ward.definition.grantedApplicationImmunityTags.AddTag("Status.Mental");
+            ward.definition.grantedTags.AddTag(TagImmunityMental);
+
+            var regen = AddEffect(db, FxRegenDraught, "回复药剂", "持续 5 天、每天结算:耐力 +5 永久落地(到期不回退)。", EDurationPolicy.HasDuration);
+            regen.definition.duration = EffectMagnitude.Scalable(5f);
+            regen.definition.period   = EffectMagnitude.Scalable(1f);
+            regen.definition.executePeriodicOnApplication = false;
+            regen.definition.modifiers.Add(new EffectModifier(AtStamina, EModifierOperation.Add, 5f));
+            regen.definition.assetTags.AddTag(TagRegen);
+
+            foreach (var e in db.Effects) e.Normalize();
+
+            // ── 技能(使用时按序施加效果) ─────────────────────────────────────────────
+            AddSkill(db, SkPsychicTamper, "精神篡改", "篡改目标心智,使其陷入三年的精神异常。", GtMagic).onUseEffectRefs.Add(FxMindTamper);
+            AddSkill(db, SkWarCry,        "战意",     "激发斗志,30 天内战力 +10。",             GtCombat).onUseEffectRefs.Add(FxBattleFocus);
+            AddSkill(db, SkMindWard,      "心智护盾", "护住心智,免疫精神类效果。",              GtMagic).onUseEffectRefs.Add(FxMentalWard);
+            foreach (var s in db.Skills) s.RebuildAttributes(db);
+
+            SaveDb(db);
+            return ValidateReport(db, "D7",
+                $"效果={db.Effects.Count}, Gameplay 标签={db.GameplayTags.Count}, 特质+1(精神异常·临时3年), 技能+3(精神篡改/战意/心智护盾)");
+        }
+
+        /// <summary>新增一个效果条目(显示名 / 描述 / 时长策略),返回以便配置定义。</summary>
+        private static ChronicleEffect AddEffect(ChronicleDatabase db, string id, string name, string desc, EDurationPolicy policy)
+        {
+            var e = new ChronicleEffect(id, policy);
+            e.displayText.SetTextValue(0, name);
+            e.descriptionText.SetTextValue(0, desc);
+            db.Effects.Add(e);
+            return e;
+        }
+
+        /// <summary>一个执行阶段组(onApply / onPeriod / onRemove …)。</summary>
+        private static EffectGroup Exec(string phase, params EffectItem[] items)
+        {
+            var g = new EffectGroup(phase);
+            g.items.AddRange(items);
+            return g;
+        }
+
+        /// <summary>一条执行项(执行器键 + 参数)。</summary>
+        private static EffectItem Item(string key, params EffectParam[] parameters)
+        {
+            var it = new EffectItem(key);
+            it.parameters.AddRange(parameters);
+            return it;
+        }
+
+        private static EffectParam EStr(string id, string v)   { var p = new EffectParam(id, EffectParamType.String); p.SetString(v); return p; }
+        private static EffectParam EInt(string id, long v)     { var p = new EffectParam(id, EffectParamType.Int);    p.SetInt(v);    return p; }
+        private static EffectParam EFloat(string id, double v) { var p = new EffectParam(id, EffectParamType.Float);  p.SetFloat(v);  return p; }
+
+        // ════════════════════════════════════════════════════════════════════════
         //  共享基础设施
         // ════════════════════════════════════════════════════════════════════════
 
@@ -575,7 +694,7 @@ namespace Ale.Chronicle.DemoEditor
             return db;
         }
 
-        /// <summary>清空全部 19 个列表(D1 全量重建起点)。</summary>
+        /// <summary>清空全部 21 个列表(D1 全量重建起点)。</summary>
         private static void ClearAll(ChronicleDatabase db)
         {
             db.EnumTypesList.Clear();
@@ -597,6 +716,8 @@ namespace Ale.Chronicle.DemoEditor
             db.Titles.Clear();
             db.TitleTemplates.Clear();
             db.RankLadders.Clear();
+            db.Effects.Clear();
+            db.GameplayTags.Clear();
         }
 
         /// <summary>标脏 + 保存 + 刷新。</summary>

@@ -131,6 +131,17 @@ namespace Ale.Chronicle
             if (TryGetEntry(characterId, out var ce)) ce.Container.RemoveAll(ChronicleEffectContext.Create(characterId));
         }
 
+        /// <summary>清空某角色的全部运行时效果状态：活动效果（跑 onRemove）、永久落地修饰器、松散标签；随后丢弃容器。</summary>
+        public void ClearCharacter(string characterId)
+        {
+            if (!TryGetEntry(characterId, out var ce)) return;
+            ce.Container.RemoveAll(ChronicleEffectContext.Create(characterId));
+            ce.Permanent.Clear();
+            _byChar.Remove(characterId);
+            OnModifiersChanged?.Invoke(characterId);
+            OnEffectsChanged?.Invoke(characterId);
+        }
+
         #endregion
 
         #region 查询
