@@ -21,6 +21,7 @@
   - 七个 `Chronicle.*` 执行器：授予 / 移除特质、授予 / 剥夺头衔、增加职业经验、学会 / 遗忘技能。
 - `UiwCharacterView`：改为按「配置 ∪ 运行时」展示，新增「效果」分区（活动效果 / 剩余 / 层数 / 修饰器 + 永久落地汇总）与临时特质剩余时长；订阅运行时事件自动刷新；年龄按世界时钟推算。
 - 演示：Character Seeder 新增 **D7 效果+标签**（精神异常 / 精神篡改 / 战意 / 心智护盾 / 回复药剂）；`CharacterSystemDemo` 场景新增「效果演示」按钮面板（`ChronicleEffectDemo`）。
+- 整合 Demo（`Assets/DemoInventory`）：`ConsumableSkillUse` 改为 `ConsumableEffectUse`（`InventoryRuntimeManager.UseItem` + `ChronicleEffectContext`），回复药水 → Chronicle 库的 `regen_draught`、磨刀油 → Inventory 库自定义的 `sharpen_oil`；驱动器增世界时钟推进与角色耐力 / 战力、活动效果显示；监听器改为打印逐效果结果。需 `com.ale.inventory` ≥ 1.12.0。
 - 测试：`ChronicleEffectDatabaseTests` / `TraitRuntimeManagerTests` / `EffectRuntimeManagerTests`。
 
 ### 变更
