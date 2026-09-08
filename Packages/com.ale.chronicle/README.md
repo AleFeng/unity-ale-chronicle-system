@@ -11,7 +11,7 @@
 
 - 编辑器始终且仅在 ScriptableObject 上工作，全程支持 Undo / Redo；二进制为**单向导出**格式。
 - 角色 / 核心属性 / 特质 / 技能等实体统一走 toolkit 的**灵活属性系统**，无需改代码即可扩展字段。
-- 特质「获得条件」接入 `Ale.Condition`（年龄 / 核心属性比较 / 是否拥有某特质）；`0.6.0` 起条件里的各类 id 在编辑器中是**分组下拉**而非手打字符串。
+- 特质「获得条件」接入 `Ale.Condition`（年龄 / 核心属性比较 / 是否拥有某特质）；`0.6.0` 起条件里的各类 id 在编辑器中是**分组下拉**而非手打字符串，且全部内联条件都会进 toolkit **Condition Editor** 的引用核对与实现体检（可反向跳回本编辑器）。
 - 核心属性走 **基础值 + 修正器合流**（来源含特质 / 职业成长 / 头衔 / 条件修改值 / 活动效果 / 效果永久落地），带逐来源拆解。
 - 效果存放在 toolkit 的**共用效果库 `EffectDatabase`**（`0.5.0` 起；Effect Editor 一处配置、所有上层系统按 id 引用），走 **GAS 式 `EffectDefinition`**（时长 / 周期 / 叠加 / Gameplay 标签 / 施加条件 / 修饰器 / 执行阶段），技能「使用」按序施加；运行时经 `EffectRuntimeManager` 落到属性汇流、特质、头衔、职业经验、技能。
 - 文本本地化（Unity Localization）、TextMeshPro、Addressable 均通过编译宏可选启用（与 toolkit 统一）。

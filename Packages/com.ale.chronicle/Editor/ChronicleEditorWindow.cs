@@ -14,6 +14,18 @@ namespace Ale.Chronicle.Editor
     /// 本窗口只提供领域钩子：页签集合、创建数据库、缓存刷新（查重 + RebuildAttributes）、状态栏文案、
     /// 导出是否禁用、导出按钮。同时实现 <see cref="IChronicleEditorContext"/> 供各面板取用。
     /// </summary>
+    /// <summary>编年史编辑器的系统页签（与 <see cref="ChronicleEditorWindow.SystemTabLabels"/> 同序）。供外部跳转指定落点。</summary>
+    public enum EChronicleTab
+    {
+        General    = 0,
+        Character  = 1,
+        Attribute  = 2,
+        Trait      = 3,
+        Profession = 4,
+        Skill      = 5,
+        Title      = 6,
+    }
+
     public sealed class ChronicleEditorWindow : EditorDatabaseWindowBase<ChronicleDatabase>, IChronicleEditorContext
     {
         private readonly AttributeSystemTab _attributeTab = new AttributeSystemTab();
@@ -43,6 +55,50 @@ namespace Ale.Chronicle.Editor
             var window = OpenWindow();
             if (db) window.SetDatabase(db);
             window.Focus();
+        }
+
+        /// <summary>打开窗口、载入数据库并切到指定页签。供外部跳转使用（如 Condition Editor 的「被引用」列表）。</summary>
+        public static void Open(ChronicleDatabase db, EChronicleTab tab)
+        {
+            var window = OpenWindow();
+            if (db) window.SetDatabase(db);
+            window.SelectSystemTab((int)tab);
+            window.Focus();
+            window.Repaint();
+        }
+
+        /// <summary>打开到「特质」页并定位到指定特质（下一帧 Layout 激活右列 Inspector）。</summary>
+        public static void OpenTrait(ChronicleDatabase db, string traitId)
+            => OpenAt(db, EChronicleTab.Trait, w => w._traitTab.RequestSelect(Find(db?.Traits, t => t.id == traitId)));
+
+        /// <summary>打开到「职业」页并定位到指定职业。</summary>
+        public static void OpenProfession(ChronicleDatabase db, string professionId)
+            => OpenAt(db, EChronicleTab.Profession, w => w._professionTab.RequestSelect(Find(db?.Professions, p => p.id == professionId)));
+
+        /// <summary>打开到「头衔」页并定位到指定头衔。</summary>
+        public static void OpenTitle(ChronicleDatabase db, string titleId)
+            => OpenAt(db, EChronicleTab.Title, w => w._titleTab.RequestSelect(Find(db?.Titles, t => t.id == titleId)));
+
+        /// <summary>打开到「属性」页并定位到指定核心属性。</summary>
+        public static void OpenCoreAttribute(ChronicleDatabase db, string attrId)
+            => OpenAt(db, EChronicleTab.Attribute, w => w._attributeTab.RequestSelect(Find(db?.CoreAttributes, a => a.id == attrId)));
+
+        private static void OpenAt(ChronicleDatabase db, EChronicleTab tab, Action<ChronicleEditorWindow> select)
+        {
+            var window = OpenWindow();
+            if (db) window.SetDatabase(db);
+            window.SelectSystemTab((int)tab);
+            select(window);                    // RequestSelect 须在数据库设定之后调用
+            window.Focus();
+            window.Repaint();
+        }
+
+        private static T Find<T>(List<T> list, Func<T, bool> match) where T : class
+        {
+            if (list == null) return null;
+            foreach (var item in list)
+                if (item != null && match(item)) return item;
+            return null;
         }
 
         /// <summary>获取（或创建）窗口；首次创建时按 <see cref="WindowDefaultSize"/> 定尺寸并居中。</summary>

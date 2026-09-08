@@ -11,6 +11,8 @@
 ### 新增
 
 - **`ChronicleConditionCatalogs`**（`Runtime/Condition/`）：5 个候选目录引用常量——`Attribute` / `Trait` / `Title` / `Profession` / `RankLadder`。放在运行时程序集是因为判定器 schema（运行时代码）要引用它。
+- **`ChronicleConditionUsageProvider`**（`Editor/Common/`，`[InitializeOnLoad]`）：把编年史里的 **7 处内联条件**（特质获得条件、职业从业 / 转职条件、头衔获得条件、技能树的技能 / 层级解锁条件与技能点获取条件、核心属性的按条件修改值）经 `ConditionEvaluatorIndex.RegisterUsageProvider` 贡献给 toolkit 的判定器索引。此前这些条件对 Condition Editor 是**隐形的**——「被引用」「悬空键」「实现体检」都统计不到，而效果侧的内联条件却统计得到；补上之后 Condition Evaluators 页的引用核对覆盖全部上层系统。**条件仍然内联存放，数据结构与序列化一字未动**——内联与 id 引用是条件系统并存的两种用法。
+- **`ChronicleEditorWindow` 新增跳转入口**：`EChronicleTab` 页签枚举 + `Open(db, tab)` / `OpenTrait` / `OpenProfession` / `OpenTitle` / `OpenCoreAttribute`（后四者落到对应页签并定位到那条实体）。上面的用法提供者据此给每条引用配「跳转」回调（技能树的三处条件因技能树是「技能」页的左列面板，只落到页签）。
 - **`ChronicleConditionParamProvider`**（`Editor/Common/`，`[InitializeOnLoad]`）：向 toolkit 的 `ConditionDrawerHooks` 登记 5 个 `IConditionParamCatalogProvider`（系统名「Chronicle」），扫描工程内全部 `ChronicleDatabase` 资产，为核心属性 / 特质 / 头衔 / 职业 / 阶级序列供给「显示名 (id)」候选。形状与同目录的 `ChronicleEffectAttributeProvider` 一致；`ChronicleDatabasePostprocessor` 现在一并失效两者的资产缓存。
 
 ### 变更
