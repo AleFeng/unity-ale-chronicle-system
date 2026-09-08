@@ -4,6 +4,24 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.6.0] - 2026-09-08
+
+**条件参数里的各类 id 从裸文本框变成分组下拉。** 编年史的 7 个 `Chronicle.*` 判定器里，`attrId` / `traitId` / `titleId` / `professionId` / `ladderId` 一直是手打字符串——打错一个字静默返回 false，`ConditionEngine` 只对**未注册的判定器键**告警，对写错的**参数值**完全无声；而同一个属性 id 在 Effect Editor 里早就是按系统名分组的下拉（`ChronicleEffectAttributeProvider`）。toolkit 1.12.0 为条件系统补上了对称的注入点，本版接入：判定器在 schema 里声明参数属于哪个候选目录，编辑器侧登记提供者供给候选。纯编辑期改善，运行时语义与序列化格式一字未动。
+
+### 新增
+
+- **`ChronicleConditionCatalogs`**（`Runtime/Condition/`）：5 个候选目录引用常量——`Attribute` / `Trait` / `Title` / `Profession` / `RankLadder`。放在运行时程序集是因为判定器 schema（运行时代码）要引用它。
+- **`ChronicleConditionParamProvider`**（`Editor/Common/`，`[InitializeOnLoad]`）：向 toolkit 的 `ConditionDrawerHooks` 登记 5 个 `IConditionParamCatalogProvider`（系统名「Chronicle」），扫描工程内全部 `ChronicleDatabase` 资产，为核心属性 / 特质 / 头衔 / 职业 / 阶级序列供给「显示名 (id)」候选。形状与同目录的 `ChronicleEffectAttributeProvider` 一致；`ChronicleDatabasePostprocessor` 现在一并失效两者的资产缓存。
+
+### 变更
+
+- **6 个判定器的字符串参数标注 `catalogRef`**：`Chronicle.AttributeCompare.attrId` → 属性、`HasTrait.traitId` → 特质、`HasTitle.titleId` → 头衔、`HasProfession.professionId` / `ProfessionLevelAtLeast.professionId` → 职业、`HasRankAtLeast.ladderId` → 阶级序列。于是条件表达式绘制器把这些字段渲染为分组下拉（悬空值保留并标「（未知）」）。`Chronicle.Age` 无字符串参数，未改动。
+
+### 说明
+
+- 依赖底线随之提高到 toolkit **1.12.0**（需要 `ConditionParamDef.catalogRef` 与 `ConditionDrawerHooks`）。
+- 本版**没有**把 9 个内联 `ConditionExpression` 字段（特质 / 职业 / 头衔 / 技能树 ×3 / 技能点 / 条件修改器）改成按 id 引用 toolkit 的新条件库——「可以引用」的能力已由 toolkit 1.12.0 的 `EditorConditionRefListDrawer` 铺好，实际迁移按需分批推进。
+
 ## [0.5.0] - 2026-09-07
 
 **效果与 Gameplay 标签外移至 toolkit 1.10.0 的共用效果库 `EffectDatabase`；编年史库只保留技能的效果 id 引用。** 0.4.0 把效果存在编年史库里、编辑器自带一份「效果」页签——Inventory 也有一份结构相同的，效果只能在各自库内定义。本版按 toolkit 1.10.0 的共用化方案改造：效果 / 标签在 Effect Editor 一处配置、所有上层系统按 id 引用；Chronicle 只保留「效果引用列表 + 跳转」，并继续实现自己的 `Chronicle.*` 执行器（效果本质是「对某个系统的操作」，系统如何被操作由系统自己实现）。运行时语义不变：`CharacterSystemDemo` 的精神篡改 / 战意 / 心智护盾 / 回复药剂 / 推进时钟流程与 0.4.0 逐位一致，只是效果来自 `EffectDatabase.asset`。

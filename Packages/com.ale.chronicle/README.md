@@ -11,12 +11,12 @@
 
 - 编辑器始终且仅在 ScriptableObject 上工作，全程支持 Undo / Redo；二进制为**单向导出**格式。
 - 角色 / 核心属性 / 特质 / 技能等实体统一走 toolkit 的**灵活属性系统**，无需改代码即可扩展字段。
-- 特质「获得条件」接入 `Ale.Condition`（年龄 / 核心属性比较 / 是否拥有某特质）。
+- 特质「获得条件」接入 `Ale.Condition`（年龄 / 核心属性比较 / 是否拥有某特质）；`0.6.0` 起条件里的各类 id 在编辑器中是**分组下拉**而非手打字符串。
 - 核心属性走 **基础值 + 修正器合流**（来源含特质 / 职业成长 / 头衔 / 条件修改值 / 活动效果 / 效果永久落地），带逐来源拆解。
 - 效果存放在 toolkit 的**共用效果库 `EffectDatabase`**（`0.5.0` 起；Effect Editor 一处配置、所有上层系统按 id 引用），走 **GAS 式 `EffectDefinition`**（时长 / 周期 / 叠加 / Gameplay 标签 / 施加条件 / 修饰器 / 执行阶段），技能「使用」按序施加；运行时经 `EffectRuntimeManager` 落到属性汇流、特质、头衔、职业经验、技能。
 - 文本本地化（Unity Localization）、TextMeshPro、Addressable 均通过编译宏可选启用（与 toolkit 统一）。
 
-> ⚠️ **当前版本 `0.5.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
+> ⚠️ **当前版本 `0.6.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.6.0` 条件参数里的 属性 / 特质 / 头衔 / 职业 / 阶级序列 id 由裸文本框改为**分组下拉**（判定器 schema 标注 `catalogRef` + 编辑器侧登记候选提供者，接入 toolkit 1.12.0 的 `ConditionDrawerHooks`）；`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
 
 ---
 
@@ -163,7 +163,7 @@
 
 > ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](../com.ale.toolkit)（其中已内置 `Ale.Condition` 条件系统），必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，故 `dependencies` 留空——**顺序不能颠倒**，否则会报 `找不到 Ale.Toolkit.* / Ale.Condition.* / Ale.Effect.*` 一类编译错。
 
-- **`com.ale.toolkit`（必需，先安装；`0.5.0` 起最低 1.10.0——需含共用效果库 `EffectDatabase` / Effect Editor，及 `Ale.Condition` / `Ale.Effect` / `Ale.GameplayTags` / `Ale.Modifier.Core`）** —— 属性系统 / 虚拟滚动列表 / 编辑器三列框架 / 编辑器界面多语言 / 序列化基元 / 条件系统 / 效果系统 / 层级标签 / 修饰器。
+- **`com.ale.toolkit`（必需，先安装；`0.6.0` 起最低 1.12.0——需含共用效果库 `EffectDatabase` / Effect Editor 与条件参数候选注入点 `ConditionDrawerHooks`，及 `Ale.Condition` / `Ale.Effect` / `Ale.GameplayTags` / `Ale.Modifier.Core`）** —— 属性系统 / 虚拟滚动列表 / 编辑器三列框架 / 编辑器界面多语言 / 序列化基元 / 条件系统 / 效果系统 / 层级标签 / 修饰器。
 - Unity 2022.3+（`package.json` 声明的最低版本；本仓库基于 `Unity 6000.3` 开发与维护）。
 - TextMeshPro（可选，`ATK_TMP` 宏）、Unity Localization（可选，`ATK_LOCALIZATION` 宏）、Unity Addressables（可选，`ATK_ADDRESSABLE` 宏）。
 - `com.ale.inventory`（**仅整合 Demo 需要**，核心包不依赖）。
