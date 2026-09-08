@@ -10,7 +10,7 @@ namespace Ale.Chronicle
         private static readonly ConditionParamDef[] Schema =
         {
             new ConditionParamDef("scope",  ConditionParamType.Int,    false, "作用域", null, ChronicleConditionScopes.Labels),
-            new ConditionParamDef("attrId", ConditionParamType.String, false, "属性ID"),
+            new ConditionParamDef("attrId", ConditionParamType.String, false, "属性ID", null, null, ChronicleConditionCatalogs.Attribute),
             ConditionCompare.CreateOpParam(),
             new ConditionParamDef("value",  ConditionParamType.Float,  false, "数值"),
         };

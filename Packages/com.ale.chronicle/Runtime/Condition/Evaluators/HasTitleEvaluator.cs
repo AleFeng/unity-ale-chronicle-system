@@ -10,7 +10,7 @@ namespace Ale.Chronicle
         private static readonly ConditionParamDef[] Schema =
         {
             new ConditionParamDef("scope",   ConditionParamType.Int,    false, "作用域", null, ChronicleConditionScopes.Labels),
-            new ConditionParamDef("titleId", ConditionParamType.String, false, "头衔ID"),
+            new ConditionParamDef("titleId", ConditionParamType.String, false, "头衔ID", null, null, ChronicleConditionCatalogs.Title),
         };
 
         public string Key => "Chronicle.HasTitle";

@@ -10,7 +10,7 @@ namespace Ale.Chronicle
         private static readonly ConditionParamDef[] Schema =
         {
             new ConditionParamDef("scope",   ConditionParamType.Int,    false, "作用域", null, ChronicleConditionScopes.Labels),
-            new ConditionParamDef("traitId", ConditionParamType.String, false, "特质ID"),
+            new ConditionParamDef("traitId", ConditionParamType.String, false, "特质ID", null, null, ChronicleConditionCatalogs.Trait),
         };
 
         public string Key => "Chronicle.HasTrait";

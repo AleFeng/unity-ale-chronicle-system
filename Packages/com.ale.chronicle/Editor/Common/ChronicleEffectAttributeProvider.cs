@@ -59,8 +59,9 @@ namespace Ale.Chronicle.Editor
     {
         private static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] movedTo, string[] movedFrom)
         {
-            if (Touches(imported) || Touches(deleted) || Touches(movedTo))
-                ChronicleEffectAttributeProvider.Invalidate();
+            if (!Touches(imported) && !Touches(deleted) && !Touches(movedTo)) return;
+            ChronicleEffectAttributeProvider.Invalidate();
+            ChronicleConditionParamProvider.ChronicleConditionParamCatalogs.Invalidate();
         }
 
         private static bool Touches(string[] paths)

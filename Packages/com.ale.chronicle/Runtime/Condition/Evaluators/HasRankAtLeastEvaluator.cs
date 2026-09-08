@@ -10,7 +10,7 @@ namespace Ale.Chronicle
         private static readonly ConditionParamDef[] Schema =
         {
             new ConditionParamDef("scope",    ConditionParamType.Int,    false, "作用域", null, ChronicleConditionScopes.Labels),
-            new ConditionParamDef("ladderId", ConditionParamType.String, false, "阶级序列ID"),
+            new ConditionParamDef("ladderId", ConditionParamType.String, false, "阶级序列ID", null, null, ChronicleConditionCatalogs.RankLadder),
             new ConditionParamDef("minTier",  ConditionParamType.Int,    false, "最低位阶"),
         };
 
