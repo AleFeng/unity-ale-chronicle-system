@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Ale.Condition;
 using Ale.Condition.Editor;
 using UnityEditor;
 
@@ -16,8 +15,8 @@ namespace Ale.Chronicle.Editor
     /// <para>覆盖 7 处内联字段：特质获得条件、职业从业条件、头衔获得条件、技能树的技能 / 层级解锁条件与技能点获取条件、
     /// 核心属性的按条件修改值。「跳转」回调直接落到编年史编辑器对应页签并定位到那条实体（技能树三处落到「技能」页）。</para>
     ///
-    /// <para>与同目录的 <see cref="ChronicleEffectAttributeProvider"/> 一样按资产实时枚举；索引本身由 toolkit 的
-    /// <c>ConditionEvaluatorIndexPostprocessor</c> 在 <c>.asset</c> 增删改后失效重建，本类无需自备缓存。</para>
+    /// <para>记录构造、位置文案与资产遍历统一走 toolkit 的 <see cref="ConditionUsageCollector"/>，与效果侧的提供者保持一致格式；
+    /// 索引本身由 <c>ConditionEvaluatorIndexPostprocessor</c> 在 <c>.asset</c> 增删改后失效重建，本类无需自备缓存。</para>
     /// </summary>
     [InitializeOnLoad]
     internal static class ChronicleConditionUsageProvider
@@ -31,17 +30,14 @@ namespace Ale.Chronicle.Editor
         {
             var result = new List<ConditionKeyUsage>();
 
-            foreach (var guid in AssetDatabase.FindAssets("t:ChronicleDatabase"))
+            ConditionUsageCollector.ForEachAsset<ChronicleDatabase>(db =>
             {
-                var db = AssetDatabase.LoadAssetAtPath<ChronicleDatabase>(AssetDatabase.GUIDToAssetPath(guid));
-                if (!db) continue;
-
                 // ① 特质：获得条件
                 foreach (var trait in db.Traits)
                 {
                     if (trait == null) continue;
                     string id = trait.id;
-                    Collect(result, trait.eligibility, db, id, "获得条件",
+                    ConditionUsageCollector.Collect(result, trait.eligibility, db, id, "获得条件",
                         () => ChronicleEditorWindow.OpenTrait(db, id));
                 }
 
@@ -50,7 +46,7 @@ namespace Ale.Chronicle.Editor
                 {
                     if (profession == null) continue;
                     string id = profession.id;
-                    Collect(result, profession.requirements, db, id, "从业 / 转职条件",
+                    ConditionUsageCollector.Collect(result, profession.requirements, db, id, "从业 / 转职条件",
                         () => ChronicleEditorWindow.OpenProfession(db, id));
                 }
 
@@ -59,7 +55,7 @@ namespace Ale.Chronicle.Editor
                 {
                     if (title == null) continue;
                     string id = title.id;
-                    Collect(result, title.acquisitionConditions, db, id, "获得条件",
+                    ConditionUsageCollector.Collect(result, title.acquisitionConditions, db, id, "获得条件",
                         () => ChronicleEditorWindow.OpenTitle(db, id));
                 }
 
@@ -76,18 +72,20 @@ namespace Ale.Chronicle.Editor
                             var entry = tree.skills[i];
                             if (entry == null) continue;
                             string what = string.IsNullOrEmpty(entry.skillRef) ? $"技能{i + 1}" : entry.skillRef;
-                            Collect(result, entry.unlockCondition, db, treeId, $"技能 {what} 解锁条件", jump);
+                            ConditionUsageCollector.Collect(result, entry.unlockCondition, db, treeId, $"技能 {what} 解锁条件", jump);
                         }
 
                     if (tree.tiers != null)
                         for (int i = 0; i < tree.tiers.Count; i++)
                             if (tree.tiers[i] != null)
-                                Collect(result, tree.tiers[i].unlockCondition, db, treeId, $"层级{i + 1} 解锁条件", jump);
+                                ConditionUsageCollector.Collect(result, tree.tiers[i].unlockCondition, db, treeId,
+                                    $"层级{i + 1} 解锁条件", jump);
 
                     if (tree.pointGrants != null)
                         for (int i = 0; i < tree.pointGrants.Count; i++)
                             if (tree.pointGrants[i] != null)
-                                Collect(result, tree.pointGrants[i].condition, db, treeId, $"技能点{i + 1} 获取条件", jump);
+                                ConditionUsageCollector.Collect(result, tree.pointGrants[i].condition, db, treeId,
+                                    $"技能点{i + 1} 获取条件", jump);
                 }
 
                 // ⑦ 核心属性：按条件修改值
@@ -99,26 +97,13 @@ namespace Ale.Chronicle.Editor
                     {
                         var cm = attr.conditionalModifiers[i];
                         if (cm == null) continue;
-                        Collect(result, cm.condition, db, id, $"条件修改值{i + 1}",
+                        ConditionUsageCollector.Collect(result, cm.condition, db, id, $"条件修改值{i + 1}",
                             () => ChronicleEditorWindow.OpenCoreAttribute(db, id));
                     }
                 }
-            }
+            });
 
             return result;
-        }
-
-        private static void Collect(List<ConditionKeyUsage> into, ConditionExpression expr,
-            ChronicleDatabase db, string ownerId, string where, Action jump)
-        {
-            ConditionEvaluatorIndex.CollectKeys(expr, (key, gi, ii) => into.Add(new ConditionKeyUsage
-            {
-                Key      = key,
-                Asset    = db,
-                OwnerId  = ownerId,
-                Location = $"{where} · 组{gi + 1} 第{ii + 1}项",
-                Jump     = jump,
-            }));
         }
     }
 }
