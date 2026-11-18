@@ -16,7 +16,7 @@ namespace Ale.Chronicle
     /// 继承 <see cref="ToolkitSingleton{T}"/>，关闭 Domain Reload 时也在每次播放开始复位。</para>
     /// </summary>
     public class TitleRuntimeManager
-        : ToolkitSingleton<TitleRuntimeManager>, ISaveable<RuntimeCharacterTitleState>
+        : ToolkitSingleton<TitleRuntimeManager>, ISaveableRuntime<RuntimeCharacterTitleState>
     {
         /// <summary>角色 ID → 持有头衔列表（按获得顺序）。按需创建；无头衔的角色不入字典。</summary>
         private readonly Dictionary<string, List<TitleHolding>> _byChar
@@ -143,7 +143,7 @@ namespace Ale.Chronicle
 
         #region 存档
 
-        /// <inheritdoc cref="ISaveable{TState}.GetSaveData"/>
+        /// <inheritdoc cref="ISaveableRuntime{TState}.GetSaveData"/>
         public List<RuntimeCharacterTitleState> GetSaveData()
         {
             var result = new List<RuntimeCharacterTitleState>(_byChar.Count);
@@ -156,7 +156,7 @@ namespace Ale.Chronicle
             return result;
         }
 
-        /// <inheritdoc cref="ISaveable{TState}.LoadSaveData"/>
+        /// <inheritdoc cref="ISaveableRuntime{TState}.LoadSaveData"/>
         public void LoadSaveData(List<RuntimeCharacterTitleState> data)
         {
             _byChar.Clear();
@@ -174,7 +174,7 @@ namespace Ale.Chronicle
             // 加载不触发事件。
         }
 
-        /// <inheritdoc cref="ISaveable.ResetAll"/>
+        /// <inheritdoc cref="ISaveableRuntime.ResetAll"/>
         public void ResetAll() => _byChar.Clear();
 
         #endregion

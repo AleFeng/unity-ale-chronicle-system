@@ -4,6 +4,18 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.7.0] - 2026-11-18
+
+**跟进 `com.ale.toolkit` 2.0.0 的存档接口改名。** 行为没有变化。
+
+### 破坏性变更
+
+- ⚠️ **最低 `com.ale.toolkit` 版本提至 2.0.0**：`ChronicleClock`、`EffectRuntimeManager`、`ProfessionRuntimeManager`、`SkillRuntimeManager`、`TitleRuntimeManager`、`TraitRuntimeManager` 改为实现 `ISaveableRuntime<TState>`。宿主若按 `ISaveable` 引用这些管理器，改用 `ISaveableRuntime`。
+
+### 变更
+
+- README 与 `ChronicleInfo.Version` 同步。
+
 ## [0.6.0] - 2026-09-08
 
 **条件参数里的各类 id 从裸文本框变成分组下拉。** 编年史的 7 个 `Chronicle.*` 判定器里，`attrId` / `traitId` / `titleId` / `professionId` / `ladderId` 一直是手打字符串——打错一个字静默返回 false，`ConditionEngine` 只对**未注册的判定器键**告警，对写错的**参数值**完全无声；而同一个属性 id 在 Effect Editor 里早就是按系统名分组的下拉（`ChronicleEffectAttributeProvider`）。toolkit 1.12.0 为条件系统补上了对称的注入点，本版接入：判定器在 schema 里声明参数属于哪个候选目录，编辑器侧登记提供者供给候选。纯编辑期改善，运行时语义与序列化格式一字未动。

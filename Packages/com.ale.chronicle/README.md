@@ -69,13 +69,13 @@
 - **经验曲线** `ExpCurve` 三模式：**公式**（`baseExp × level^exponent + linear`）/ **表格**（逐级显式）/ **曲线**（`AnimationCurve`，经 `AttributeValue` 承载），统一 `ExpToNext` / `TotalExpForLevel` 求值。
 - **每级成长汇流**：`CollectGrowthModifiers(level, …)` 按角色当前等级把成长折算为 `Add` 修正器（`sourceTag = "prof:{id}:growth"`）汇入核心属性——与特质同栈、升级即刷新。
 - **转职树** `ProfessionTree`：职业间「父 → 子 = 可转职为」的进阶 DAG（`ProfessionTreeNode.childProfessionRefs`）；编辑器左列列出、右列缩进结构编辑（加子带**防环**，`Validate` 亦做成环 DFS 检测）。
-- **运行时** `ProfessionRuntimeManager`（`ISaveable`）：习得 / 放弃 / 单一主职业；`AddExp` 按曲线跑升级循环、`maxLevel` 封顶，每升级触发 `OnLevelUp` 并施加 `LevelUnlock`（授头衔经 `TitleRuntimeManager`、授特质经 `OnUnlockTrait` 事件）。
+- **运行时** `ProfessionRuntimeManager`（`ISaveableRuntime`）：习得 / 放弃 / 单一主职业；`AddExp` 按曲线跑升级循环、`maxLevel` 封顶，每升级触发 `OnLevelUp` 并施加 `LevelUnlock`（授头衔经 `TitleRuntimeManager`、授特质经 `OnUnlockTrait` 事件）。
 
 ### 头衔系统（Title）
 - **头衔模板** `TitleTemplate`（`ConfigTemplateBase`）：一族头衔的蓝图——名称 / 色点 / 自定义字段 schema + 预设「默认种类 / 可剥夺」。编辑器头衔页左列首个子页签，中列以其作过滤维。
 - **头衔条目** `TitleDefinition`（`AttributeOwner`），`ETitleKind` 两类：**阶级头衔（RankTitle）**——有位阶 `rankTier`、可继承（预留）、逐级晋升同时只持其一；**称号（Epithet）**——靠事迹获得、多为唯一。另含 `templateRef` 来源模板 / `isUnique` / `isRevocable` / 修饰器（汇入核心属性 `title:{id}`）/ 好感修饰器（社交轴，暂不汇入核心）/ 获得条件（`Ale.Condition`）/ 模板 schema 驱动的自定义字段 `values`。
 - **阶级序列** `RankLadder`：承载阶级头衔的有序阶梯（低 → 高）；编辑器左列列出、右列有序链编辑（加菜单仅列阶级头衔，`Validate` 校验成员须为 RankTitle）。
-- **运行时** `TitleRuntimeManager`（`ISaveable`）：`Grant` 授予——阶级头衔按阶梯「晋升替换」（同序列只持其一）、唯一头衔从他人剥夺并触发 `OnTitleTransferred`；`Revoke` 受 `isRevocable` 约束；`GetHighestRankTier` 查序列最高位阶。
+- **运行时** `TitleRuntimeManager`（`ISaveableRuntime`）：`Grant` 授予——阶级头衔按阶梯「晋升替换」（同序列只持其一）、唯一头衔从他人剥夺并触发 `OnTitleTransferred`；`Revoke` 受 `isRevocable` 约束；`GetHighestRankTier` 查序列最高位阶。
 
 ### 效果系统（Effect，`0.4.0`；`0.5.0` 效果外移至 toolkit 共用效果库）
 
@@ -93,7 +93,7 @@
 
 ## 技能运行时（两层模型 + 一次性使用）
 
-`SkillRuntimeManager`（`ToolkitSingleton`，非 Mono、首次访问自动创建，实现 `ISaveable<RuntimeLearnedSkillState>`）把技能状态分为**三种语义**：
+`SkillRuntimeManager`（`ToolkitSingleton`，非 Mono、首次访问自动创建，实现 `ISaveableRuntime<RuntimeLearnedSkillState>`）把技能状态分为**三种语义**：
 
 1. **永久学会层** `_learned`：`角色 → 有序去重的技能 id 列表`，**入存档**（`GetSaveData` / `LoadSaveData`）。
 2. **外部提供者层** `_provided`：`角色 → 提供者 key → 技能 id 列表`，**不入存档**——读档后由业务层按当前来源（如已装备道具）**重算**。
@@ -134,12 +134,12 @@
 
 - **`ChronicleDataManager`**（`ToolkitSingleton`，非 Mono）：注册一个 / 多个 `ChronicleDatabase`，提供跨库 O(1) 惰性字典查询（`GetSkill` / `GetSkillTree` / `GetProfession` / `GetTitle` / `GetRankLadder` / `GetAllSkills` / `GetAllSkillTrees` / `GetAllProfessions` / `GetAllTitles` / `GetAllRankLadders` / …）；id 冲突「先注册者优先」；`Register` / `Unregister` / `ClearDatabases` / `LoadFromBinary` / `InvalidateIndex`。`0.5.0` 起不再登记为 toolkit 效果定义源、不再并入 Gameplay 标签（效果经 toolkit `EffectDataManager`）。
 - **`ChronicleRuntimeManager`**（`ToolkitMonoSingleton`，Mono）：唯一运行时 Mono 主机——覆盖式 UI 与技能 Tooltip 宿主。
-- **`SkillRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：见上。
-- **`ProfessionRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：每角色职业进度（等级 / 经验 / 主职业）；`AddExp` 按 `ExpCurve` 升级 + 施加 `LevelUnlock`；存档持进度。
-- **`TitleRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveable`）：每角色持有头衔；阶级头衔「一序列一持有」晋升替换、唯一头衔易主；存档持持有。
-- **`ChronicleClock`**（`ToolkitSingleton`，`ISaveable`，`0.4.0`）：世界日时钟；`AdvanceDays` / `AdvanceYears` 依次驱动特质到期、效果周期 / 到期，派发 `OnDaysAdvanced`。
-- **`TraitRuntimeManager`**（`ToolkitSingleton`，`ISaveable`，`0.4.0`）：运行期授予的特质（`Grant` / `Revoke` / `RevokeBySource` / `Has` / `GetEffectiveTraits` / `Tick`）；互斥 / 等价组拒绝、临时到期、重复授予按 `durationStacksRefresh` 刷新 + 叠层；与配置层合成有效特质。
-- **`EffectRuntimeManager`**（`ToolkitSingleton`，`ISaveable`，`0.4.0`）：每角色一个 toolkit `EffectContainer` + 永久落地修饰器列表；`Apply` / `Remove` / `RemoveById` / `RemoveBySourceTag` / `RemoveWithTag(s)` / `RemoveAll` / `ClearCharacter` / `Tick` / `GetActiveEffects` / `GetPermanentModifiers` / `CollectModifiers`；实现 toolkit 的 `IEffectContainerSource` / `IEffectAttributeSink` / `IEffectAttributeSource` / `IGameplayTagSource`；`CueSink` 可挂线索落地（演示用 `ChronicleDebugCueSink`）。
+- **`SkillRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveableRuntime`）：见上。
+- **`ProfessionRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveableRuntime`）：每角色职业进度（等级 / 经验 / 主职业）；`AddExp` 按 `ExpCurve` 升级 + 施加 `LevelUnlock`；存档持进度。
+- **`TitleRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveableRuntime`）：每角色持有头衔；阶级头衔「一序列一持有」晋升替换、唯一头衔易主；存档持持有。
+- **`ChronicleClock`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：世界日时钟；`AdvanceDays` / `AdvanceYears` 依次驱动特质到期、效果周期 / 到期，派发 `OnDaysAdvanced`。
+- **`TraitRuntimeManager`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：运行期授予的特质（`Grant` / `Revoke` / `RevokeBySource` / `Has` / `GetEffectiveTraits` / `Tick`）；互斥 / 等价组拒绝、临时到期、重复授予按 `durationStacksRefresh` 刷新 + 叠层；与配置层合成有效特质。
+- **`EffectRuntimeManager`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：每角色一个 toolkit `EffectContainer` + 永久落地修饰器列表；`Apply` / `Remove` / `RemoveById` / `RemoveBySourceTag` / `RemoveWithTag(s)` / `RemoveAll` / `ClearCharacter` / `Tick` / `GetActiveEffects` / `GetPermanentModifiers` / `CollectModifiers`；实现 toolkit 的 `IEffectContainerSource` / `IEffectAttributeSink` / `IEffectAttributeSource` / `IGameplayTagSource`；`CueSink` 可挂线索落地（演示用 `ChronicleDebugCueSink`）。
 - **`ChronicleCharacterRuntime`**（静态，`0.4.0`）：运行时属性汇流 `Evaluate(characterId, attrId)`——特质 / 职业成长 / 头衔各取配置 ∪ 运行时，+ 条件修改值（条件经 `ChronicleEffectContext` 求值、重入防护）+ 活动效果修饰器（未抑制、非周期）+ 永久落地；另提供 `HasProfession` / `GetProfessionLevel` / `HasTitle` / `GetHighestRankTier` 等有效状态查询。
 - **`ChronicleEffectContext.Create(target, source)`** / **`ChronicleRuntimeConditionSource`**（`0.4.0`）：组装效果 / 条件上下文（主体 = 目标、对象 = 来源、父 / 母经角色定义反查），注册定义源（toolkit `EffectDataManager`，未命中回退全局注册表）/ 容器源 / 属性读写 / 标签源 / 执行器落地门面 `IChronicleRuntimeSink`；业务层直接调 toolkit `EffectApplier` 时可复用。
 - **二进制导出**：`ChronicleConfigSerializer` 把 `ChronicleDatabase` ↔ 紧凑二进制。魔数 `CHRO`、**当前格式 `Version = 8`**、`MinReadableVersion = 1`；按版本追加块（v2 加属性/特质模板 + 分组标签 + 数字格式 + 模板引用/属性值；v3 追加技能模板 + 技能；v4 追加 职业 / 转职树 / 头衔 / 阶级序列，及角色的职业 / 头衔 持有字段；v5 追加 职业模板 / 头衔模板 两块，并在职业 / 头衔块尾追加 `templateRef` + 自定义字段 `values`；**v6 追加 技能树 一块，并在职业块尾追加 `skillTreeRefs`、核心属性块尾追加 `conditionalModifiers`（条件修改值）；v7 追加 效果 / Gameplay 标签 两块（效果定义以 Effect System JSON 串承载），并在技能块尾追加 `onUseEffectRefs`；v8 不再写出效果 / Gameplay 标签两块（外移至 toolkit 效果库，由 `EffectConfigSerializer` 单独导出），读 v7 文件时两块读入 legacy 字段供迁移**）——**append-only 向后兼容**，旧版本（含 v3 ~ v7）导出的二进制仍可导入。对象引用经 `IAssetRefResolver` 以 GUID 承载；特质 / 职业 / 头衔 / 技能树 / 属性条件修改的条件表达式以条件系统 JSON 存储，效果定义以效果系统 JSON 存储。

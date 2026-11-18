@@ -17,7 +17,7 @@ namespace Ale.Chronicle
     /// <para><b>时长约定</b>（<see cref="Grant"/> 的 durationDays）：0 = 按特质定义（临时 → <see cref="TraitDefinition.defaultDurationDays"/>，永久 → 永久）；
     /// &gt;0 = 指定天数；&lt;0 = 强制永久。与执行器 <c>Chronicle.GrantTrait</c> 的参数一致。</para>
     /// </summary>
-    public class TraitRuntimeManager : ToolkitSingleton<TraitRuntimeManager>, ISaveable<RuntimeCharacterTraitState>
+    public class TraitRuntimeManager : ToolkitSingleton<TraitRuntimeManager>, ISaveableRuntime<RuntimeCharacterTraitState>
     {
         private readonly Dictionary<string, List<CharacterTraitInstance>> _byChar
             = new Dictionary<string, List<CharacterTraitInstance>>();

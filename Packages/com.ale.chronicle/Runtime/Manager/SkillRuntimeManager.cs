@@ -22,7 +22,7 @@ namespace Ale.Chronicle
     /// <b>有效</b>已学集合（永久 ∪ 提供）变化时触发 <see cref="OnLearnedChanged"/> 供技能 UI 刷新。</para>
     /// </summary>
     public class SkillRuntimeManager
-        : ToolkitSingleton<SkillRuntimeManager>, ISaveable<RuntimeLearnedSkillState>
+        : ToolkitSingleton<SkillRuntimeManager>, ISaveableRuntime<RuntimeLearnedSkillState>
     {
         /// <summary>角色 ID → 永久已学技能 ID 列表（保持学习顺序、去重）。按需创建；无已学技能的角色不入字典。</summary>
         private readonly Dictionary<string, List<string>> _learned
@@ -281,7 +281,7 @@ namespace Ale.Chronicle
 
         #region 存档
 
-        /// <inheritdoc cref="ISaveable{TState}.GetSaveData"/>
+        /// <inheritdoc cref="ISaveableRuntime{TState}.GetSaveData"/>
         public List<RuntimeLearnedSkillState> GetSaveData()
         {
             var result = new List<RuntimeLearnedSkillState>(_learned.Count);
@@ -294,7 +294,7 @@ namespace Ale.Chronicle
             return result;
         }
 
-        /// <inheritdoc cref="ISaveable{TState}.LoadSaveData"/>
+        /// <inheritdoc cref="ISaveableRuntime{TState}.LoadSaveData"/>
         public void LoadSaveData(List<RuntimeLearnedSkillState> data)
         {
             _learned.Clear();
@@ -311,7 +311,7 @@ namespace Ale.Chronicle
             // 提供层不落盘：加载后由业务层从当前来源（装备等）重算，避免陈旧授予 / 重复计数。
         }
 
-        /// <inheritdoc cref="ISaveable.ResetAll"/>
+        /// <inheritdoc cref="ISaveableRuntime.ResetAll"/>
         public void ResetAll()
         {
             _learned.Clear();

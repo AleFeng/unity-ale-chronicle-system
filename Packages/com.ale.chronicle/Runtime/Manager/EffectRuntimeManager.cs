@@ -16,7 +16,7 @@ namespace Ale.Chronicle
     /// 时间推进由 <see cref="ChronicleClock.AdvanceDays"/> 驱动 <see cref="Tick"/>（单位：世界日）。
     /// </summary>
     public class EffectRuntimeManager
-        : ToolkitSingleton<EffectRuntimeManager>, ISaveable<RuntimeCharacterEffectState>,
+        : ToolkitSingleton<EffectRuntimeManager>, ISaveableRuntime<RuntimeCharacterEffectState>,
           IEffectContainerSource, IEffectAttributeSink, IEffectAttributeSource, IGameplayTagSource
     {
         private sealed class CharacterEffects

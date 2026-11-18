@@ -14,7 +14,7 @@ namespace Ale.Chronicle
     /// <para>继承 <see cref="ToolkitSingleton{T}"/>，关闭 Domain Reload 时也在每次播放开始复位。</para>
     /// </summary>
     public class ProfessionRuntimeManager
-        : ToolkitSingleton<ProfessionRuntimeManager>, ISaveable<RuntimeCharacterProfessionState>
+        : ToolkitSingleton<ProfessionRuntimeManager>, ISaveableRuntime<RuntimeCharacterProfessionState>
     {
         /// <summary>角色 ID → 职业进度列表。按需创建；无职业的角色不入字典。</summary>
         private readonly Dictionary<string, List<ProfessionProgress>> _byChar
@@ -165,7 +165,7 @@ namespace Ale.Chronicle
 
         #region 存档
 
-        /// <inheritdoc cref="ISaveable{TState}.GetSaveData"/>
+        /// <inheritdoc cref="ISaveableRuntime{TState}.GetSaveData"/>
         public List<RuntimeCharacterProfessionState> GetSaveData()
         {
             var result = new List<RuntimeCharacterProfessionState>(_byChar.Count);
@@ -178,7 +178,7 @@ namespace Ale.Chronicle
             return result;
         }
 
-        /// <inheritdoc cref="ISaveable{TState}.LoadSaveData"/>
+        /// <inheritdoc cref="ISaveableRuntime{TState}.LoadSaveData"/>
         public void LoadSaveData(List<RuntimeCharacterProfessionState> data)
         {
             _byChar.Clear();
@@ -196,7 +196,7 @@ namespace Ale.Chronicle
             // 加载不触发事件。
         }
 
-        /// <inheritdoc cref="ISaveable.ResetAll"/>
+        /// <inheritdoc cref="ISaveableRuntime.ResetAll"/>
         public void ResetAll() => _byChar.Clear();
 
         #endregion

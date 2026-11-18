@@ -17,7 +17,7 @@ namespace Ale.Chronicle
     /// <see cref="EffectRuntimeManager.Tick"/>（效果周期结算 / 到期），最后派发 <see cref="OnDaysAdvanced"/>。
     /// 「日 → 岁」换算暂按 <see cref="DaysPerYear"/>，历法 / 种族细化随后续子系统落地。
     /// </summary>
-    public class ChronicleClock : ToolkitSingleton<ChronicleClock>, ISaveable<ChronicleClockState>
+    public class ChronicleClock : ToolkitSingleton<ChronicleClock>, ISaveableRuntime<ChronicleClockState>
     {
         /// <summary>每年天数（换算用）。</summary>
         public const int DaysPerYear = 365;
