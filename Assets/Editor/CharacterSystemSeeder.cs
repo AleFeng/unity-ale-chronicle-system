@@ -54,6 +54,15 @@ namespace Ale.Chronicle.DemoEditor
         public const string PfMeasurements = "measurements"; // 三围(VectorInt3:胸/腰/臀)
         public const string PfBloodType    = "bloodType";    // 血型(Enum→EnumBlood)
         public const string PfInterests    = "interests";    // 兴趣(String 数组)
+        public const string PfCodename     = "codename";     // 代号(0.8.0 起,下同)
+        public const string PfPersonality  = "personality";  // 性格
+        public const string PfSpecialty    = "specialty";    // 特长(String 数组)
+        public const string PfLikes        = "likes";        // 喜欢的东西(String 数组)
+        public const string PfDislikes     = "dislikes";     // 讨厌的东西(String 数组)
+        public const string PfAffiliation  = "affiliation";  // 所属
+        public const string PfPortrait     = "portrait";     // 立绘(Prefab)
+        public const string PfHeadIcon     = "headIcon";     // 头像(Prefab)
+        public const string DemoCharacterPrefabDir = "Assets/Demo/Assets/UI/Prefab/Character";
 
         // ── 职业 id(D5 建立;D3 里程碑/等级头衔按此命名,D5 经 LevelUnlock 引用) ─────
         public const string ProfKnight  = "knight";       // 骑士(主职业,0~99)
@@ -119,6 +128,14 @@ namespace Ale.Chronicle.DemoEditor
             charTpl.attributes.Add(new AttributeDefinition(PfMeasurements,         EFieldType.VectorInt3));             // 三围(胸/腰/臀)
             charTpl.attributes.Add(new AttributeDefinition(PfBloodType,            EFieldType.Enum, false, EnumBlood)); // 血型
             charTpl.attributes.Add(new AttributeDefinition(PfInterests,            EFieldType.String, true));           // 兴趣(数组)
+            charTpl.attributes.Add(new AttributeDefinition(PfCodename,             EFieldType.String));                 // 代号
+            charTpl.attributes.Add(new AttributeDefinition(PfPersonality,          EFieldType.String));                 // 性格
+            charTpl.attributes.Add(new AttributeDefinition(PfSpecialty,            EFieldType.String, true));           // 特长(数组)
+            charTpl.attributes.Add(new AttributeDefinition(PfLikes,                EFieldType.String, true));           // 喜欢的东西(数组)
+            charTpl.attributes.Add(new AttributeDefinition(PfDislikes,             EFieldType.String, true));           // 讨厌的东西(数组)
+            charTpl.attributes.Add(new AttributeDefinition(PfAffiliation,          EFieldType.String));                 // 所属
+            charTpl.attributes.Add(new AttributeDefinition(PfPortrait,             EFieldType.Prefab));                 // 立绘(预制体)
+            charTpl.attributes.Add(new AttributeDefinition(PfHeadIcon,             EFieldType.Prefab));                 // 头像(预制体)
             db.CharacterTemplates.Add(charTpl);
 
             db.TraitTemplates.Add(new TraitTemplate(TplTrait));
@@ -569,6 +586,14 @@ namespace Ale.Chronicle.DemoEditor
             luna.SetAttributeValue<int>(PfBloodType, 2);                   // O(枚举「血型」A0/B1/O2/AB3)
             var interests = luna.GetAttributeValue(PfInterests);
             if (interests != null) { interests.SetString(0, "读书"); interests.SetString(1, "剑术"); interests.SetString(2, "天文"); }
+            luna.SetAttributeValue<string>(PfCodename, "银月");
+            luna.SetAttributeValue<string>(PfPersonality, "沉稳、守诺、对后辈格外耐心");
+            SetStrings(luna.GetAttributeValue(PfSpecialty), "双手剑", "星象推演");
+            SetStrings(luna.GetAttributeValue(PfLikes), "红茶", "雨夜", "旧地图");
+            SetStrings(luna.GetAttributeValue(PfDislikes), "失约", "甜食");
+            luna.SetAttributeValue<string>(PfAffiliation, "王国骑士团 第三分队");
+            SetPrefab(luna.GetAttributeValue(PfPortrait), DemoCharacterPrefabDir + "/PF_DemoPortrait_Luna.prefab");
+            SetPrefab(luna.GetAttributeValue(PfHeadIcon), DemoCharacterPrefabDir + "/PF_DemoHead_Luna.prefab");
 
             SaveDb(db);
             return ValidateReport(db, "D6", $"角色={db.Characters.Count}(露娜:2特质/2职业/2头衔/6项属性基础值+个人档案)");
@@ -697,6 +722,29 @@ namespace Ale.Chronicle.DemoEditor
                 AssetDatabase.CreateAsset(edb, EffectDbPath);
             }
             return edb;
+        }
+
+        /// <summary>字符串数组字段逐项赋值。</summary>
+        private static void SetStrings(AttributeValue v, params string[] values)
+        {
+            if (v == null) return;
+            for (int i = 0; i < values.Length; i++) v.SetString(i, values[i]);
+        }
+
+        /// <summary>
+        /// 预制体字段赋值:授权模式(ATK_ADDRESSABLE)只存地址(GUID,运行时按地址加载;Demo 目录整体已登记为 Addressable),
+        /// 直接模式存对象引用。与 Inspector 授权写入的形态一致。
+        /// </summary>
+        private static void SetPrefab(AttributeValue v, string path)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (v == null || prefab == null) return;
+#if ATK_ADDRESSABLE
+            v.SetObject(0, null);
+            v.SetObjAddress(0, AssetDatabase.AssetPathToGUID(path));
+#else
+            v.SetObject(0, prefab);
+#endif
         }
 
         /// <summary>标脏 + 保存 + 刷新(任意资产)。</summary>

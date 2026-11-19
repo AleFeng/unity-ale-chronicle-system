@@ -58,8 +58,33 @@ namespace Ale.Chronicle.Runtime.UI
         [Tooltip("元信息：性别 · 年龄。")]
         [SerializeField] private UiText metaText;
 
+        [Header("立绘 / 头像（预制体字段，0.8.0）")]
+        [Tooltip("立绘容器：把角色立绘字段引用的预制体实例化到此节点下，等比缩放放进容器。留空则不显示立绘。")]
+        [SerializeField] private RectTransform portraitContainer;
+        [Tooltip("立绘字段 ID（字段类型 Prefab）。")]
+        [SerializeField] private string portraitAttrId = "portrait";
+        [Tooltip("头像容器：同上，实例化头像预制体。有头像时隐藏「姓名首字」占位。")]
+        [SerializeField] private RectTransform headIconContainer;
+        [Tooltip("头像字段 ID（字段类型 Prefab）。")]
+        [SerializeField] private string headIconAttrId = "headIcon";
+
+        [Header("档案字段（0.8.0）")]
+        [Tooltip("个人档案逐项：字段 ID、标签、单位；未勾「独占一行」的两两并排。字段 ID 写 __age__ 表示按世界日推算的年龄。值为空的字段不显示。")]
+        [SerializeField] private List<ProfileField> profileFields = new List<ProfileField>
+        {
+            new ProfileField(WellKnownAttr.Sex, "性别"), new ProfileField(AgeKey, "年龄", " 岁"),
+            new ProfileField(WellKnownAttr.Height, "身高", " cm"), new ProfileField(WellKnownAttr.Weight, "体重", " kg"),
+            new ProfileField("measurements", "三围"), new ProfileField("bloodType", "血型"),
+            new ProfileField("interests", "兴趣", fullRow: true),
+        };
+        [Tooltip("头部元信息逐项（以「 · 」连接；标签为空时只显示值）。")]
+        [SerializeField] private List<ProfileField> metaFields = new List<ProfileField>
+        {
+            new ProfileField(WellKnownAttr.Sex, null), new ProfileField(AgeKey, null, " 岁"),
+        };
+
         [Header("展示文本（各分区，可按需留空）")]
-        [Tooltip("个人档案：性别/年龄/身高/体重/三围/血型/兴趣（两列）。")]
+        [Tooltip("个人档案：按「档案字段」逐项排版（两列 + 独占行）。")]
         [SerializeField] private UiText profileLabel;
         [Tooltip("能力：数值网格 + 逐来源明细。")]
         [SerializeField] private UiText attributesLabel;
@@ -74,6 +99,56 @@ namespace Ale.Chronicle.Runtime.UI
         [Tooltip("技能：由角色各职业关联的技能树导出 + 运行时已学。")]
         [SerializeField] private UiText skillsLabel;
 
+        /// <summary>档案字段里表示「按世界日推算的年龄」的特殊 ID。</summary>
+        public const string AgeKey = "__age__";
+
+        /// <summary>档案 / 元信息里的一项（0.8.0）。</summary>
+        [Serializable]
+        public class ProfileField
+        {
+            [Tooltip("角色字段 ID；__age__ = 按世界日推算的年龄。")]
+            public string attrId;
+            [Tooltip("标签（如「身高」）。")]
+            public string label;
+            [Tooltip("值后缀（如「 cm」）。")]
+            public string suffix;
+            [Tooltip("独占一行（长文本、数组）；否则与相邻字段两两并排。")]
+            public bool fullRow;
+
+            public ProfileField() { }
+
+            public ProfileField(string attrId, string label, string suffix = null, bool fullRow = false)
+            {
+                this.attrId  = attrId;
+                this.label   = label;
+                this.suffix  = suffix;
+                this.fullRow = fullRow;
+            }
+        }
+
+        /// <summary>一个预制体显示位：记住当前实例与它来自哪个资源，换角色或字段变化时才重建。</summary>
+        private sealed class PrefabSlot
+        {
+            public string Key;
+            public AttributeValue Source;
+            public GameObject Instance;
+
+            public void Clear()
+            {
+                if (Instance)
+                {
+                    if (Application.isPlaying) Destroy(Instance);
+                    else DestroyImmediate(Instance);
+                }
+                if (Source != null) ToolkitAssets.Release(Source);
+                Key = null;
+                Source = null;
+                Instance = null;
+            }
+        }
+
+        private readonly PrefabSlot _portrait = new PrefabSlot();
+        private readonly PrefabSlot _headIcon = new PrefabSlot();
         private bool _subscribed;
         private bool _dirty;
 
@@ -160,12 +235,21 @@ namespace Ale.Chronicle.Runtime.UI
             {
                 if (titleLabel) titleLabel.text = $"(未找到角色：{characterId})";
                 SetSections(string.Empty);
+                _portrait.Clear();
+                _headIcon.Clear();
+                if (portraitInitialText) { portraitInitialText.text = "?"; portraitInitialText.enabled = true; }
                 return;
             }
 
-            // 头部：姓名 / 副标题（爵位·主职业）/ 元信息（性别·年龄）/ 头像占位（姓名首字）
+            // 头部：姓名 / 副标题（爵位·主职业）/ 元信息（性别·年龄）/ 头像（预制体，无则姓名首字占位）
             if (titleLabel)          titleLabel.text          = ResolveName(character);
-            if (portraitInitialText) portraitInitialText.text = Initial(character);
+            ShowPrefab(_portrait, portraitContainer, character, portraitAttrId);
+            bool hasHead = ShowPrefab(_headIcon, headIconContainer, character, headIconAttrId);
+            if (portraitInitialText)
+            {
+                portraitInitialText.text    = Initial(character);
+                portraitInitialText.enabled = !hasHead;
+            }
             if (subtitleText)        subtitleText.text        = BuildSubtitle(character, dm);
             if (metaText)            metaText.text            = BuildMeta(character, dm);
 
@@ -239,14 +323,25 @@ namespace Ale.Chronicle.Runtime.UI
             return string.Join("  ·  ", parts);
         }
 
-        /// <summary>元信息：性别 · 年龄（纯文本，配色由节点设定）。</summary>
+        /// <summary>元信息：按 <see cref="metaFields"/> 逐项（默认 性别 · 年龄），纯文本，配色由节点设定。</summary>
         private string BuildMeta(CharacterDefinition c, ChronicleDataManager dm)
         {
             var parts = new List<string>();
-            string sex = FieldValue(c, dm, WellKnownAttr.Sex);
-            if (!string.IsNullOrEmpty(sex)) parts.Add(sex);
-            parts.Add(AgeYears(c) + " 岁");
+            foreach (var f in metaFields)
+            {
+                string value = ProfileValue(c, dm, f);
+                if (value == null) continue;
+                parts.Add(string.IsNullOrEmpty(f.label) ? value : f.label + " " + value);
+            }
             return string.Join("  ·  ", parts);
+        }
+
+        /// <summary>一项档案字段的显示值（含后缀）；字段不存在或值为空时返回 null。</summary>
+        private string ProfileValue(CharacterDefinition c, ChronicleDataManager dm, ProfileField f)
+        {
+            if (f == null || string.IsNullOrEmpty(f.attrId)) return null;
+            string value = f.attrId == AgeKey ? AgeYears(c).ToString() : FieldValue(c, dm, f.attrId);
+            return string.IsNullOrEmpty(value) ? null : value + f.suffix;
         }
 
         private int AgeYears(CharacterDefinition c)
@@ -255,26 +350,35 @@ namespace Ale.Chronicle.Runtime.UI
             return daysPerYear > 0 ? ageDays / daysPerYear : ageDays;
         }
 
-        /// <summary>个人档案：两列键值。性别/年龄/身高/体重/三围/血型两两成行，兴趣独占一行。</summary>
+        /// <summary>
+        /// 个人档案：按 <see cref="profileFields"/> 逐项排版——普通字段两两并排（两列），「独占一行」的字段单独成行；
+        /// 值为空的字段跳过。字段 ID 由宿主在 Inspector 配置，不再写死（0.8.0）。
+        /// </summary>
         private string BuildProfile(CharacterDefinition c, ChronicleDataManager dm)
         {
-            var cells = new List<string>();
-            cells.Add(Cell("性别", FieldValue(c, dm, WellKnownAttr.Sex)));
-            cells.Add(Cell("年龄", AgeYears(c) + " 岁"));
-            cells.Add(Cell("身高", FieldValue(c, dm, WellKnownAttr.Height) + " cm"));
-            cells.Add(Cell("体重", FieldValue(c, dm, WellKnownAttr.Weight) + " kg"));
-            cells.Add(Cell("三围", FieldValue(c, dm, "measurements")));
-            cells.Add(Cell("血型", FieldValue(c, dm, "bloodType")));
-
             var sb = new StringBuilder();
-            for (int i = 0; i < cells.Count; i += 2)
+            string pending = null;   // 等待并排的左列
+            foreach (var f in profileFields)
             {
-                sb.Append("<pos=0%>").Append(cells[i]);
-                if (i + 1 < cells.Count) sb.Append("<pos=50%>").Append(cells[i + 1]);
-                sb.Append('\n');
+                string value = ProfileValue(c, dm, f);
+                if (value == null) continue;
+                string cell = Cell(f.label, value);
+                if (f.fullRow)
+                {
+                    if (pending != null) { sb.Append("<pos=0%>").Append(pending).Append('\n'); pending = null; }
+                    sb.Append(cell).Append('\n');
+                }
+                else if (pending == null)
+                {
+                    pending = cell;
+                }
+                else
+                {
+                    sb.Append("<pos=0%>").Append(pending).Append("<pos=50%>").Append(cell).Append('\n');
+                    pending = null;
+                }
             }
-            string interests = FieldValue(c, dm, "interests");
-            if (!string.IsNullOrEmpty(interests)) sb.Append(Cell("兴趣", interests));
+            if (pending != null) sb.Append("<pos=0%>").Append(pending).Append('\n');
             return sb.ToString().TrimEnd('\n');
         }
 
@@ -546,6 +650,91 @@ namespace Ale.Chronicle.Runtime.UI
                 }
             }
             return sb.ToString();
+        }
+
+        #endregion
+
+        #region 立绘 / 头像
+
+        /// <summary>
+        /// 把角色字段 <paramref name="attrId"/>（Prefab 类型）引用的预制体实例化到 <paramref name="container"/> 下并等比放进容器。
+        /// 同一资源不重复实例化；换角色或字段变化时先销毁旧实例、释放旧句柄。
+        /// </summary>
+        /// <returns>该字段有预制体可显示（加载可能仍在进行）。</returns>
+        private bool ShowPrefab(PrefabSlot slot, RectTransform container, CharacterDefinition c, string attrId)
+        {
+            if (!container) return false;
+            var av = string.IsNullOrEmpty(attrId) ? null : c.GetAttributeValue(attrId);
+            string key = null;
+            if (av != null && av.Type == EFieldType.Prefab)
+                key = av.AsObject ? "obj:" + av.AsObject.GetInstanceID() : av.GetObjAddress(0);
+            if (string.IsNullOrEmpty(key)) key = null;
+            if (key == slot.Key) return key != null;
+
+            slot.Clear();
+            if (key == null) return false;
+            slot.Key = key;
+            slot.Source = av;
+            ToolkitAssets.Load<GameObject>(av, prefab =>
+            {
+                // 异步加载回来时角色可能已经换了：只认当前这一次。
+                if (slot.Key != key || !prefab || !container) return;
+                slot.Instance = Instantiate(prefab, container, false);
+                FitInto(slot.Instance, container);
+            });
+            return true;
+        }
+
+        /// <summary>
+        /// 把实例等比缩放、居中放进容器：UI 预制体（根节点是 RectTransform）按矩形，
+        /// 其余（SpriteRenderer 等世界空间渲染）按全部 Renderer 的包围盒。
+        /// </summary>
+        public static void FitInto(GameObject instance, RectTransform container)
+        {
+            if (!instance || !container) return;
+            var box = container.rect;
+            var t = instance.transform;
+
+            if (t is RectTransform rt)
+            {
+                rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+                var size = rt.rect.size;
+                float k = size.x > 0f && size.y > 0f ? Mathf.Min(box.width / size.x, box.height / size.y) : 1f;
+                rt.localScale = new Vector3(k, k, 1f);
+                rt.anchoredPosition = box.center - rt.rect.center * k;
+                return;
+            }
+
+            t.localPosition = Vector3.zero;
+            t.localRotation = Quaternion.identity;
+            t.localScale = Vector3.one;
+            var renderers = instance.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0) return;
+            bool any = false;
+            Vector2 min = default, max = default;
+            foreach (var r in renderers)
+            {
+                var b = r.bounds;
+                for (int i = 0; i < 4; i++)
+                {
+                    var corner = new Vector3(i % 2 == 0 ? b.min.x : b.max.x, i < 2 ? b.min.y : b.max.y, b.center.z);
+                    Vector2 p = container.InverseTransformPoint(corner);
+                    if (!any) { min = max = p; any = true; }
+                    else { min = Vector2.Min(min, p); max = Vector2.Max(max, p); }
+                }
+            }
+            var w = max - min;
+            if (w.x <= 0f || w.y <= 0f) return;
+            float s = Mathf.Min(box.width / w.x, box.height / w.y);
+            t.localScale = new Vector3(s, s, 1f);
+            t.localPosition = (Vector3)(box.center - (min + max) * 0.5f * s);
+        }
+
+        protected override void OnDestroy()
+        {
+            _portrait.Clear();
+            _headIcon.Clear();
+            base.OnDestroy();
         }
 
         #endregion

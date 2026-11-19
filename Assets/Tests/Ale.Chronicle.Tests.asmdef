@@ -5,6 +5,7 @@
         "Ale.Chronicle.Runtime",
         "Ale.Chronicle.Runtime.UI",
         "Ale.Toolkit.Runtime",
+        "Ale.Toolkit.Runtime.UI",
         "Ale.Condition.Core",
         "Ale.Effect.Core",
         "Ale.Effect.Runtime",

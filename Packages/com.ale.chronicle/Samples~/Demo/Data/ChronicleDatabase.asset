@@ -1370,6 +1370,118 @@ MonoBehaviour:
         objRefs: []
         curves: []
         objAddresses: []
+    - id: codename
+      type: 2
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: personality
+      type: 2
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: specialty
+      type: 2
+      isArray: 1
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: likes
+      type: 2
+      isArray: 1
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: dislikes
+      type: 2
+      isArray: 1
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: affiliation
+      type: 2
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: portrait
+      type: 11
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 11
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: headIcon
+      type: 11
+      isArray: 0
+      enumTypeRef: 
+      defaultValue:
+        type: 11
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs: []
+        curves: []
+        objAddresses: []
     raceRef: 
     guaranteedTraitRefs: []
     randomTraitPoolRefs: []
@@ -1474,6 +1586,108 @@ MonoBehaviour:
         objRefs: []
         curves: []
         objAddresses: []
+    - id: codename
+      value:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u94F6\u6708"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: personality
+      value:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u6C89\u7A33\u3001\u5B88\u8BFA\u3001\u5BF9\u540E\u8F88\u683C\u5916\u8010\u5FC3"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: specialty
+      value:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u53CC\u624B\u5251"
+        - "\u661F\u8C61\u63A8\u6F14"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: likes
+      value:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u7EA2\u8336"
+        - "\u96E8\u591C"
+        - "\u65E7\u5730\u56FE"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: dislikes
+      value:
+        type: 2
+        isArray: 1
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u5931\u7EA6"
+        - "\u751C\u98DF"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: affiliation
+      value:
+        type: 2
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings:
+        - "\u738B\u56FD\u9A91\u58EB\u56E2 \u7B2C\u4E09\u5206\u961F"
+        objRefs: []
+        curves: []
+        objAddresses: []
+    - id: portrait
+      value:
+        type: 11
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs:
+        - {fileID: 0}
+        curves: []
+        objAddresses:
+        - d28f5c84186c5f44d998c177b8d667bf
+    - id: headIcon
+      value:
+        type: 11
+        isArray: 0
+        enumTypeRef: 
+        ints: 
+        floats: []
+        strings: []
+        objRefs:
+        - {fileID: 0}
+        curves: []
+        objAddresses:
+        - 5dc61bc4b420eeb43ba49ef57db18685
     coreAttributes:
     - attrId: might
       baseValue: 14

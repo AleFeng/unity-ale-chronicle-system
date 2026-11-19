@@ -16,7 +16,7 @@
 - 效果存放在 toolkit 的**共用效果库 `EffectDatabase`**（`0.5.0` 起；Effect Editor 一处配置、所有上层系统按 id 引用），走 **GAS 式 `EffectDefinition`**（时长 / 周期 / 叠加 / Gameplay 标签 / 施加条件 / 修饰器 / 执行阶段），技能「使用」按序施加；运行时经 `EffectRuntimeManager` 落到属性汇流、特质、头衔、职业经验、技能。
 - 文本本地化（Unity Localization）、TextMeshPro、Addressable 均通过编译宏可选启用（与 toolkit 统一）。
 
-> ⚠️ **当前版本 `0.6.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.6.0` 条件参数里的 属性 / 特质 / 头衔 / 职业 / 阶级序列 id 由裸文本框改为**分组下拉**（判定器 schema 标注 `catalogRef` + 编辑器侧登记候选提供者，接入 toolkit 1.12.0 的 `ConditionDrawerHooks`）；`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
+> ⚠️ **当前版本 `0.8.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.8.0` 角色信息面板的档案字段改为 Inspector 配置、立绘 / 头像改为实例化预制体字段；`0.6.0` 条件参数里的 属性 / 特质 / 头衔 / 职业 / 阶级序列 id 由裸文本框改为**分组下拉**（判定器 schema 标注 `catalogRef` + 编辑器侧登记候选提供者，接入 toolkit 1.12.0 的 `ConditionDrawerHooks`）；`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
 
 ---
 
@@ -118,7 +118,7 @@
 
 位于 `Runtime/UI/`，独立程序集 `Ale.Chronicle.Runtime.UI`（命名空间 `Ale.Chronicle.Runtime.UI`），依赖 toolkit 的虚拟滚动引擎与通用控件：
 
-- **`UiwCharacterView`**（`UiwViewBase`，`0.3.1`；`0.4.0` 接入运行时）：**角色信息面板**——从 `ChronicleDataManager` 取一个 `CharacterDefinition`，按「配置 ∪ 运行时」分区展示 **个人档案**（姓名 / 性别 / 年龄 / 身高 / 体重 / 三围 / 血型 / 兴趣，枚举经数据管理器直解）、**能力**（6 项核心属性经 `ChronicleCharacterRuntime` 求「基础 → 当前」+ 逐来源明细，含活动效果与永久落地）、**特质**（临时特质附剩余时长 / 层数）、**效果**（活动效果：策略 / 剩余 / 周期 / 层数 / 抑制 / 修饰器 + 永久落地汇总；无独立节点时并入特质卡）、**职业（等级 + 主职业）/ 头衔（阶级头衔附阶级序列位次）/ 技能（职业关联技能树导出 + 已学）**；打开期间订阅各运行时管理器与世界时钟事件，同帧合并刷新；年龄按 `ChronicleClock` 世界日推算（`useWorldClock`）。TMP 富文本信息卡排版，随内容自适应高度，无额外美术依赖。
+- **`UiwCharacterView`**（`UiwViewBase`，`0.3.1`；`0.4.0` 接入运行时）：**角色信息面板**——从 `ChronicleDataManager` 取一个 `CharacterDefinition`，按「配置 ∪ 运行时」分区展示 **个人档案**（`0.8.0` 起由 Inspector 的「档案字段」列表决定显示哪些字段：字段 ID + 标签 + 单位 + 是否独占一行，`__age__` 表示按世界日推算的年龄，值为空的跳过；默认列表即原先的 性别 / 年龄 / 身高 / 体重 / 三围 / 血型 / 兴趣，枚举经数据管理器直解；头部元信息同理配「元信息字段」）、**立绘 / 头像**（`0.8.0`：角色的 Prefab 类型字段 `portrait` / `headIcon`（字段 ID 可配）经 `ToolkitAssets` 加载并实例化到 `portraitContainer` / `headIconContainer` 下，`FitInto` 等比缩放居中——UI 预制体按 RectTransform、世界空间预制体按 Renderer 包围盒；有头像时隐藏姓名首字占位）、**能力**（6 项核心属性经 `ChronicleCharacterRuntime` 求「基础 → 当前」+ 逐来源明细，含活动效果与永久落地）、**特质**（临时特质附剩余时长 / 层数）、**效果**（活动效果：策略 / 剩余 / 周期 / 层数 / 抑制 / 修饰器 + 永久落地汇总；无独立节点时并入特质卡）、**职业（等级 + 主职业）/ 头衔（阶级头衔附阶级序列位次）/ 技能（职业关联技能树导出 + 已学）**；打开期间订阅各运行时管理器与世界时钟事件，同帧合并刷新；年龄按 `ChronicleClock` 世界日推算（`useWorldClock`）。TMP 富文本信息卡排版，随内容自适应高度，无额外美术依赖。
 - **`UiwSkillView`**（`UiwViewBase`）：技能主界面——标题 + 搜索 + 主/副分组标签 AND 过滤页签 + 网格/顺序双视图；来源可在 `Database`（目录）与 `Character`（已学，含提供者）之间切换，订阅 `OnLearnedChanged` 自动刷新。
 - **`UiwSkillGridList` / `UiwSkillOrderList`**：技能虚拟网格 / 单列列表（继承 toolkit `UiwVirtualGridList` / `UiwVirtualOrderList`）。
 - **`UiwSkillEntry`**（`UiwHoverTooltipSource`）：技能格（图标 / 名称 / 阶级背景 + 可选描述与自定义字段行），悬停触发全局 Tooltip。
@@ -230,7 +230,7 @@ var active  = EffectRuntimeManager.Instance.GetActiveEffects("hero");    // 活�
 ```
 
 ### 5. 一键 Demo
-- **Sample 场景**：`CharacterSystemDemo` 演示场景（同屏 `UiwCharacterView` 角色信息面板 + `UiwSkillView` 技能界面，由代码全量生成的示例 `ChronicleDatabase` 驱动、含示例角色露娜）已作为 Sample 打包于 **`Samples~/Demo`**——在 Package Manager 本包详情页 **`Samples`** 区一键 `Import` 后打开场景 Play 即见。右侧「效果演示」按钮面板（`ChronicleEffectDemo`）：使用「精神篡改 / 战意 / 心智护盾」、饮用「回复药剂」、推进 30 天 / 1 年、重置——角色面板随之刷新（精神异常特质三年后自愈、战力 +10 三十天后回落、心智护盾阻断篡改、耐力逐日永久落地）。示例数据经 `Tools > Ale Toolkit > Chronicle System > Character Seeder` 的 D1~D7 逐步生成（D7 生成 toolkit 效果库 `Data/EffectDatabase.asset`：枚举「效果类别」+ 模板「通用」+ 4 标签 + 4 效果）。
+- **Sample 场景**：`CharacterSystemDemo` 演示场景（同屏 `UiwCharacterView` 角色信息面板 + `UiwSkillView` 技能界面，由代码全量生成的示例 `ChronicleDatabase` 驱动、含示例角色露娜）已作为 Sample 打包于 **`Samples~/Demo`**——在 Package Manager 本包详情页 **`Samples`** 区一键 `Import` 后打开场景 Play 即见。右侧「效果演示」按钮面板（`ChronicleEffectDemo`）：使用「精神篡改 / 战意 / 心智护盾」、饮用「回复药剂」、推进 30 天 / 1 年、重置——角色面板随之刷新（精神异常特质三年后自愈、战力 +10 三十天后回落、心智护盾阻断篡改、耐力逐日永久落地）。示例角色露娜带全套档案字段（代号 / 所属 / 性格 / 特长 / 喜欢 / 讨厌）与立绘、头像预制体（`Assets/UI/Prefab/Character/`，`0.8.0`）。示例数据经 `Tools > Ale Toolkit > Chronicle System > Character Seeder` 的 D1~D7 逐步生成（D7 生成 toolkit 效果库 `Data/EffectDatabase.asset`：枚举「效果类别」+ 模板「通用」+ 4 标签 + 4 效果）。
 - **Demo Wizard**：菜单 `Tools > Ale Toolkit > Chronicle System > Demo Wizard` 一键生成技能 UI 预制体。
 - **整合演示**：`Assets/DemoInventory/`（Chronicle × Inventory 整合，需 `com.ale.inventory`）。
 

@@ -1359,6 +1359,41 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &4623798911510484591
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8384419218422084973}
+  m_Layer: 5
+  m_Name: PortraitContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8384419218422084973
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4623798911510484591}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9035513281811945987}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -24, y: -24}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4760114101724728306
 GameObject:
   m_ObjectHideFlags: 0
@@ -2262,6 +2297,103 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!1 &7234138216354896494
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9035513281811945987}
+  - component: {fileID: 7461535562282680250}
+  - component: {fileID: 4993168626477154113}
+  - component: {fileID: 3340937671116336898}
+  m_Layer: 5
+  m_Name: Card_Portrait
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &9035513281811945987
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7234138216354896494}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8384419218422084973}
+  m_Father: {fileID: 1414569516709135960}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &7461535562282680250
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7234138216354896494}
+  m_CullTransparentMesh: 1
+--- !u!114 &4993168626477154113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7234138216354896494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.08235294, g: 0.105882354, b: 0.16078432, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3340937671116336898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7234138216354896494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 360
+  m_PreferredWidth: -1
+  m_PreferredHeight: 360
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &8214913226660067967
 GameObject:
   m_ObjectHideFlags: 0
@@ -2433,6 +2565,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8973225258439649472}
+  - {fileID: 9035513281811945987}
   - {fileID: 4231637286945375263}
   - {fileID: 4437763186573755277}
   - {fileID: 1251709221658957603}
@@ -2491,6 +2624,72 @@ MonoBehaviour:
   portraitInitialText: {fileID: 5372535515425756626}
   subtitleText: {fileID: 4001141851387411363}
   metaText: {fileID: 3838839510510314741}
+  portraitContainer: {fileID: 8384419218422084973}
+  portraitAttrId: portrait
+  headIconContainer: {fileID: 552742021920026914}
+  headIconAttrId: headIcon
+  profileFields:
+  - attrId: sex
+    label: "\u6027\u522B"
+    suffix: 
+    fullRow: 0
+  - attrId: __age__
+    label: "\u5E74\u9F84"
+    suffix: " \u5C81"
+    fullRow: 0
+  - attrId: height
+    label: "\u8EAB\u9AD8"
+    suffix: ' cm'
+    fullRow: 0
+  - attrId: weight
+    label: "\u4F53\u91CD"
+    suffix: ' kg'
+    fullRow: 0
+  - attrId: measurements
+    label: "\u4E09\u56F4"
+    suffix: 
+    fullRow: 0
+  - attrId: bloodType
+    label: "\u8840\u578B"
+    suffix: 
+    fullRow: 0
+  - attrId: codename
+    label: "\u4EE3\u53F7"
+    suffix: 
+    fullRow: 0
+  - attrId: affiliation
+    label: "\u6240\u5C5E"
+    suffix: 
+    fullRow: 1
+  - attrId: personality
+    label: "\u6027\u683C"
+    suffix: 
+    fullRow: 1
+  - attrId: interests
+    label: "\u5174\u8DA3"
+    suffix: 
+    fullRow: 1
+  - attrId: specialty
+    label: "\u7279\u957F"
+    suffix: 
+    fullRow: 1
+  - attrId: likes
+    label: "\u559C\u6B22"
+    suffix: 
+    fullRow: 1
+  - attrId: dislikes
+    label: "\u8BA8\u538C"
+    suffix: 
+    fullRow: 1
+  metaFields:
+  - attrId: sex
+    label: 
+    suffix: 
+    fullRow: 0
+  - attrId: __age__
+    label: 
+    suffix: " \u5C81"
+    fullRow: 0
   profileLabel: {fileID: 1640391333232997244}
   attributesLabel: {fileID: 1030558044229746756}
   traitsLabel: {fileID: 4166260632853938385}

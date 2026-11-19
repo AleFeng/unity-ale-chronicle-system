@@ -4,6 +4,23 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.8.0] - 2026-11-20
+
+**角色信息面板：档案字段改为可配置，立绘 / 头像改为实例化预制体。** 此前 `UiwCharacterView` 的个人档案按字段 ID 写死（性别 / 年龄 / 身高 / 体重 / 三围 / 血型 / 兴趣），宿主加一个档案字段就得改插件；头像位只有姓名首字占位，没有立绘。
+
+### 新增
+
+- `UiwCharacterView.profileFields` / `metaFields`（Inspector 列表，`ProfileField`：字段 ID、标签、单位、是否独占一行）：个人档案与头部元信息按列表逐项排版，普通字段两两并排、独占行单独成行，值为空的跳过；字段 ID 写 `__age__` 表示按世界日推算的年龄。默认列表与原先的输出一致。
+- 立绘 / 头像：`portraitContainer` + `portraitAttrId`（默认 `portrait`）、`headIconContainer` + `headIconAttrId`（默认 `headIcon`）。角色的 Prefab 类型字段经 `ToolkitAssets` 加载（授权模式按地址异步）并实例化到容器下；同一资源不重复实例化，换角色时销毁旧实例、释放句柄；有头像时隐藏姓名首字占位。
+- `UiwCharacterView.FitInto(instance, container)`（公开静态）：把实例等比缩放、居中放进容器——根节点是 RectTransform 的按矩形，否则按全部 Renderer 的包围盒（世界空间的 SpriteRenderer 立绘）。
+- 结论：角色模板的自定义字段可直接用 toolkit 的 `Prefab` 字段类型承载预制体引用，不需要另建外部表。
+- Demo：示例角色露娜补齐 代号 / 性格 / 特长 / 喜欢 / 讨厌 / 所属，并配立绘、头像两个分层 UI 预制体（`Assets/UI/Prefab/Character/`）；角色面板加立绘卡与两个容器，档案字段列表配上新字段。Character Seeder 的 D1（模板字段）与 D6（露娜取值）同步；`Samples~/Demo` 同步。
+- 测试：`CharacterViewTests`（UI / 世界空间两种自适应、档案字段排版）。
+
+### 说明
+
+- 世界空间的预制体放进 Screen Space - Camera 画布时，与 UI 的前后顺序由宿主处理（如在容器上挂 `SortingGroup`）。
+
 ## [0.7.0] - 2026-11-18
 
 **跟进 `com.ale.toolkit` 2.0.0 的存档接口改名。** 行为没有变化。
