@@ -373,5 +373,52 @@ namespace Ale.Chronicle.Tests
             Assert.IsFalse(_em.HasEffect("hero", "battle_focus"));
             Assert.AreEqual(20f, Might("hero"));
         }
+
+        // ── 外部来源提供的修饰器 ─────────────────────────────────────────────────────
+
+        [Test]
+        public void ProvidedModifiers_Aggregate_Replace_NotSaved()
+        {
+            int changed = 0;
+            Action<string> onChanged = id => { if (id == "hero") changed++; };
+            _em.OnModifiersChanged += onChanged;
+            try
+            {
+                _em.SetProvidedModifiers("hero", "equipment", new[]
+                {
+                    new ModifierDefinition("might", EModifierOperation.Add, 7f),
+                    new ModifierDefinition("stamina", EModifierOperation.Add, 3f, "equip:visor"),
+                });
+                Assert.AreEqual(27f, Might("hero"));
+                Assert.AreEqual(3f, Stamina("hero"));
+                bool traced = false;
+                foreach (var c in ChronicleCharacterRuntime.Evaluate("hero", "might").Breakdown)
+                    if (c.SourceTag == "provider:equipment") traced = true;
+                Assert.IsTrue(traced, "来源标记为空的记为 provider:{key}");
+
+                _em.SetProvidedModifiers("hero", "equipment", new[] { new ModifierDefinition("might", EModifierOperation.Add, 2f) });
+                Assert.AreEqual(22f, Might("hero"), "整组替换");
+                Assert.AreEqual(0f, Stamina("hero"));
+
+                var saved = _em.GetSaveData();
+                Assert.AreEqual(0, saved.Count, "提供层不落盘");
+                _em.LoadSaveData(saved);
+                Assert.AreEqual(22f, Might("hero"), "读档不动提供层，由宿主重算");
+
+                _em.SetProvidedModifiers("hero", "equipment", null);
+                Assert.AreEqual(20f, Might("hero"));
+                Assert.AreEqual(3, changed);
+                _em.SetProvidedModifiers("hero", "equipment", null);
+                Assert.AreEqual(3, changed, "撤掉不存在的来源不发事件");
+
+                _em.SetProvidedModifiers("hero", "equipment", new[] { new ModifierDefinition("might", EModifierOperation.Add, 5f) });
+                _em.ResetAll();
+                Assert.AreEqual(20f, Might("hero"), "ResetAll 一并清空");
+            }
+            finally
+            {
+                _em.OnModifiersChanged -= onChanged;
+            }
+        }
     }
 }

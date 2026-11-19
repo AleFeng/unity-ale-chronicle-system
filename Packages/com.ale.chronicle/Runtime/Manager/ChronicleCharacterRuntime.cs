@@ -8,7 +8,8 @@ namespace Ale.Chronicle
     /// <summary>
     /// 角色运行时视图（静态门面）：把配置层与各运行时管理器合成「有效状态」，并做<b>运行时属性汇流</b>——
     /// 基础值 + ① 特质（配置 ∪ 运行时）② 职业成长（配置 ∪ 运行时，同职业取较高等级）③ 头衔（配置 ∪ 运行时）
-    /// ④ 条件修改值（条件经 <see cref="ChronicleEffectContext"/> 求值；重入防护）⑤ 活动效果修饰器（未抑制、非周期）⑥ 效果永久落地修饰器，
+    /// ④ 条件修改值（条件经 <see cref="ChronicleEffectContext"/> 求值；重入防护）⑤ 活动效果修饰器（未抑制、非周期）⑥ 效果永久落地修饰器
+    /// ⑦ 外部来源提供的修饰器（<see cref="EffectRuntimeManager.SetProvidedModifiers"/>，如装备加成），
     /// 经 <see cref="CoreAttributeResolver.Evaluate(CoreAttributeDefinition, float, IEnumerable{ModifierDefinition})"/> 夹紧范围并给出逐来源明细。
     /// 纯配置的求值仍用 <see cref="CoreAttributeResolver"/>。
     /// </summary>
@@ -44,7 +45,7 @@ namespace Ale.Chronicle
             return CoreAttributeResolver.Evaluate(def, baseValue, mods);
         }
 
-        /// <summary>收集作用于 <paramref name="attrId"/> 的全部运行时修饰器（六类来源；传空属性 id 收集全部）。</summary>
+        /// <summary>收集作用于 <paramref name="attrId"/> 的全部运行时修饰器（七类来源；传空属性 id 收集全部）。</summary>
         public static void CollectModifiers(string characterId, string attrId, IConditionContext ctx, List<ModifierDefinition> into)
         {
             var dm = ChronicleDataManager.Instance;
@@ -89,7 +90,7 @@ namespace Ale.Chronicle
                 }
             }
 
-            // ⑤⑥ 活动效果（未抑制、非周期）+ 永久落地
+            // ⑤⑥⑦ 活动效果（未抑制、非周期）+ 永久落地 + 外部来源提供
             if (!string.IsNullOrEmpty(characterId))
                 EffectRuntimeManager.Instance.CollectModifiers(characterId, attrId, into);
         }

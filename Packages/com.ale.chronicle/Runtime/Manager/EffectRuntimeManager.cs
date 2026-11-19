@@ -11,7 +11,7 @@ namespace Ale.Chronicle
     /// <summary>
     /// 效果运行时管理器：每个角色一个 toolkit <see cref="EffectContainer"/>（GAS 式 ASC：活动效果 / 叠加 / 周期 / 抑制 / 授予标签）
     /// + 一份<b>永久落地修饰器</b>列表（瞬时与周期效果的修饰器经 <see cref="IEffectAttributeSink"/> 写入，来源 <c>effect:{id}#{句柄}</c>；
-    /// 不改配置基础值，可存档、可追溯）。施加走 <see cref="ChronicleEffectContext"/> + toolkit <see cref="EffectApplier"/>：
+    /// 不改配置基础值，可存档、可追溯）+ 外部来源提供的修饰器（<see cref="SetProvidedModifiers"/>，如装备加成；不落盘）。施加走 <see cref="ChronicleEffectContext"/> + toolkit <see cref="EffectApplier"/>：
     /// 定义按 id 经 toolkit 效果库（<c>EffectDataManager</c> → 全局效果注册表）解析；属性汇流由 <see cref="ChronicleCharacterRuntime"/> 经 <see cref="CollectModifiers"/> 取用。
     /// 时间推进由 <see cref="ChronicleClock.AdvanceDays"/> 驱动 <see cref="Tick"/>（单位：世界日）。
     /// </summary>
@@ -183,21 +183,71 @@ namespace Ale.Chronicle
         }
 
         /// <summary>
-        /// 把作用于 <paramref name="attributeId"/> 的活动效果修饰器（未抑制、非周期；已按层数缩放，来源 <c>{sourceTag}#{句柄}</c>）
-        /// 与永久落地修饰器（克隆）追加进 <paramref name="into"/>，返回追加数。传空属性 id 收集全部。
+        /// 把作用于 <paramref name="attributeId"/> 的活动效果修饰器（未抑制、非周期；已按层数缩放，来源 <c>{sourceTag}#{句柄}</c>）、
+        /// 永久落地修饰器与外部来源提供的修饰器（<see cref="SetProvidedModifiers"/>）的克隆追加进 <paramref name="into"/>，返回追加数。传空属性 id 收集全部。
         /// </summary>
         public int CollectModifiers(string characterId, string attributeId, List<ModifierDefinition> into)
         {
-            if (into == null || !TryGetEntry(characterId, out var ce)) return 0;
-            int n = ce.Container.CollectModifiers(attributeId, into);
+            if (into == null || string.IsNullOrEmpty(characterId)) return 0;
+            int n = 0;
+            if (_byChar.TryGetValue(characterId, out var ce))
+                n += ce.Container.CollectModifiers(attributeId, into) + AddMatching(ce.Permanent, attributeId, into);
+            if (_provided.TryGetValue(characterId, out var providers))
+                foreach (var list in providers.Values) n += AddMatching(list, attributeId, into);
+            return n;
+        }
+
+        private static int AddMatching(List<ModifierDefinition> source, string attributeId, List<ModifierDefinition> into)
+        {
+            int n = 0;
             bool all = string.IsNullOrEmpty(attributeId);
-            foreach (var m in ce.Permanent)
+            foreach (var m in source)
             {
                 if (m == null || (!all && m.targetAttributeId != attributeId)) continue;
                 into.Add(m.Clone());
                 n++;
             }
             return n;
+        }
+
+        #endregion
+
+        #region 外部来源提供的修饰器
+
+        /// <summary>角色 ID → 来源 key → 修饰器。不落盘，见 <see cref="SetProvidedModifiers"/>。</summary>
+        private readonly Dictionary<string, Dictionary<string, List<ModifierDefinition>>> _provided
+            = new Dictionary<string, Dictionary<string, List<ModifierDefinition>>>();
+
+        /// <summary>
+        /// 整体替换某外部来源提供给角色的修饰器（如装备加成：宿主订阅换装事件，重算整组后传入）；传 null / 空集合 = 撤掉该来源。
+        /// 与 <see cref="SkillRuntimeManager.SetProvidedSkills"/> 同一思路：参与属性汇流，<b>不落盘</b>——读档后由宿主从当前来源重算，
+        /// <see cref="ResetAll"/> 一并清空。修饰器按克隆保存，来源标记为空的记为 <c>provider:{providerKey}</c>。触发 <see cref="OnModifiersChanged"/>。
+        /// </summary>
+        public void SetProvidedModifiers(string characterId, string providerKey, IEnumerable<ModifierDefinition> modifiers)
+        {
+            if (string.IsNullOrEmpty(characterId) || string.IsNullOrEmpty(providerKey)) return;
+            var list = new List<ModifierDefinition>();
+            if (modifiers != null)
+                foreach (var m in modifiers)
+                {
+                    if (m == null || string.IsNullOrEmpty(m.targetAttributeId)) continue;
+                    var copy = m.Clone();
+                    if (string.IsNullOrEmpty(copy.sourceTag)) copy.sourceTag = "provider:" + providerKey;
+                    list.Add(copy);
+                }
+
+            _provided.TryGetValue(characterId, out var providers);
+            if (list.Count == 0)
+            {
+                if (providers == null || !providers.Remove(providerKey)) return;
+                if (providers.Count == 0) _provided.Remove(characterId);
+            }
+            else
+            {
+                if (providers == null) _provided[characterId] = providers = new Dictionary<string, List<ModifierDefinition>>();
+                providers[providerKey] = list;
+            }
+            OnModifiersChanged?.Invoke(characterId);
         }
 
         #endregion
@@ -283,7 +333,11 @@ namespace Ale.Chronicle
             // 加载不触发事件。
         }
 
-        public void ResetAll() => _byChar.Clear();
+        public void ResetAll()
+        {
+            _byChar.Clear();
+            _provided.Clear();
+        }
 
         #endregion
 

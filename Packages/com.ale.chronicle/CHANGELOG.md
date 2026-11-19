@@ -4,6 +4,20 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.9.0] - 2026-11-20
+
+**属性汇流新增「外部来源提供」的修饰器层。** 此前宿主要把装备加成这类「随外部状态整组变化」的数值注入属性，只能借活动效果（要建效果定义、会进存档、读档后还得先删再加）或永久落地（只增不减、撤不掉）。现在与技能的 `SetProvidedSkills` 对称：宿主按来源整组替换，不落盘，读档后从当前来源重算。
+
+### 新增
+
+- `EffectRuntimeManager.SetProvidedModifiers(characterId, providerKey, modifiers)`：整体替换某来源提供给角色的修饰器，传 null / 空集合 = 撤掉该来源；修饰器按克隆保存，来源标记为空的记为 `provider:{providerKey}`；触发 `OnModifiersChanged`（角色面板据此刷新）。提供层不进 `GetSaveData`，`LoadSaveData` 不动它，`ResetAll` 一并清空。
+- `ChronicleCharacterRuntime` 的属性汇流由六类来源扩为七类：⑦ 外部来源提供的修饰器（经 `EffectRuntimeManager.CollectModifiers` 一并收集）。
+- 测试：`EffectRuntimeManagerTests.ProvidedModifiers_Aggregate_Replace_NotSaved`。
+
+### 修复
+
+- `ChronicleInfo.Version` 停在 `0.7.0`（0.8.0 漏改），同步为 `0.9.0`。
+
 ## [0.8.0] - 2026-11-20
 
 **角色信息面板：档案字段改为可配置，立绘 / 头像改为实例化预制体。** 此前 `UiwCharacterView` 的个人档案按字段 ID 写死（性别 / 年龄 / 身高 / 体重 / 三围 / 血型 / 兴趣），宿主加一个档案字段就得改插件；头像位只有姓名首字占位，没有立绘。

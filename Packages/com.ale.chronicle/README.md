@@ -12,11 +12,11 @@
 - 编辑器始终且仅在 ScriptableObject 上工作，全程支持 Undo / Redo；二进制为**单向导出**格式。
 - 角色 / 核心属性 / 特质 / 技能等实体统一走 toolkit 的**灵活属性系统**，无需改代码即可扩展字段。
 - 特质「获得条件」接入 `Ale.Condition`（年龄 / 核心属性比较 / 是否拥有某特质）；`0.6.0` 起条件里的各类 id 在编辑器中是**分组下拉**而非手打字符串，且全部内联条件都会进 toolkit **Condition Editor** 的引用核对与实现体检（可反向跳回本编辑器）。
-- 核心属性走 **基础值 + 修正器合流**（来源含特质 / 职业成长 / 头衔 / 条件修改值 / 活动效果 / 效果永久落地），带逐来源拆解。
+- 核心属性走 **基础值 + 修正器合流**（来源含特质 / 职业成长 / 头衔 / 条件修改值 / 活动效果 / 效果永久落地 / 外部来源提供，如装备），带逐来源拆解。
 - 效果存放在 toolkit 的**共用效果库 `EffectDatabase`**（`0.5.0` 起；Effect Editor 一处配置、所有上层系统按 id 引用），走 **GAS 式 `EffectDefinition`**（时长 / 周期 / 叠加 / Gameplay 标签 / 施加条件 / 修饰器 / 执行阶段），技能「使用」按序施加；运行时经 `EffectRuntimeManager` 落到属性汇流、特质、头衔、职业经验、技能。
 - 文本本地化（Unity Localization）、TextMeshPro、Addressable 均通过编译宏可选启用（与 toolkit 统一）。
 
-> ⚠️ **当前版本 `0.8.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.8.0` 角色信息面板的档案字段改为 Inspector 配置、立绘 / 头像改为实例化预制体字段；`0.6.0` 条件参数里的 属性 / 特质 / 头衔 / 职业 / 阶级序列 id 由裸文本框改为**分组下拉**（判定器 schema 标注 `catalogRef` + 编辑器侧登记候选提供者，接入 toolkit 1.12.0 的 `ConditionDrawerHooks`）；`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
+> ⚠️ **当前版本 `0.9.0`**：角色 / 属性 / 特质 / 技能 / 职业 / 头衔 六大领域 + **效果**领域的配置与运行时数据基础已可用（`0.9.0` 属性汇流新增「外部来源提供」的修饰器层 `SetProvidedModifiers`，装备加成等按来源整组替换、不落盘；`0.8.0` 角色信息面板的档案字段改为 Inspector 配置、立绘 / 头像改为实例化预制体字段；`0.6.0` 条件参数里的 属性 / 特质 / 头衔 / 职业 / 阶级序列 id 由裸文本框改为**分组下拉**（判定器 schema 标注 `catalogRef` + 编辑器侧登记候选提供者，接入 toolkit 1.12.0 的 `ConditionDrawerHooks`）；`0.5.0` 效果与 Gameplay 标签外移至 toolkit 1.10.0 的**共用效果库**（Effect Editor 一处配置、跨系统按 id 引用，附一键迁移），编年史库只保留技能的效果 id 引用；`0.4.0` 接入 toolkit 的 **GAS 式效果系统与 Gameplay 标签**：技能「使用」施加效果，效果落到属性 / 特质 / 头衔 / 职业 / 技能，新增世界时钟与运行时特质；`0.3.1` 新增运行时**角色信息面板 `UiwCharacterView`** 与「角色系统」演示 Sample；`0.3.0` 技能新增**技能树**、属性新增**按条件修改值**、职业可**关联技能树**）；「百万级人生模拟」中的世代推进、角色随机生成规则（`CharacterTemplate` 的种族 / 保底特质 / 属性点预算等）、继承结算（`TitleDefinition.heritable` / `successionPolicyRef`）、派生属性与身体机能修正目标（`EModifierTargetKind` 的部分取值）等尚为**预留**、暂未接入求值。下文只描述**已实现**能力。
 
 ---
 
@@ -139,8 +139,8 @@
 - **`TitleRuntimeManager`**（`ToolkitSingleton`，非 Mono，`ISaveableRuntime`）：每角色持有头衔；阶级头衔「一序列一持有」晋升替换、唯一头衔易主；存档持持有。
 - **`ChronicleClock`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：世界日时钟；`AdvanceDays` / `AdvanceYears` 依次驱动特质到期、效果周期 / 到期，派发 `OnDaysAdvanced`。
 - **`TraitRuntimeManager`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：运行期授予的特质（`Grant` / `Revoke` / `RevokeBySource` / `Has` / `GetEffectiveTraits` / `Tick`）；互斥 / 等价组拒绝、临时到期、重复授予按 `durationStacksRefresh` 刷新 + 叠层；与配置层合成有效特质。
-- **`EffectRuntimeManager`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：每角色一个 toolkit `EffectContainer` + 永久落地修饰器列表；`Apply` / `Remove` / `RemoveById` / `RemoveBySourceTag` / `RemoveWithTag(s)` / `RemoveAll` / `ClearCharacter` / `Tick` / `GetActiveEffects` / `GetPermanentModifiers` / `CollectModifiers`；实现 toolkit 的 `IEffectContainerSource` / `IEffectAttributeSink` / `IEffectAttributeSource` / `IGameplayTagSource`；`CueSink` 可挂线索落地（演示用 `ChronicleDebugCueSink`）。
-- **`ChronicleCharacterRuntime`**（静态，`0.4.0`）：运行时属性汇流 `Evaluate(characterId, attrId)`——特质 / 职业成长 / 头衔各取配置 ∪ 运行时，+ 条件修改值（条件经 `ChronicleEffectContext` 求值、重入防护）+ 活动效果修饰器（未抑制、非周期）+ 永久落地；另提供 `HasProfession` / `GetProfessionLevel` / `HasTitle` / `GetHighestRankTier` 等有效状态查询。
+- **`EffectRuntimeManager`**（`ToolkitSingleton`，`ISaveableRuntime`，`0.4.0`）：每角色一个 toolkit `EffectContainer` + 永久落地修饰器列表；`Apply` / `Remove` / `RemoveById` / `RemoveBySourceTag` / `RemoveWithTag(s)` / `RemoveAll` / `ClearCharacter` / `Tick` / `GetActiveEffects` / `GetPermanentModifiers` / `CollectModifiers`；`SetProvidedModifiers`（`0.9.0`：外部来源整组提供修饰器，如装备加成；与 `SetProvidedSkills` 对称，不落盘，读档后由业务层重算）；实现 toolkit 的 `IEffectContainerSource` / `IEffectAttributeSink` / `IEffectAttributeSource` / `IGameplayTagSource`；`CueSink` 可挂线索落地（演示用 `ChronicleDebugCueSink`）。
+- **`ChronicleCharacterRuntime`**（静态，`0.4.0`）：运行时属性汇流 `Evaluate(characterId, attrId)`——特质 / 职业成长 / 头衔各取配置 ∪ 运行时，+ 条件修改值（条件经 `ChronicleEffectContext` 求值、重入防护）+ 活动效果修饰器（未抑制、非周期）+ 永久落地 + 外部来源提供（`0.9.0`）；另提供 `HasProfession` / `GetProfessionLevel` / `HasTitle` / `GetHighestRankTier` 等有效状态查询。
 - **`ChronicleEffectContext.Create(target, source)`** / **`ChronicleRuntimeConditionSource`**（`0.4.0`）：组装效果 / 条件上下文（主体 = 目标、对象 = 来源、父 / 母经角色定义反查），注册定义源（toolkit `EffectDataManager`，未命中回退全局注册表）/ 容器源 / 属性读写 / 标签源 / 执行器落地门面 `IChronicleRuntimeSink`；业务层直接调 toolkit `EffectApplier` 时可复用。
 - **二进制导出**：`ChronicleConfigSerializer` 把 `ChronicleDatabase` ↔ 紧凑二进制。魔数 `CHRO`、**当前格式 `Version = 8`**、`MinReadableVersion = 1`；按版本追加块（v2 加属性/特质模板 + 分组标签 + 数字格式 + 模板引用/属性值；v3 追加技能模板 + 技能；v4 追加 职业 / 转职树 / 头衔 / 阶级序列，及角色的职业 / 头衔 持有字段；v5 追加 职业模板 / 头衔模板 两块，并在职业 / 头衔块尾追加 `templateRef` + 自定义字段 `values`；**v6 追加 技能树 一块，并在职业块尾追加 `skillTreeRefs`、核心属性块尾追加 `conditionalModifiers`（条件修改值）；v7 追加 效果 / Gameplay 标签 两块（效果定义以 Effect System JSON 串承载），并在技能块尾追加 `onUseEffectRefs`；v8 不再写出效果 / Gameplay 标签两块（外移至 toolkit 效果库，由 `EffectConfigSerializer` 单独导出），读 v7 文件时两块读入 legacy 字段供迁移**）——**append-only 向后兼容**，旧版本（含 v3 ~ v7）导出的二进制仍可导入。对象引用经 `IAssetRefResolver` 以 GUID 承载；特质 / 职业 / 头衔 / 技能树 / 属性条件修改的条件表达式以条件系统 JSON 存储，效果定义以效果系统 JSON 存储。
 
@@ -225,7 +225,9 @@ TitleRuntimeManager.Instance.Grant("hero", "duke", worldDay: 0);
 SkillRuntimeManager.Instance.UseSkill("hero", "war_cry", sourceKey: "ui", sourceCharacterId: "hero");
 EffectRuntimeManager.Instance.Apply("regen_draught", "hero");           // 直接施加（如道具使用）
 ChronicleClock.Instance.AdvanceDays(30);                                 // 特质到期 / 效果周期与到期
-float might = ChronicleCharacterRuntime.EvaluateValue("hero", "might");  // 运行时汇流（含活动效果 / 永久落地）
+EffectRuntimeManager.Instance.SetProvidedModifiers("hero", "equipment",  // 外部来源整组提供修饰器（0.9.0；不落盘，读档后重算）
+    new[] { new ModifierDefinition("might", EModifierOperation.Add, 5f) });
+float might = ChronicleCharacterRuntime.EvaluateValue("hero", "might");  // 运行时汇流（含活动效果 / 永久落地 / 外部来源提供）
 var active  = EffectRuntimeManager.Instance.GetActiveEffects("hero");    // 活动效果（剩余 / 层数 / 修饰器）
 ```
 
