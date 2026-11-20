@@ -56,6 +56,24 @@ namespace Ale.Chronicle.Tests
         }
 
         [Test]
+        public void FitInto_UiPrefab_CentersInOffCenterContainer()
+        {
+            var box = Container(new Vector2(360, 616));
+            box.pivot = new Vector2(0f, 0.5f);   // 容器轴心靠左（贴边排版常见）
+            var inst = new GameObject("Portrait", typeof(RectTransform));
+            inst.transform.SetParent(box, false);
+            var rt = (RectTransform)inst.transform;
+            rt.sizeDelta = new Vector2(600, 1500);
+
+            UiwCharacterView.FitInto(inst, box);
+
+            var c = new Vector3[4]; rt.GetWorldCorners(c);
+            var b = new Vector3[4]; box.GetWorldCorners(b);
+            Assert.AreEqual(Center(b).x, Center(c).x, 1e-3f, "容器轴心不在正中也要放正");
+            Assert.AreEqual(Center(b).y, Center(c).y, 1e-3f);
+        }
+
+        [Test]
         public void FitInto_WorldSpaceRenderer_FitsBounds()
         {
             var box = Container(new Vector2(336, 336));

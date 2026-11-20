@@ -701,7 +701,8 @@ namespace Ale.Chronicle.Runtime.UI
                 var size = rt.rect.size;
                 float k = size.x > 0f && size.y > 0f ? Mathf.Min(box.width / size.x, box.height / size.y) : 1f;
                 rt.localScale = new Vector3(k, k, 1f);
-                rt.anchoredPosition = box.center - rt.rect.center * k;
+                // 锚点已在容器矩形正中，anchoredPosition 是相对它的偏移：只抵掉实例自身轴心的偏移（容器轴心不在正中时也对）。
+                rt.anchoredPosition = -rt.rect.center * k;
                 return;
             }
 

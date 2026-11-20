@@ -4,6 +4,15 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.9.1] - 2026-11-20
+
+**档案界面的 UI 预制体在轴心不居中的容器里放偏了。** `UiwCharacterView.FitInto` 放 UI 预制体（立绘 / 头像）时，把容器矩形中心又加了一遍偏移，只有容器轴心在正中时才放得正；容器轴心靠左（贴边排版）时整体右移半个容器宽。世界空间预制体那一支不受影响。
+
+### 修复
+
+- `FitInto` 的 UI 分支只抵掉实例自身轴心的偏移，容器轴心在哪都居中。
+- 测试：`CharacterViewTests.FitInto_UiPrefab_CentersInOffCenterContainer`。
+
 ## [0.9.0] - 2026-11-20
 
 **属性汇流新增「外部来源提供」的修饰器层。** 此前宿主要把装备加成这类「随外部状态整组变化」的数值注入属性，只能借活动效果（要建效果定义、会进存档、读档后还得先删再加）或永久落地（只增不减、撤不掉）。现在与技能的 `SetProvidedSkills` 对称：宿主按来源整组替换，不落盘，读档后从当前来源重算。
