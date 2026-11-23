@@ -4,6 +4,38 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.11.0] - 2026-11-23
+
+**档案的值按当前语言显示。** 档案字段的枚举值此前显示 `EnumItem.name`，数组字段固定用「、」连接。需要 `com.ale.toolkit` 2.6.0（文字型字段的 `ToDisplayString` 取当前语言）。
+
+### 新增
+
+- `UiwCharacterView.listSeparator`（`TextValue`，默认「、」）：数组字段（兴趣、喜欢等）各项之间的分隔符，可挂本地化引用按语言取。
+
+### 变更
+
+- 档案字段的枚举值改用 `EnumItem.ResolveDisplayName()`。
+
+## [0.10.0] - 2026-11-23
+
+**档案字段的标签、单位与「个人档案」标题可挂本地化引用。** `UiwCharacterView` 的档案字段（`ProfileField`）标签与后缀此前是普通字符串，分区标题「个人档案」写死在代码里，切换语言后不变。
+
+### 变更
+
+- `UiwCharacterView.ProfileField.label` / `suffix` 由 `string` 改为 `TextValue`（纯文本 fallback + 可选的原生本地化引用）；构造函数 `ProfileField(attrId, label, suffix, fullRow)` 仍收字符串。
+
+### 新增
+
+- `UiwCharacterView.profileTitle`（`TextValue`，默认「个人档案」）：个人档案分区的标题。
+
+### 说明
+
+- 其余分区（能力、特质、效果、职业、头衔、技能）的标题与明细里的文字仍写在代码里、只有中文，有需要时再开放。
+
+### 升级注意
+
+- 字段类型变了，旧版预制体上填的档案字段标签与后缀会变空，需要重新填写。
+
 ## [0.9.1] - 2026-11-20
 
 **档案界面的 UI 预制体在轴心不居中的容器里放偏了。** `UiwCharacterView.FitInto` 放 UI 预制体（立绘 / 头像）时，把容器矩形中心又加了一遍偏移，只有容器轴心在正中时才放得正；容器轴心靠左（贴边排版）时整体右移半个容器宽。世界空间预制体那一支不受影响。

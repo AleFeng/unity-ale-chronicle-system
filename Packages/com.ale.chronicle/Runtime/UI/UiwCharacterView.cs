@@ -86,6 +86,10 @@ namespace Ale.Chronicle.Runtime.UI
         [Header("展示文本（各分区，可按需留空）")]
         [Tooltip("个人档案：按「档案字段」逐项排版（两列 + 独占行）。")]
         [SerializeField] private UiText profileLabel;
+        [Tooltip("个人档案的分区标题。")]
+        [SerializeField] private TextValue profileTitle = new TextValue("个人档案");
+        [Tooltip("档案里数组字段（兴趣、喜欢等）各项之间的分隔符，按语言取（中文「、」，英文「, 」）。")]
+        [SerializeField] private TextValue listSeparator = new TextValue("、");
         [Tooltip("能力：数值网格 + 逐来源明细。")]
         [SerializeField] private UiText attributesLabel;
         [Tooltip("特质（配置 ∪ 运行时；临时特质附剩余时长；含携带的属性修饰器摘要）。")]
@@ -109,9 +113,9 @@ namespace Ale.Chronicle.Runtime.UI
             [Tooltip("角色字段 ID；__age__ = 按世界日推算的年龄。")]
             public string attrId;
             [Tooltip("标签（如「身高」）。")]
-            public string label;
+            public TextValue label = new TextValue();
             [Tooltip("值后缀（如「 cm」）。")]
-            public string suffix;
+            public TextValue suffix = new TextValue();
             [Tooltip("独占一行（长文本、数组）；否则与相邻字段两两并排。")]
             public bool fullRow;
 
@@ -120,8 +124,8 @@ namespace Ale.Chronicle.Runtime.UI
             public ProfileField(string attrId, string label, string suffix = null, bool fullRow = false)
             {
                 this.attrId  = attrId;
-                this.label   = label;
-                this.suffix  = suffix;
+                this.label   = new TextValue(label);
+                this.suffix  = new TextValue(suffix);
                 this.fullRow = fullRow;
             }
         }
@@ -256,7 +260,7 @@ namespace Ale.Chronicle.Runtime.UI
             string traits  = BuildTraits(character, dm);
             string effects = BuildEffects(character, dm);
 
-            if (profileLabel)     profileLabel.text     = Section("个人档案", BuildProfile(character, dm));
+            if (profileLabel)     profileLabel.text     = Section(profileTitle.ResolveText(), BuildProfile(character, dm));
             if (attributesLabel)  attributesLabel.text  = Section("能力",     BuildAttributes(character, dm));
             if (effectsLabel)
             {
@@ -331,7 +335,8 @@ namespace Ale.Chronicle.Runtime.UI
             {
                 string value = ProfileValue(c, dm, f);
                 if (value == null) continue;
-                parts.Add(string.IsNullOrEmpty(f.label) ? value : f.label + " " + value);
+                string label = f.label.ResolveText();
+                parts.Add(string.IsNullOrEmpty(label) ? value : label + " " + value);
             }
             return string.Join("  ·  ", parts);
         }
@@ -340,8 +345,8 @@ namespace Ale.Chronicle.Runtime.UI
         private string ProfileValue(CharacterDefinition c, ChronicleDataManager dm, ProfileField f)
         {
             if (f == null || string.IsNullOrEmpty(f.attrId)) return null;
-            string value = f.attrId == AgeKey ? AgeYears(c).ToString() : FieldValue(c, dm, f.attrId);
-            return string.IsNullOrEmpty(value) ? null : value + f.suffix;
+            string value = f.attrId == AgeKey ? AgeYears(c).ToString() : FieldValue(c, dm, f.attrId, listSeparator.ResolveText());
+            return string.IsNullOrEmpty(value) ? null : value + f.suffix.ResolveText();
         }
 
         private int AgeYears(CharacterDefinition c)
@@ -362,7 +367,7 @@ namespace Ale.Chronicle.Runtime.UI
             {
                 string value = ProfileValue(c, dm, f);
                 if (value == null) continue;
-                string cell = Cell(f.label, value);
+                string cell = Cell(f.label.ResolveText(), value);
                 if (f.fullRow)
                 {
                     if (pending != null) { sb.Append("<pos=0%>").Append(pending).Append('\n'); pending = null; }
@@ -386,8 +391,8 @@ namespace Ale.Chronicle.Runtime.UI
         private static string Cell(string label, string value)
             => $"<color={ColLabel}>{label}</color> <color={ColName}>{value}</color>";
 
-        /// <summary>取字段显示值；枚举经 <see cref="ChronicleDataManager"/> 直解为枚举项名（与 SkillRankUtil 同范式）。</summary>
-        private static string FieldValue(CharacterDefinition c, ChronicleDataManager dm, string attrId)
+        /// <summary>取字段显示值；枚举经 <see cref="ChronicleDataManager"/> 直解为枚举项显示名（与 SkillRankUtil 同范式），文字型取当前语言，数组按 <paramref name="separator"/> 连接。</summary>
+        private static string FieldValue(CharacterDefinition c, ChronicleDataManager dm, string attrId, string separator)
         {
             var av = c.GetAttributeValue(attrId);
             if (av == null) return string.Empty;
@@ -395,9 +400,9 @@ namespace Ale.Chronicle.Runtime.UI
             {
                 var et   = dm != null ? dm.GetEnumType(av.EnumTypeRef) : null;
                 var item = et != null ? et.GetItemByValue(av.AsEnumValue) : null;
-                return item != null ? item.name : av.AsInt.ToString();
+                return item != null ? item.ResolveDisplayName() : av.AsInt.ToString();
             }
-            return av.ToDisplayString();
+            return av.ToDisplayString(string.IsNullOrEmpty(separator) ? "、" : separator);
         }
 
         /// <summary>能力：上半三列「属性名 当前值（金）」网格；下半逐属性「基础→当前 · 各来源明细」（弱化小号）。运行时汇流。</summary>
