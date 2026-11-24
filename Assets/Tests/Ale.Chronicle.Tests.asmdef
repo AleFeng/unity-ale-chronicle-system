@@ -11,6 +11,7 @@
         "Ale.Effect.Runtime",
         "Ale.GameplayTags.Core",
         "Ale.Modifier.Core",
+        "Unity.TextMeshPro",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

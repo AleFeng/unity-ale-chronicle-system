@@ -4,6 +4,12 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.11.1] - 2026-11-24
+
+### 修复
+
+- `UiwCharacterView` 个人档案两两并排的字段：外文的标签或值较长时（如英文「Measurements (92, 58, 88)」），左列会压到右列上。并排时逐格量宽，放不下半行（减半个字的间隔）的那一格用 `<size=N%>` 按比例缩小字号；TMP 的字号自适应只看整段是否超框，管不到列宽。新增 `UiwCharacterView.FitWidth`（仅 TMP）。
+
 ## [0.11.0] - 2026-11-23
 
 **档案的值按当前语言显示。** 档案字段的枚举值此前显示 `EnumItem.name`，数组字段固定用「、」连接。需要 `com.ale.toolkit` 2.6.0（文字型字段的 `ToDisplayString` 取当前语言）。

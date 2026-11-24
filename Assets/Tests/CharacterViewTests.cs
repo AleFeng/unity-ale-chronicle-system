@@ -128,5 +128,31 @@ namespace Ale.Chronicle.Tests
             StringAssert.Contains("清酒、黑咖啡", lines[1], "独占一行，数组用顿号连接");
             StringAssert.DoesNotContain("空字段", text, "空值跳过");
         }
+
+#if ATK_TMP
+        [Test]
+        public void FitWidth_ShrinksOnlyCellsWiderThanColumn()
+        {
+            // 只用 ASCII：默认字库（静态图集）里都有，量宽时不会往后备字库加字形、改动工程资源
+            var go = Track(new GameObject("Label", typeof(RectTransform)));
+            go.SetActive(false);
+            var label = go.AddComponent<TMPro.TextMeshProUGUI>();
+            label.font = TMPro.TMP_Settings.defaultFontAsset;
+            if (!label.font) Assert.Ignore("没有默认 TMP 字库");
+            label.fontSize = 20;
+            const string shortCell = "<color=#8FA3BF>Age</color> <color=#E6F1FF>23</color>";
+            const string longCell = "<color=#8FA3BF>Measurements</color> <color=#E6F1FF>(92, 58, 88)</color>";
+            float full = label.GetPreferredValues(longCell, float.PositiveInfinity, float.PositiveInfinity).x;
+
+            Assert.AreEqual(shortCell, UiwCharacterView.FitWidth(label, shortCell, full), "放得下的原样返回");
+            Assert.AreEqual(longCell, UiwCharacterView.FitWidth(label, longCell, 0f), "文本框没有尺寸时不处理");
+
+            string fitted = UiwCharacterView.FitWidth(label, longCell, full * 0.5f);
+            StringAssert.StartsWith("<size=", fitted);
+            float width = label.GetPreferredValues(fitted, float.PositiveInfinity, float.PositiveInfinity).x;
+            Assert.LessOrEqual(width, full * 0.5f + 0.5f, "缩小后放得进列宽");
+            Assert.Greater(width, full * 0.4f, "按比例缩小，不缩过头");
+        }
+#endif
     }
 }

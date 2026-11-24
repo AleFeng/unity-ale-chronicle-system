@@ -358,11 +358,19 @@ namespace Ale.Chronicle.Runtime.UI
         /// <summary>
         /// 个人档案：按 <see cref="profileFields"/> 逐项排版——普通字段两两并排（两列），「独占一行」的字段单独成行；
         /// 值为空的字段跳过。字段 ID 由宿主在 Inspector 配置，不再写死（0.8.0）。
+        /// 并排的两格放不下半行时按比例缩小该格字号（<see cref="FitWidth"/>，0.11.1）。
         /// </summary>
         private string BuildProfile(CharacterDefinition c, ChronicleDataManager dm)
         {
             var sb = new StringBuilder();
             string pending = null;   // 等待并排的左列
+#if ATK_TMP
+            // 一列宽 = 半行减半个字宽的间隔
+            float column = 0f;
+            if (profileLabel)
+                column = (profileLabel.rectTransform.rect.width - profileLabel.margin.x - profileLabel.margin.z) * 0.5f
+                         - profileLabel.fontSize * 0.5f;
+#endif
             foreach (var f in profileFields)
             {
                 string value = ProfileValue(c, dm, f);
@@ -379,6 +387,10 @@ namespace Ale.Chronicle.Runtime.UI
                 }
                 else
                 {
+#if ATK_TMP
+                    pending = FitWidth(profileLabel, pending, column);
+                    cell    = FitWidth(profileLabel, cell, column);
+#endif
                     sb.Append("<pos=0%>").Append(pending).Append("<pos=50%>").Append(cell).Append('\n');
                     pending = null;
                 }
@@ -390,6 +402,22 @@ namespace Ale.Chronicle.Runtime.UI
         /// <summary>「标签 值」着色单元（标签灰蓝、值近白）。</summary>
         private static string Cell(string label, string value)
             => $"<color={ColLabel}>{label}</color> <color={ColName}>{value}</color>";
+
+#if ATK_TMP
+        /// <summary>
+        /// 文本在 <paramref name="label"/> 当前字号下宽于 <paramref name="maxWidth"/> 时，用 &lt;size&gt; 按比例缩小到放得下；否则原样返回。
+        /// 两列排版靠 &lt;pos&gt; 定位，左列过长会压到右列上，而 TMP 的字号自适应只看整段是否超框，管不到列宽，所以逐格处理。
+        /// <paramref name="maxWidth"/> 不大于 0（文本框还没有尺寸）时不处理。
+        /// </summary>
+        public static string FitWidth(UiText label, string text, float maxWidth)
+        {
+            if (!label || maxWidth <= 0f || string.IsNullOrEmpty(text)) return text;
+            float width = label.GetPreferredValues(text, float.PositiveInfinity, float.PositiveInfinity).x;
+            if (width <= maxWidth) return text;
+            int percent = Mathf.FloorToInt(maxWidth / width * 100f);
+            return $"<size={percent}%>{text}</size>";
+        }
+#endif
 
         /// <summary>取字段显示值；枚举经 <see cref="ChronicleDataManager"/> 直解为枚举项显示名（与 SkillRankUtil 同范式），文字型取当前语言，数组按 <paramref name="separator"/> 连接。</summary>
         private static string FieldValue(CharacterDefinition c, ChronicleDataManager dm, string attrId, string separator)
